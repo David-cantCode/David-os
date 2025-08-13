@@ -16,9 +16,10 @@
 
 
 
+
+
 CODE_SEG equ 0x08 
 DATA_SEG equ 0x10
-
 
 KERNEL_LOAD_SEG equ 0x1000
 KERNEL_START_ADDR equ 0x100000 
@@ -52,14 +53,7 @@ start:
     mov al, 8
     int 0x13
 
-    jc disk_read_error
-
-
-
-
-
-
-
+    jc disk_read_error ; added by chatgpt will fix later.
 
 
     cli
@@ -93,6 +87,9 @@ enable_a20: ;allows cpu to use memmory greater then 1mb
 
 
 
+;**************************************
+;**************START PROTECTED MODE********
+;**************************************8
 [bits 32]
 init_pm:
     mov ax, DATA_SEG
@@ -104,12 +101,15 @@ init_pm:
     mov esp, 0x90000        
 
 
-    jmp CODE_SEG:KERNEL_START_ADDR
+    jmp CODE_SEG:KERNEL_START_ADDR*16 ;EDITED BY CHATGPT UNTESTED
 
 
 
 
-;___________________________________________
+
+;**************************************
+;**************CREATE GPT TABLE********
+
 gdt_start:
     dq 0x0000000000000000
     dq 0x00CF9A000000FFFF
@@ -125,4 +125,4 @@ gdt_descriptor:
 
 
 times 510 - ($-$$) db 0
-dw 0xAA55
+dw 0xAA55 ;finish last 2 bytes with special number to let bios know its bootable
