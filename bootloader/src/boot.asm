@@ -1,4 +1,4 @@
-
+;AUG 12 2025
 
 ; memmory segments
 ;CS code segment
@@ -10,6 +10,8 @@
 ;Physical address = seg * 16 + offset
 
 
+
+;unfinished 
 
 [BITS 16]
 [ORG 0x7c00] ;tells assembler code will begin here
@@ -88,8 +90,8 @@ enable_a20: ;allows cpu to use memmory greater then 1mb
 
 
 ;**************************************
-;**************START PROTECTED MODE********
-;**************************************8
+;***********START PROTECTED MODE*******
+;**************************************
 [bits 32]
 init_pm:
     mov ax, DATA_SEG
@@ -101,7 +103,7 @@ init_pm:
     mov esp, 0x90000        
 
 
-    jmp CODE_SEG:KERNEL_START_ADDR*16 ;EDITED BY CHATGPT UNTESTED
+    jmp CODE_SEG:KERNEL_START_ADDR ;fix? 
 
 
 
