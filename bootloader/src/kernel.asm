@@ -1,3 +1,7 @@
+;AUG 13 2025
+;in between file that calls our kernel.c from the bootloader.
+
+
 [BITS 32]
 
 global _start 
