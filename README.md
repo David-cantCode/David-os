@@ -1,6 +1,6 @@
 DATE STARTED AUGUST 12 2025
 
 TODO:
-  finish bootloader 
+ bootloader finished??
 
-  make a actual kernel
+  kernel is fucked
