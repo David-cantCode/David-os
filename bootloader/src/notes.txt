@@ -1,0 +1,85 @@
+
+Notes:
+
+Anything that requires a bios call (basic input output system) is easier done in real mode
+
+
+
+Most kernals require protected mode:
+for these you need to
+(1) enable A20 (allow cpu to use memmmory greater then 1mb)
+(2) load a GDT 
+(3) enter protected mode 
+
+
+GDT - A data structure used by the cpu in protected mode (and more) to define memory segments (cs, ds, es, ss, gs, fs)
+    real mode; Segments are defined as segment_base = segment_register * 16.
+    Protected mode; CPU no longer assumes segment bases are just selector * 16. uses memory segments to look up descriptors in the GDT.
+
+    1; Create the GDT in memory, Define descriptors for at least:
+
+        (A) A null descriptor (required, first entry).
+        (B) A code segment descriptor.
+        (C) A data segment descriptor.
+
+        How is this done? 
+    
+        dq 0x0000000000000000 ;null descriptor
+
+        ;code segment allows execution and reading.
+
+        dw 0xFFFF      ; Segment Limit (low 16 bits)
+        dw 0x0000      ; Base Address (low 16 bits)
+        db 0x00        ; Base Address (middle 8 bits)
+        db 0x9A        ; Access Byte tells the cpu how to be used
+        db 0xCF        ; Flags (4 bits) + Segment Limit (high 4 bits)
+        db 0x00        ; Base Address (high 8 bits)
+
+        ;data segment  allows reading and writing.
+
+        dw 0xFFFF      ; Segment Limit low
+        dw 0x0000      ; Base Address low
+        db 0x00        ; Base Address middle
+        db 0x92        ; Access Byte
+        db 0xCF        ; Flags + Limit high nibble
+        db 0x00        ; Base Address high
+
+
+
+        confusing as fuck
+
+
+
+
+
+    2; Load the GDT address and size into the GDTR register, using the 'lgdt' instruction.
+
+        lgdt [gdtr_pointer] 
+
+    3; Set the PE bit in CR0 to enter protected mode
+        mov eax, cr0
+        or eax, 1          ; Set PE bit (bit 0)
+        mov cr0, eax 
+
+    
+    4:  Reloads segment registers with the selectors defined in the GDT.:
+
+        ex: jmp CODE_SEG_SELECTOR:protected_mode_label
+
+
+
+bonus: 
+
+    bootloaders are limited to 512mb 
+
+
+    times 510 - ($ - $$) db 0:
+    fills the remaining spaces with 0s so the size of the bootloader becomes 510mb exactly.
+
+    dw 0xAA55
+    writes 2mb in memory filling the remaining space. 
+    the bios checks for this number to recognize the sector is bootable 
+
+
+
+
