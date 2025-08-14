@@ -1,0 +1,32 @@
+********************************
+*********KERNEL .TXT*************
+*********************************8
+
+
+To my understanding different kernels different text mode buffers to draw on the screen.
+the text mode im using is vga, unfortunately it is not used in uefi and only legacy BIOS.
+
+nonetheless i will use vga 
+
+
+To do so we must point to address of vga 0xB8000 using a short.
+
+
+    Writting a character would require us to write a value to the vga memmory (at 0xB8000)
+        vga[0] = 0x0758;
+
+    this code writes the letter 'x', how?
+
+    first lets understand the VGA byte format. Each screen cell consist two bytes:
+        Attribute byte - colors, background 
+            bits 0-3 - text color 
+            bits 4-6 - background color 
+            bit 7 - if its blinking 0 for false (not used in modern environments like qemu)
+
+        Character byte
+            ascii code of symbol              
+
+        The atribute byte is the high byte
+
+
+        
