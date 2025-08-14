@@ -22,3 +22,8 @@ Aug 13:
 Aug 14: 
 bootlaoder works and kernel gets loaded :)
 kernel said hello world! yay
+
+next:
+   Interupt Descritor table.
+   Handle keyboard input.
+   basic shell
