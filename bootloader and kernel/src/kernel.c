@@ -21,15 +21,18 @@ void clear_screen(){
 }
 
 
-void print_char(char character, unsigned char attribute, int posX, int posY) { //fix this
+void print_char(char character, unsigned char attribute, int posX, int posY) { 
+   // vga[1] = (0x07 << 8) | 'i';
+
     vga[posY * VGA_COLS + posX] = (attribute << 8) | character;
 }
 
 
 
 
-void print_string(const char* string, unsigned char attribute, int posX, int posY){  //fix this
-    int i = 0;
+void print_string(char* string, unsigned char attribute, int posX, int posY){  //works but you cant directly put a string as a agrument
+    int i = 0;                                                                 //you need to put a variable. why? idk. it works so im not complaing
+
     while (string[i] != '\0') {
         print_char(string[i], attribute, posX + i, posY);
         i++;
@@ -40,22 +43,14 @@ void print_string(const char* string, unsigned char attribute, int posX, int pos
 
 
 void kernel_main() {
-    clear_screen();
+   // clear_screen();
 
 
-   // print_string("Hello world", 0x07, 0, 0); // white on black WHY ISNT THIS WORKING 
-    
-    vga[0] = (0x07 << 8) | 'H';
-    vga[1] = (0x07 << 8) | 'e';
-    vga[2] = (0x07 << 8) | 'l';
-    vga[3] = (0x07 << 8) | 'l';
-    vga[4] = (0x07 << 8) | 'o';
-    vga[5] = (0x07 << 8) | ' ';
-    vga[6] = (0x07 << 8) | 'W';
-    vga[7] = (0x07 << 8) | 'o';
-    vga[8] = (0x07 << 8) | 'r';
-    vga[9] = (0x07 << 8) | 'l';
-    vga[10] =(0x07 << 8) | 'd';
+    char greeting[] = "Kernel was succesfully loaded!";
+
+    print_string(greeting, 0x07, 0, 2);
+
+
 }
 
 
