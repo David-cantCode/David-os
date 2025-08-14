@@ -1,0 +1,61 @@
+
+
+//*****************************************************
+/******************COMPILING*****************************
+//*****************************************************
+    Luckily compiling was made 100x easier due to a youtube tutorial
+
+    make sure build.sh is executable by 
+        chmod +x build.sh
+
+    then 
+        make clean
+
+    and 
+        ./build.sh
+
+
+
+
+//*****************************************************
+/******************RUNNING*****************************
+//*****************************************************
+
+
+have 3 terminals open:
+
+terminal one:
+
+    run this line once in the bootloader folder and your done: 
+        qemu-system-x86_64 -drive format=raw,file=./bin/os.bin -s -S
+
+
+terminal 2:
+    run this once:
+        vncviewer localhost:5900
+
+    change the numbers to the port# 
+
+
+terminal: 3
+    run this in the bootloader folder:
+        gdb
+        add-symbol-file ./build/completeKernel.o 0x100000
+    OPTIONAL add break point: 
+        break kernel_main
+        target remote :1234
+        n
+    Next start the cpu by pressing c
+        c
+
+
+
+
+optional:
+    in a terminal run:
+        bless os.bin
+    you see some cool shit
+
+
+
+Noted: gnome should be used, i3 gave me issues.
