@@ -23,7 +23,11 @@ Aug 14:
 bootlaoder works and kernel gets loaded :)
 kernel said hello world! yay
 
+Aug 15:
+   made the IDT thank god for this interupt artical https://wiki.osdev.org/Interrupts_Tutorial
+
+
 next:
-   Interupt Descritor table.
-   Handle keyboard input.
+  
+   PIC
    basic shell
