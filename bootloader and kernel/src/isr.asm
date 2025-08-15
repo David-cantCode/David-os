@@ -1,30 +1,32 @@
-[BITS 32]
-global isr_stub_table    ; make the table visible to C
-extern exception_handler ; tell NASM that exception_handler is in C
 
-;=============================
-; Macros for stubs
-;=============================
-%macro isr_no_err_stub 1
-isr_stub_%+%1:
-    pusha                  ; save registers
-    call exception_handler
-    popa
-    iret
-%endmacro
+global isr_stub_table    ; make visible for c
 
+;*************************
+;*****STUB MACROS********
+;*************************
+
+
+;works and gets called when you divide by zero (:
 %macro isr_err_stub 1
 isr_stub_%+%1:
-    pusha
-    call exception_handler
-    popa
+   ; call exception_handler
+    cli
+    pushad
+    popad
+    add esp, 4       ; skip error code 
+    sti
+    iret
+%endmacro
+
+%macro isr_no_err_stub 1
+isr_stub_%+%1:
     iret
 %endmacro
 
 
-;=============================
-; Define stubs for exceptions 0–31
-;=============================
+;*************************
+;******STUBS*************
+;*************************
 isr_no_err_stub 0
 isr_no_err_stub 1
 isr_no_err_stub 2
@@ -58,23 +60,14 @@ isr_no_err_stub 29
 isr_err_stub    30
 isr_no_err_stub 31
 
-;*****************************
-; Create table of all ISR addresses
-;**************************
-
-
-;display debug letter L (doesnt fucking work)
-    mov edi, 0xB8000 
-    mov al, 'L'
-    mov ah, 0x07
-    mov [edi], ax
 
 
 
-section .data
+;counter to assign stubs in memmory
 
+global isr_stub_table
 isr_stub_table:
-%assign i 0
+%assign i 0         
 %rep 32
     dd isr_stub_%+i
 %assign i i+1

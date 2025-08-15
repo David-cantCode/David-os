@@ -1,15 +1,16 @@
 #include "kernel.h"
+#include "IDT.c"
+#include <stdint.h>
 
 // kernel.c AUG 14
 
-#define VGA_ADDRESS 0xB8000 //vga txt mode buffer 
+
 #define VGA_COLS 80 //x 
 #define VGA_ROWS 25 // y 
 
 
-static unsigned short* const vga = (unsigned short*)VGA_ADDRESS;
 
-
+extern void* isr_stub_table[];
 
 void clear_screen(){
     unsigned int i;
@@ -46,9 +47,28 @@ void kernel_main() {
    // clear_screen();
 
 
-    char greeting[] = "Kernel was succesfully loaded!";
+    char greeting[] = "Kernel was succesfully loaded";
 
     print_string(greeting, 0x07, 0, 2);
+
+
+    char msgIDT[] = "Loading Interupt Data table";
+    print_string(msgIDT, 0x07, 0, 3);
+
+
+    idt_init();
+
+
+   // int divzero = 1 / 0;
+
+    char msgIDTSuccess[] = "Interupt Data table succesfuly loaded.";
+    print_string(msgIDTSuccess, 0x07, 0, 4);
+
+
+    
+
+
+
 
 
 }
