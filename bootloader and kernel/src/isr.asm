@@ -1,12 +1,16 @@
 
 global isr_stub_table    ; make visible for c
+global irq1_handler  
+extern keyboard_callback ; C function we'll call from here
+extern PIC_sendEOI       ; PIC End Of Interrupt function
+
 
 ;*************************
 ;*****STUB MACROS********
 ;*************************
 
 
-;works and gets called when you divide by zero (:
+;works and gets called when error
 %macro isr_err_stub 1
 isr_stub_%+%1:
    ; call exception_handler
@@ -65,6 +69,7 @@ isr_no_err_stub 31
 
 ;counter to assign stubs in memmory
 
+
 global isr_stub_table
 isr_stub_table:
 %assign i 0         
@@ -72,3 +77,17 @@ isr_stub_table:
     dd isr_stub_%+i
 %assign i i+1
 %endrep
+
+
+;*************************
+;******IRQ1 HANDLER*******
+;*************************
+irq1_handler:
+    pusha                  ; Save registers
+    call keyboard_callback ; Call C keyboard handler
+    mov al, 1              ; IRQ number 1 (keyboard)
+    push eax
+    call PIC_sendEOI       ; Tell PIC we’re done
+    add esp, 4
+    popa
+    iretd

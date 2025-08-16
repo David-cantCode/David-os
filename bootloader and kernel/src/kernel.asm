@@ -29,7 +29,7 @@ _start:
     mov edi, 0xB8000  ;point to first cell
 
 
-    ;should change to a better loop 
+    ;should change to a better loop
     mov al, 'L'
     mov ah, 0x07
     mov [edi], ax
@@ -113,13 +113,6 @@ _start:
     mov [edi], ax
 
 
-;added a simple delay to give the effect of loading kernel
-;just for fun
-
-mov ecx, 400000000  
-.delay:
-    dec ecx
-    jnz .delay
 
 
  

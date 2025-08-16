@@ -88,6 +88,7 @@ init_pm:
     mov gs, ax
     mov ss, ax 
     mov esp, 0x90000
+    
 
 ; --- Copy kernel from 0x00010000 -> 0x00100000 ---
     mov esi, KERN_LOAD_PHYS        ; src

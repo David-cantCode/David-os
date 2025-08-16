@@ -1,12 +1,12 @@
 #include "kernel.h"
-#include "IDT.c"
+#include "idt.c"
 #include <stdint.h>
+#include "../libary/stdconsole.h"
+#include "../drivers/pic.h"
 
 // kernel.c AUG 14
 
 
-#define VGA_COLS 80 //x 
-#define VGA_ROWS 25 // y 
 
 
 
@@ -22,30 +22,11 @@ void clear_screen(){
 }
 
 
-void print_char(char character, unsigned char attribute, int posX, int posY) { 
-   // vga[1] = (0x07 << 8) | 'i';
-
-    vga[posY * VGA_COLS + posX] = (attribute << 8) | character;
-}
-
-
-
-
-void print_string(char* string, unsigned char attribute, int posX, int posY){  //works but you cant directly put a string as a agrument
-    int i = 0;                                                                 //you need to put a variable. why? idk. it works so im not complaing
-
-    while (string[i] != '\0') {
-        print_char(string[i], attribute, posX + i, posY);
-        i++;
-    }
-
-}
-
 
 
 void kernel_main() {
    // clear_screen();
-
+    __asm__ volatile ("cli");
 
     char greeting[] = "Kernel was succesfully loaded";
 
@@ -59,17 +40,24 @@ void kernel_main() {
     idt_init();
 
 
-   // int divzero = 1 / 0;
-
     char msgIDTSuccess[] = "Interupt Data table succesfuly loaded.";
     print_string(msgIDTSuccess, 0x07, 0, 4);
 
 
+    char msgpic[] = "Loading The Programmable Interrupt Controller";
+    print_string(msgpic, 0x07, 0, 5);
+    
+ 
+
+
+    PIC_remap(0x8, 0x70);
+
+    //IRQ_set_mask(0xFF);      //kills the stack never un comment keeping this to remind me of my 4  hours of debugging  (no joke)
     
 
 
-
-
+    char msgpicSuccess[] = "Programmable Interrupt Controller successfuly loaded.";
+    print_string(msgpicSuccess, 0x07, 0, 7);
 
 }
 
