@@ -1,29 +1,96 @@
-FILES = ./build/kernel.asm.o ./build/kernel.o
-FLAGS = -g -ffreestanding -nostdlib -nostartfiles -nodefaultlibs -Wall  -O0 -Iinc
+
+BUILD_DIR = ./build
+BIN_DIR   = ./bin
+SRC_DIR   = ./src
+
+# Toolchain
+CC = i686-elf-gcc
+AS = nasm
+LD = i686-elf-ld
+OBJCOPY = i686-elf-objcopy
+
+# Compiler flags (kept from your original)
+FLAGS = -g -ffreestanding -nostdlib -nostartfiles -nodefaultlibs -Wall -O0 -Iinc -Ilibary
+
+LIB_SRCS := $(wildcard libary/*.c)
+LIB_OBJS := $(patsubst libary/%.c, $(BUILD_DIR)/%.o, $(LIB_SRCS))
+DRI_SRCS := $(wildcard drivers/*.c)
+DRI_OBJS := $(patsubst drivers/%.c,$(BUILD_DIR)/%.o,$(DRI_SRCS))
 
 
+OBJS = $(BUILD_DIR)/kernel.asm.o \
+       $(BUILD_DIR)/kernel.o \
+       $(BUILD_DIR)/isr.o \
+       $(LIB_OBJS) \
+       $(DRI_OBJS)
+	
+
+.PHONY: all clean run gdb-instructions
+
+all: $(BIN_DIR)/os.bin $(BUILD_DIR)/completeKernel.o
+
+$(BUILD_DIR)/%.o: libary/%.c | $(BUILD_DIR)
+	$(CC) $(FLAGS) -std=gnu99 -c $< -o $@
+	
+$(BUILD_DIR)/%.o: drivers/%.c | $(BUILD_DIR)
+	$(CC) $(FLAGS) -std=gnu99 -c $< -o $@
 
 
-all: 
+# ensure directories exist
+$(BUILD_DIR):
+	mkdir -p $(BUILD_DIR)
 
-	#!/bin/bash
-	mkdir -p ./bin ./build
-	nasm -f bin ./src/boot.asm -o ./bin/boot.bin
-	nasm -f elf -g ./src/kernel.asm -o ./build/kernel.asm.o
-	i686-elf-gcc -I./src $(FLAGS) -std=gnu99 -c ./src/kernel.c -o ./build/kernel.o
-	i686-elf-ld -g -relocatable ./build/kernel.asm.o ./build/kernel.o -o ./build/completeKernel.o
-	i686-elf-gcc $(FLAGS) -T ./src/linker.ld -o ./bin/kernel.bin -ffreestanding -O0 -nostdlib ./build/completeKernel.o
+$(BIN_DIR):
+	mkdir -p $(BIN_DIR)
 
-	dd if=./bin/boot.bin >> ./bin/os.bin
-	dd if=./bin/kernel.bin >> ./bin/os.bin
-	dd if=/dev/zero bs=512 count=8 >> ./bin/os.bin
+# Bootloader (raw binary)
+$(BIN_DIR)/boot.bin: $(SRC_DIR)/boot.asm | $(BIN_DIR)
+	$(AS) -f bin $< -o $@
 
+# Assemble kernel asm and ISR as elf32 objects
+$(BUILD_DIR)/kernel.asm.o: $(SRC_DIR)/kernel.asm | $(BUILD_DIR)
+	$(AS) -f elf32 -g $< -o $@
+
+$(BUILD_DIR)/isr.o: $(SRC_DIR)/isr.asm | $(BUILD_DIR)
+	$(AS) -f elf32 -g $< -o $@
+
+# Compile C kernel
+$(BUILD_DIR)/kernel.o: $(SRC_DIR)/kernel.c | $(BUILD_DIR)
+	$(CC) $(FLAGS) -std=gnu99 -c $< -o $@
+
+# Link flat binary kernel using your linker.ld (script expects to produce binary)
+# Output: bin/kernel.bin (flat binary)
+$(BIN_DIR)/kernel.bin: $(OBJS) $(SRC_DIR)/linker.ld | $(BIN_DIR)
+	$(LD) -T $(SRC_DIR)/linker.ld -o $@ $(OBJS)
+
+# Produce relocatable object containing all kernel symbols for GDB
+# Output: build/completeKernel.o
+$(BUILD_DIR)/completeKernel.o: $(OBJS) | $(BUILD_DIR)
+	$(LD) -r -o $@ $(OBJS)
+
+# Build OS image: bootloader (512 bytes) + kernel (raw binary) + padding
+$(BIN_DIR)/os.bin: $(BIN_DIR)/boot.bin $(BIN_DIR)/kernel.bin
+	dd if=$(BIN_DIR)/boot.bin of=$@ bs=512 conv=notrunc
+	dd if=$(BIN_DIR)/kernel.bin of=$@ bs=512 seek=1 conv=notrunc
+	dd if=/dev/zero bs=512 count=8 >> $@
+
+# Convenience: run under QEMU
+run: all
+	@echo "Starting QEMU with bin/os.bin..."
+	qemu-system-i386 -drive format=raw,file=$(BIN_DIR)/os.bin
+
+# Print GDB instructions (safe: doesn't try to launch gdb/qemu for you)
+gdb-instructions: all
+	@echo "To debug with gdb and QEMU, run these steps in separate shells:"
+	@echo ""
+	@echo "1) Start QEMU with gdbserver (-S = pause CPU, -s = open :1234):"
+	@echo "   qemu-system-i386 -s -S -drive format=raw,file=$(BIN_DIR)/os.bin &"
+	@echo ""
+	@echo "2) In your GDB shell (i686-elf-gdb):"
+	@echo "   (gdb) target remote :1234"
+	@echo "   (gdb) add-symbol-file $(BUILD_DIR)/completeKernel.o 0x00100000"
+	@echo ""
+	@echo "Note: the address 0x00100000 is where your linker script places the kernel."
 
 clean:
-
-	rm -f ./bin/boot.bin
-	rm -f ./bin/kernel.bin
-	rm -f ./bin/os.bin
-	rm -f ./build/kernel.asm.o
-	rm -f ./build/kernel.o 
-	rm -f ./build/completeKernel.o
+	rm -rf $(BIN_DIR) $(BUILD_DIR)

@@ -15,17 +15,17 @@ static char* byte_to_hex(uint8_t b, char* buffer) {
 
 
 void keyboard_callback(void) {
-    uint8_t scancode = inb(0x60);
+    //uint8_t scancode = inb(0x60);
 
-    char hex_buf[3];
-    byte_to_hex(scancode, hex_buf);
+    //char hex_buf[3];
+    //byte_to_hex(scancode, hex_buf);
 
-    char msg[32] = "Key pressed: ";
+    //char msg[32] = "Key pressed: ";
 
 
-    msg[13] = hex_buf[0];
-    msg[14] = hex_buf[1];
-    msg[15] = '\0';
+    //msg[13] = hex_buf[0];
+    //msg[14] = hex_buf[1];
+    //msg[15] = '\0';
 
-    print_string(msg, 0x07, 0, 6);
+    //print_string(msg, 0x07, 0, 6);
 }

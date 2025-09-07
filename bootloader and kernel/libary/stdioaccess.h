@@ -1,9 +1,12 @@
+#ifndef STDIOACESS_H
+#define STDIOACESS_H
 
 #include <stdint.h>
 
 
 
-static inline uint8_t inb(uint16_t port);
-static inline void outb(uint16_t port, uint8_t val);
-static inline void io_wait(void);
+ uint8_t inb(uint16_t port);
+ void outb(uint16_t port, uint8_t val);
+ void io_wait(void);
 
+#endif
