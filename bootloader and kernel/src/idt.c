@@ -1,6 +1,5 @@
 #include <stdint.h>
 #include <stdbool.h>
-#include "../libary/stdconsole.h"
 
 
 #define IDT_FLAG_PRESENT 0x80
@@ -77,6 +76,5 @@ idtr.limit = (uint16_t)sizeof(idt_entry_t) * IDT_MAX_DESCRIPTORS - 1;
 __asm__ volatile ("lidt %0" : : "m"(idtr)); // load the new IDT
 //__asm__ volatile ("sti"); // set the interrupt flag
 }
-
 
 

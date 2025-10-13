@@ -3,7 +3,7 @@ global isr_stub_table    ; make visible for c
 global irq1_handler  
 extern keyboard_callback ; C function we'll call from here
 extern PIC_sendEOI       ; PIC End Of Interrupt function
-
+extern irq_handler_c
 
 ;*************************
 ;*****STUB MACROS********
@@ -83,11 +83,24 @@ isr_stub_table:
 ;******IRQ1 HANDLER*******
 ;*************************
 irq1_handler:
-    pusha                  ; Save registers
-    call keyboard_callback ; Call C keyboard handler
-    mov al, 1              ; IRQ number 1 (keyboard)
-    push eax
-    call PIC_sendEOI       ; Tell PIC we’re done
-    add esp, 4
-    popa
-    iretd
+ 
+    cli                 ; disable interrupts
+    pushad              ; save EAX..EDI (32-bit)
+    pushfd              ; save EFLAGS
+
+
+    push dword 1        ; push IRQ number as 32-bit cdecl argument
+    call irq_handler_c  ; common handler, will call registered C handler
+    add  esp, 4         ; clean the argument stack
+
+    popfd               ; restore EFLAGS
+    popad               ; restore registers
+
+    ; send EOI to PICs (do this after C handler so handler can use ports)
+    push dword 1
+    call PIC_sendEOI
+    add  esp, 4
+
+    sti                 ; optionally, but usually not needed before iret
+    iretd               ; return from interrupt
+

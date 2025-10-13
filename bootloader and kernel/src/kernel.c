@@ -1,12 +1,23 @@
 #include "kernel.h"
 #include "idt.c"
+#include <stdbool.h>
 #include <stdint.h>
 #include "../libary/stdconsole.h"
 #include "../drivers/pic.h"
+#include "../libary/stdioaccess.h"
+
 
 // kernel.c AUG 14
 
 
+bool is_pic = false;
+
+#define PIC1		0x20		
+#define PIC2		0xA0		
+#define PIC1_COMMAND	PIC1
+#define PIC1_DATA	(PIC1+1)
+#define PIC2_COMMAND	PIC2
+#define PIC2_DATA	(PIC2+1)
 
 
 
@@ -21,6 +32,24 @@ void clear_screen(){
 
 }
 
+void IRQ_set_mask(uint8_t IRQline) {
+    uint16_t port;
+    uint8_t value;
+
+    if(IRQline < 8) {
+        port = PIC1_DATA;
+    } else {
+        port = PIC2_DATA;
+        IRQline -= 8;
+    }
+    value = inb(port) | (1 << IRQline);
+    outb(port, value);        
+
+
+
+
+}
+
 
 
 
@@ -28,43 +57,32 @@ void kernel_main() {
    // clear_screen();
     __asm__ volatile ("cli");
 
-    //char greeting[] = "Kernel was succesfully loaded";
-
-    //print_string(greeting, 0x07, 0, 2);
 
 
-   // char msgIDT[] = "Loading Interupt Data table";
-    //print_string(msgIDT, 0x07, 0, 3);
+    char greeting[] = "Kernel was entered.";
+
+    print_string(greeting, 0x07, 0, 2);
+
+
+    char load_idt[] = "Loading IDT";
+    print_string(load_idt, 0x07, 0, 3);
 
 
     idt_init();
 
 
-    char msgIDTSuccess[] = "Interupt Data table succesfuly loaded.";
-    print_string(msgIDTSuccess, 0x07, 0, 4);
-
-
-    //char msgpic[] = "Loading The Programmable Interrupt Controller";
-    //print_string(msgpic, 0x07, 0, 5);
-    
- 
-
-
-    PIC_remap(0x8, 0x70);
+    char idt_sucess[] = "IDT was succesfully loaded";
+    print_string(idt_sucess, 0x07, 0, 4);
 
 
 
 
-    //IRQ_set_mask(0xFF);      //kills the stack never un comment keeping this to remind me of my 4  hours of debugging  (no joke)
-    
 
-    //next set the keyboard stud
+    PIC_remap(0x20, 0x28);
 
 
 
 
-    char greeting[] = "Kernel was succesfully loaded";
-    print_string(greeting, 0x07, 0, 2);
 
 
 
@@ -76,10 +94,15 @@ void kernel_main() {
     print_string(msgpicSuccess, 0x07, 0, 7);
 
 
-    
+    __asm__ volatile("cli");
+    IRQ_clear_mask(1);
+
+    char msgIDT[] = "debug msg if here irq mask was cleared!";
+    print_string(msgIDT, 0x07, 0, 10);
 
 
 
+    asm volatile("sti"); 
 
 
 
