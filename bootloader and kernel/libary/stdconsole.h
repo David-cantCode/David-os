@@ -12,8 +12,10 @@ static unsigned short* const vga = (unsigned short*)VGA_ADDRESS;
 
 
 
-
+int string_length(char s[]);
 void print_string(char* string, unsigned char attribute, int posX, int posY);
 void print_char(char character, unsigned char attribute, int posX, int posY);
 static char* byte_to_hex(uint8_t b, char* buffer);
+void clear_screen();
+void append(char s[], char n);
 #endif

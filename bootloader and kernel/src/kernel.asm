@@ -119,7 +119,6 @@ _start:
 
 .done:
     call kernel_main
-
     jmp $                       
 
 

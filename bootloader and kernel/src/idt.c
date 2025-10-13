@@ -1,80 +1,42 @@
-#include <stdint.h>
-#include <stdbool.h>
+#include "idt.h"
+#include "../libary/stdioaccess.h"
+
+IDT_gate g_IDT[256];
+
+IDT_register g_IDTDescriptor;
 
 
-#define IDT_FLAG_PRESENT 0x80
-#define IDT_FLAG_INT32   0x0E
-uint8_t flags = IDT_FLAG_PRESENT | IDT_FLAG_INT32;
-
-
-
-#define IDT_MAX_DESCRIPTORS 256
-
-
-typedef struct {
-    uint16_t limit;  // Size of the IDT - 1
-    uint32_t base;   // Address of the first element in the IDT
-} __attribute__((packed)) idtr_t;
-
-static idtr_t idtr;
-
-typedef struct {
-	uint16_t    isr_low;      // The lower 16 bits of the ISR's address
-	uint16_t    kernel_cs ;    // The GDT segment selector that the CPU will load into CS before calling the ISR
-	uint8_t     reserved;     // Set to zero
-	uint8_t     attributes;   // Type and attributes; see the IDT page
-	uint16_t    isr_high;     // The higher 16 bits of the ISR's address
-    
-
-
-} __attribute__((packed)) idt_entry_t;
-
-
-
-
-
-__attribute__((aligned(0x10))) 
-static idt_entry_t idt[256]; //IDT entries
-
-
-    
-
-//*********************************** 
-//**********ASSIGN IDT ENTRIES******
-// ******************************** 
-
-void idt_set_descriptor(uint8_t vector, void* isr, uint8_t flags);
-void idt_set_descriptor(uint8_t vector, void* isr, uint8_t flags) {
-    //makes it this far
-    
-    
-    idt_entry_t* descriptor = &idt[vector];
-
-    descriptor->isr_low        = (uint32_t)isr & 0xFFFF;
-    descriptor->kernel_cs      = 0x08; 
-    descriptor->attributes     = flags;
-    descriptor->isr_high       = (uint32_t)isr >> 16;
-    descriptor->reserved       = 0;
+void IDT_SetGate(int interrupt, unsigned long base)
+{
+    g_IDT[interrupt].offset_lower = (base) & 0xFFFF;
+    g_IDT[interrupt].segment_selector = 0x08;
+    g_IDT[interrupt].always0 = 0;
+    g_IDT[interrupt].flags = 0x8E;
+    g_IDT[interrupt].offset_higher = (base >> 16) & 0xFFFF;
 }
 
+void IDT_Initialize()
+{   
+    g_IDTDescriptor.base = (unsigned long) &g_IDT;
+    g_IDTDescriptor.limit = sizeof(g_IDT) - 1;
+    IDT_load(&g_IDTDescriptor);
 
+     outb(0x20, 0x11);
+     outb(0xA0, 0x11);
 
-static bool vectors[IDT_MAX_DESCRIPTORS];
+    // ICW2
+     outb(0x21, 0x20);
+     outb(0xA1, 0x28);
 
-extern void* isr_stub_table[];
+    // ICW3
+     outb(0x21, 0x04);
+    outb(0xA1, 0x02);
 
-void idt_init(void);
-void idt_init() {
-idtr.base = (uintptr_t)&idt[0];
-idtr.limit = (uint16_t)sizeof(idt_entry_t) * IDT_MAX_DESCRIPTORS - 1;
+    // ICW4
+     outb(0x21, 0x01);
+     outb(0xA1, 0x01);
 
-        for (uint8_t vector = 0; vector < 32; vector++) {
-            idt_set_descriptor(vector, isr_stub_table[vector], 0x8E);
-            vectors[vector] = true;
-        }
-
-__asm__ volatile ("lidt %0" : : "m"(idtr)); // load the new IDT
-//__asm__ volatile ("sti"); // set the interrupt flag
+    // OCW1
+     outb(0x21, 0xFC); // 1111 1100 -> unmask IRQ0 (timer) and unmask IRQ1 (keyboard)
+     outb(0xA1, 0xFF);
 }
-
-
