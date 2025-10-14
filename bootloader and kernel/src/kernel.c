@@ -3,68 +3,58 @@
 #include <stdbool.h>
 #include <stdint.h>
 #include "../libary/stdconsole.h"
-#include "../libary/stdioaccess.h"
 #include "isr.h"
 
 
 // kernel.c AUG 14
 
 
-bool is_pic = false;
-
-#define PIC1		0x20		
-#define PIC2		0xA0		
-#define PIC1_COMMAND	PIC1
-#define PIC1_DATA	(PIC1+1)
-#define PIC2_COMMAND	PIC2
-#define PIC2_DATA	(PIC2+1)
+extern volatile int key_down;
+//extern volatile char typed_letter;
 
 
 
-extern void* isr_stub_table[];
-
-
-bool loop = true;
-
-
-void IRQ_set_mask(uint8_t IRQline) {
-    uint16_t port;
-    uint8_t value;
-
-    if(IRQline < 8) {
-        port = PIC1_DATA;
-    } else {
-        port = PIC2_DATA;
-        IRQline -= 8;
+int compare_string(char s1[], char s2[]) {
+    int i;
+    for (i = 0; s1[i] == s2[i]; i++) {
+        if (s1[i] == '\0') return 0;
     }
-    value = inb(port) | (1 << IRQline);
-    outb(port, value);        
+    return s1[i] - s2[i];
+}
 
 
+void execute_command(char *input) {
 
+   if (compare_string(input, "CLEAR") == 0) {
+        clear_screen();
+    }
 
 }
 
 
-
-
 void kernel_main() {
-   // clear_screen();
+    //clear_screen();
     __asm__ volatile ("cli");
     IDT_Initialize();
     ISR_Initialize();
 
 
+    
 
-    char msgIDT[] = "debug msg if here irq mask was cleared!";
-    print_string(msgIDT, 0x07, 0, 10);
+    char msgIDT[] = "Kernel was loaded";
+    print_string(msgIDT, 0x07, 0, 2);
+
+  
 
     asm volatile("sti");
+    uint8_t tmp = inb(0x60);
+    if (key_down == 1){
 
-
-
+        char p[] = "Typing";
+        print_string(p, 0x07, 0, 5);
+        // print_char(typed_letter, 0x07, 0, 1);
+        key_down = 0;
+    }
     
 }
-
-
 

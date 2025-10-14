@@ -1,0 +1,17 @@
+Currently keyboard call back gets called but stack overflows 
+
+
+
+  
+    if (scancode == ENTER) {
+        key_buffer[key_index] = '\0';
+        key_ready = 1;  // signal main loop to process command
+        key_index = 0;
+    }
+    else if (scancode == BACKSPACE) {
+        if (key_index > 0) key_index--;
+    }
+    else {
+        char letter = scancode_to_char[scancode];
+        key_buffer[key_index++] = letter;
+    }

@@ -1,4 +1,5 @@
 #include "stdconsole.h"
+
 #include <stdint.h>
 
 
@@ -10,6 +11,15 @@ int string_length(char s[]) {
     return i;
 }
 
+
+void clear_screen(){
+    unsigned int i;
+
+    for (i = 0; i < VGA_COLS* VGA_ROWS; i++) {
+        vga[i] = (0x07 << 8) | 0x20;  // writting the ascii symbol space to clear the screen (genius)
+    }
+}
+
 void print_char(char character, unsigned char attribute, int posX, int posY) { 
    
                                 
@@ -18,7 +28,7 @@ void print_char(char character, unsigned char attribute, int posX, int posY) {
 
 
                                 //for ground and background attribute 
-void print_string(char* string, unsigned char attribute, int posX, int posY){  //works but you cant but a strign as a agr. please use print_string(msg[] )
+void print_string(char* string, unsigned char attribute, int posX, int posY){  //works but you cant but a strign as a agr. please use a char array
     int i = 0;                                                                 
 
     while (string[i] != '\0') {
@@ -36,15 +46,6 @@ static char* byte_to_hex(uint8_t b, char* buffer) {
     buffer[1] = hex_chars[b & 0x0F];
     buffer[2] = '\0';
     return buffer;
-}
-
-
-void clear_screen(){
-    unsigned int i;
-
-    for (i = 0; i < VGA_COLS* VGA_ROWS; i++) {
-        vga[i] = (0x07 << 8) | 0x20;  // writting the ascii symbol space to clear the screen (genius)
-    }
 
 }
 
@@ -54,5 +55,4 @@ void append(char s[], char n) {
     s[len] = n;
     s[len + 1] = '\0';
 }
-
 

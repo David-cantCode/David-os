@@ -16,12 +16,14 @@ _start:
     mov edi, 0xB8000           ; VGA text buffer base
     mov ecx, 80*25             ; # of cells
     mov ax, 0x0720             ; store the ascii code ' '
+
+
 .clear_loop:
     stosw                      ; store ax and inc by 2  
     loop .clear_loop
 
 
-
+    jmp .done
 
     ;******************************
     ;******PRINT 'LOADING KERNEL'***
@@ -116,6 +118,7 @@ _start:
 
 
  
+mov esp, 0x90000
 
 .done:
     call kernel_main

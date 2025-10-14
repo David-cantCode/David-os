@@ -1,7 +1,8 @@
 #ifndef ISR_H
 #define ISR_H
 
-#include "../drivers/port.h"
+#include "../libary/stdioaccess.h"
+
 #include "idt.h"
 typedef struct 
 {
@@ -55,10 +56,8 @@ extern void keyboard_callback();
 
 void __attribute__((cdecl)) ISR_Handler(Registers *ptr)
 {
-    if (ptr->interrupt==32) 
-    {
-       return;
-    }
+    //if (ptr->interrupt==32) 
+    
     
     if (ptr->interrupt==33) 
     {
@@ -67,9 +66,9 @@ void __attribute__((cdecl)) ISR_Handler(Registers *ptr)
     
     
     if (ptr->interrupt >= 40) 
-    {port_byte_out(0xA0, 0x20);}
+    {outb(0xA0, 0x20);}
     
-    port_byte_out(0x20, 0x20);
+    outb(0x20, 0x20);
         
 }
 #endif 
