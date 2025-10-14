@@ -23,7 +23,6 @@ _start:
     loop .clear_loop
 
 
-    jmp .done
 
     ;******************************
     ;******PRINT 'LOADING KERNEL'***

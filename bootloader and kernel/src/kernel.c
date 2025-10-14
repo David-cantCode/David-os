@@ -1,6 +1,5 @@
 #include "kernel.h"
 #include "idt.c"
-#include <stdbool.h>
 #include <stdint.h>
 #include "../libary/stdconsole.h"
 #include "isr.h"
@@ -33,27 +32,43 @@ void execute_command(char *input) {
 
 
 void kernel_main() {
-    //clear_screen();
+    //**************************
+    // *********INITIALLIZE*****
+    // *************************
+
     __asm__ volatile ("cli");
     IDT_Initialize();
     ISR_Initialize();
-
-
-    
-
     char msgIDT[] = "Kernel was loaded";
     print_string(msgIDT, 0x07, 0, 2);
 
-  
 
+
+
+
+    //*******************
+    // *****LOOP*******
+    // ***************** 
     asm volatile("sti");
-    uint8_t tmp = inb(0x60);
-    if (key_down == 1){
+    while (1) {
+        // pause till interupt
+        asm volatile("hlt");
 
-        char p[] = "Typing";
-        print_string(p, 0x07, 0, 5);
-        // print_char(typed_letter, 0x07, 0, 1);
-        key_down = 0;
+        if (key_down == 1) {
+
+
+            key_down = 0;
+            char p[] = "Typing"; print_string(p, 0x07, 0, 5);  
+        
+        
+        
+        
+        
+        
+        
+        }
+
+        
     }
     
 }

@@ -13,7 +13,6 @@ volatile int key_down = 0; // 0 f 1 true
 
 volatile uint8_t scancode;
 
-
 const char scancode_to_char[] = {
     '?', '?', '1', '2', '3', '4', '5',
     '6', '7', '8', '9', '0', '?', '?',
@@ -29,6 +28,5 @@ const char scancode_to_char[] = {
 
 void keyboard_callback(){
     key_down = 1;
-    scancode = inb(0x60);
-    
+    __asm__("in %%dx, %%al" : "=a" (scancode) : "d" (0x60)); //inb ; port 60
 }
