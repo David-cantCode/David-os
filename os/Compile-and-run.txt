@@ -62,4 +62,4 @@ optional:
 
 
 
-Noted: gnome should be used, i3 gave me issues.
+
