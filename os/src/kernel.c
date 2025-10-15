@@ -1,17 +1,31 @@
 #include "kernel.h"
-#include "idt.c"
-#include <stdint.h>
+#include "cpu/idt.c"
+
 #include "../libary/stdconsole.h"
-#include "isr.h"
+#include "cpu/isr.h"
 
 
 // kernel.c AUG 14
 
 
-extern volatile int key_down;
-//extern volatile char typed_letter;
+volatile int key_down;
+volatile uint8_t scancode;
 
 
+const char scancode_to_char[] = {
+    '?', '?', '1', '2', '3', '4', '5',
+    '6', '7', '8', '9', '0', '?', '?',
+    '?', '?', 'Q', 'W', 'E', 'R', 'T',
+    'Y', 'U', 'I', 'O', 'P', '?', '?',
+    '?', '?', 'A', 'S', 'D', 'F', 'G',
+    'H', 'J', 'K', 'L', '?', '?', '?',
+    '?', '?', 'Z', 'X', 'C', 'V', 'B',
+    'N', 'M', '?', '?', '?', '?', '?',
+    '?', ' '
+    };
+
+
+char input[] = {'h', 'i'};
 
 int compare_string(char s1[], char s2[]) {
     int i;
@@ -35,8 +49,7 @@ void kernel_main() {
     //**************************
     // *********INITIALLIZE*****
     // *************************
-
-    __asm__ volatile ("cli");
+     __asm__ volatile ("cli");
     IDT_Initialize();
     ISR_Initialize();
     char msgIDT[] = "Kernel was loaded";
@@ -44,28 +57,28 @@ void kernel_main() {
 
 
 
-
-
     //*******************
-    // *****LOOP*******
+    // *****MAIN*******
     // ***************** 
     asm volatile("sti");
+    clear_screen();
     while (1) {
         // pause till interupt
         asm volatile("hlt");
-
         if (key_down == 1) {
-
-
             key_down = 0;
-            char p[] = "Typing"; print_string(p, 0x07, 0, 5);  
+
+            if (scancode < 57) {
+                input[0] = scancode_to_char[scancode];
+                print_string(input, 0x07, 0, 3);
+            } 
+
+            char p[] = "Typing";
+             print_string(p, 0x07, 0, 5);  
         
-        
-        
-        
-        
-        
-        
+            
+
+
         }
 
         

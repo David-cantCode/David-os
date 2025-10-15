@@ -74,23 +74,7 @@ $(BIN_DIR)/os.bin: $(BIN_DIR)/boot.bin $(BIN_DIR)/kernel.bin
 	dd if=$(BIN_DIR)/kernel.bin of=$@ bs=512 seek=1 conv=notrunc
 	dd if=/dev/zero bs=512 count=8 >> $@
 
-# Convenience: run under QEMU
-run: all
-	@echo "Starting QEMU with bin/os.bin..."
-	qemu-system-i386 -drive format=raw,file=$(BIN_DIR)/os.bin
 
-# Print GDB instructions (safe: doesn't try to launch gdb/qemu for you)
-gdb-instructions: all
-	@echo "To debug with gdb and QEMU, run these steps in separate shells:"
-	@echo ""
-	@echo "1) Start QEMU with gdbserver (-S = pause CPU, -s = open :1234):"
-	@echo "   qemu-system-i386 -s -S -drive format=raw,file=$(BIN_DIR)/os.bin &"
-	@echo ""
-	@echo "2) In your GDB shell (i686-elf-gdb):"
-	@echo "   (gdb) target remote :1234"
-	@echo "   (gdb) add-symbol-file $(BUILD_DIR)/completeKernel.o 0x00100000"
-	@echo ""
-	@echo "Note: the address 0x00100000 is where your linker script places the kernel."
 
 clean:
 	rm -rf $(BIN_DIR) $(BUILD_DIR)

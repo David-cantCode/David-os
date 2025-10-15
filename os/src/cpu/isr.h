@@ -1,7 +1,7 @@
 #ifndef ISR_H
 #define ISR_H
 
-#include "../libary/stdioaccess.h"
+#include "../../libary/stdioaccess.h"
 
 #include "idt.h"
 typedef struct 
