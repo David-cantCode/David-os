@@ -4,7 +4,7 @@
 [BITS 32]
 
 global _start 
-extern kernel_main
+extern kernel_ini
 extern __stack_end 
 section .text
 _start:
@@ -121,7 +121,7 @@ _start:
 
 
 .done:
-    call kernel_main
+    call kernel_ini
     jmp $                       
 
 

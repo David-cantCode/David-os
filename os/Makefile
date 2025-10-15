@@ -17,6 +17,10 @@ LIB_OBJS := $(patsubst libary/%.c, $(BUILD_DIR)/%.o, $(LIB_SRCS))
 DRI_SRCS := $(wildcard drivers/*.c)
 DRI_OBJS := $(patsubst drivers/%.c,$(BUILD_DIR)/%.o,$(DRI_SRCS))
 
+SRC_C := $(wildcard $(SRC_DIR)/**/*.c)
+OBJS_C := $(patsubst $(SRC_DIR)/%.c,$(BUILD_DIR)/%.o,$(SRC_C))
+
+
 
 OBJS = $(BUILD_DIR)/kernel.asm.o \
        $(BUILD_DIR)/kernel.o \

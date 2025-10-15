@@ -3,22 +3,8 @@
 #include <stdint.h>
 
 
-int string_length(char s[]) {
-    int i = 0;
-    while (s[i] != '\0') {
-        ++i;
-    }
-    return i;
-}
 
 
-void clear_screen(){
-    unsigned int i;
-
-    for (i = 0; i < VGA_COLS* VGA_ROWS; i++) {
-        vga[i] = (0x07 << 8) | 0x20;  // writting the ascii symbol space to clear the screen (genius)
-    }
-}
 
 void print_char(char character, unsigned char attribute, int posX, int posY) { 
    
@@ -49,10 +35,4 @@ static char* byte_to_hex(uint8_t b, char* buffer) {
 
 }
 
-
-void append(char s[], char n) {
-    int len = string_length(s);
-    s[len] = n;
-    s[len + 1] = '\0';
-}
 

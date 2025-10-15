@@ -11,5 +11,5 @@ extern volatile uint8_t scancode;
 
 void keyboard_callback(){
     key_down = 1;
-    __asm__("in %%dx, %%al" : "=a" (scancode) : "d" (0x60)); //inb ; port 60
+    __asm__("in %%dx, %%al" : "=a" (scancode) : "d" (0x60)); //asgn scancode to inb on port 0x60
 }
