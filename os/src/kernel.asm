@@ -5,7 +5,7 @@
 
 global _start 
 extern kernel_main
-
+extern __stack_end 
 section .text
 _start:
    
@@ -116,8 +116,9 @@ _start:
 
 
 
- 
-mov esp, 0x90000
+     mov esp, __stack_end
+    mov ebp, esp
+
 
 .done:
     call kernel_main

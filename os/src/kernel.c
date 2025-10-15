@@ -1,16 +1,19 @@
-#include "kernel.h"
-#include "cpu/idt.c"
+// kernel.c AUG 14
 
+
+#include "cpu/idt.c"
 #include "../libary/stdconsole.h"
 #include "cpu/isr.h"
+#include <stdint.h>
 
 
-// kernel.c AUG 14
+
+
 
 
 volatile int key_down;
 volatile uint8_t scancode;
-
+uint8_t input;
 
 const char scancode_to_char[] = {
     '?', '?', '1', '2', '3', '4', '5',
@@ -25,23 +28,34 @@ const char scancode_to_char[] = {
     };
 
 
-char input[] = {'h', 'i'};
-
-int compare_string(char s1[], char s2[]) {
-    int i;
-    for (i = 0; s1[i] == s2[i]; i++) {
-        if (s1[i] == '\0') return 0;
-    }
-    return s1[i] - s2[i];
-}
 
 
-void execute_command(char *input) {
 
-   if (compare_string(input, "CLEAR") == 0) {
-        clear_screen();
-    }
 
+//todo fix this stupid ahh function that gets the incorrect character
+char scancode_to_ascii(uint8_t scancode) {
+    //1–9 + null terminator
+    if (scancode >= 0x02 && scancode <= 0x0A)
+        return '1' + (scancode - 0x02);
+    if (scancode == 0x0B) return '0';
+
+    //Q–P
+    if (scancode >= 0x10 && scancode <= 0x19)
+        return 'Q' + (scancode - 0x10);
+
+    //A–L
+    if (scancode >= 0x1E && scancode <= 0x26)
+        return 'A' + (scancode - 0x1E);
+
+    //Z–M
+    if (scancode >= 0x2C && scancode <= 0x32)
+        return 'Z' + (scancode - 0x2C);
+
+    if (scancode == 0x39) return ' ';   //space
+   
+   
+   //ret unknown
+    return 0; 
 }
 
 
@@ -57,32 +71,34 @@ void kernel_main() {
 
 
 
+
+
+
     //*******************
     // *****MAIN*******
     // ***************** 
     asm volatile("sti");
-    clear_screen();
     while (1) {
         // pause till interupt
         asm volatile("hlt");
         if (key_down == 1) {
             key_down = 0;
 
-            if (scancode < 57) {
-                input[0] = scancode_to_char[scancode];
-                print_string(input, 0x07, 0, 3);
-            } 
 
-            char p[] = "Typing";
-             print_string(p, 0x07, 0, 5);  
+        char typing[] = "typing";
+        print_string(typing, 0x07, 0, 3);
+
+    input = scancode;
+
+    char c = scancode_to_ascii(input);
+    if (c) {
+        print_char(c, 0x07, 0,5);
         
-            
+    }
 
-
-        }
 
         
     }
     
 }
-
+}

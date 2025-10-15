@@ -1,9 +1,6 @@
 
 #include <stdint.h>
 
-#define KEY_DOWN_SCANCODE_LIMIT 57
-#define BACKSPACE 0x0e
-#define ENTER 0x1C
 
 
 extern volatile int key_down; // 0 f 1 true

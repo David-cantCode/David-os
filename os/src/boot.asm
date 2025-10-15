@@ -1,4 +1,5 @@
 ;AUG 12 2025
+;DAVID BOOTLOADER aug 12
 
 ; memmory segments
 ;CS code segment
@@ -17,6 +18,9 @@
 
 
 
+
+
+
 [BITS 16]
 [ORG 0x7C00]
 
@@ -25,7 +29,7 @@ DATA_SEG            equ 0x10
 
 KERN_LOAD_PHYS      equ 0x00010000        ; 64 KiB
 KERNEL_START_ADDR   equ 0x00100000        ; 1 mib not mb lol
-KERNEL_SECTORS      equ 4                 ; adjust to real size
+KERNEL_SECTORS      equ 9               ; kernel size 
 
 start:
 
