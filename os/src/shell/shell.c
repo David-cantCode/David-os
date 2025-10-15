@@ -1,6 +1,5 @@
 #include <stdint.h>
-#include "screen.c"
-
+#include "fetch.c"
 
 #define KEY_DOWN_SCANCODE_LIMIT 57
 #define BACKSPACE 0x0e
@@ -9,6 +8,8 @@
 char key_buffer[256];
 
 volatile uint8_t scancode;
+
+
 
 const char scancode_to_char[] = {
     '?', '?', '1', '2', '3', '4', '5',
@@ -25,6 +26,10 @@ const char scancode_to_char[] = {
 void execute_command(char *input) {
     if (compare_string(input, "CLEAR") == 0) {
         clear_screen();
+    }
+    else if (compare_string(input, "FETCH")==0) {
+        fetch();
+    
     }
 
 
@@ -63,6 +68,7 @@ void shell_main(uint8_t scancode){
         key_buffer[0] = '\0';
         print("> ");
     }
+
     else{
         char letter = scancode_to_char[(int) scancode];
         append(key_buffer, letter);
