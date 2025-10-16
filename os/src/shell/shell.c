@@ -31,6 +31,9 @@ void execute_command(char *input) {
         fetch();
     
     }
+    else if (compare_string(input, "IS AMOROUS A NIGGER?")==0){
+        print("yes \n" );
+    }
 
 
 

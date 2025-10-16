@@ -3,6 +3,8 @@ BUILD_DIR = ./build
 BIN_DIR   = ./bin
 SRC_DIR   = ./src
 
+
+
 # Toolchain
 CC = i686-elf-gcc
 AS = nasm
@@ -77,6 +79,17 @@ $(BIN_DIR)/os.bin: $(BIN_DIR)/boot.bin $(BIN_DIR)/kernel.bin
 	dd if=$(BIN_DIR)/boot.bin of=$@ bs=512 conv=notrunc
 	dd if=$(BIN_DIR)/kernel.bin of=$@ bs=512 seek=1 conv=notrunc
 	dd if=/dev/zero bs=512 count=8 >> $@
+
+$(BIN_DIR)/os.iso: $(BIN_DIR)/os.bin
+	mkdir -p $(BIN_DIR)/iso_root/boot
+	cp $(BIN_DIR)/os.bin $(BIN_DIR)/iso_root/boot/os.bin
+	xorriso -as mkisofs \
+		-b boot/os.bin \
+		-no-emul-boot \
+		-boot-load-size 4 \
+		-boot-info-table \
+		-o $@ \
+		$(BIN_DIR)/iso_root
 
 
 
