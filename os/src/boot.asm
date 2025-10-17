@@ -133,4 +133,6 @@ gdt_descriptor:
 BootDrive db 0
 
 times 510 - ($-$$) db 0 ;fill all bytes to 510 with 0s 
+
+; dw 0x55AA           ;changed from 0xAA55 -> for iso 
 dw 0xAA55 ;fill last bytes 510-512 with special numbers so bios knows its bootable

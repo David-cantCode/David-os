@@ -86,7 +86,7 @@ $(BIN_DIR)/os.iso: $(BIN_DIR)/os.bin
 	xorriso -as mkisofs \
 		-b boot/os.bin \
 		-no-emul-boot \
-		-boot-load-size 4 \
+		-boot-load-size 9 \
 		-boot-info-table \
 		-o $@ \
 		$(BIN_DIR)/iso_root
