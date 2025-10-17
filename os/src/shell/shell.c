@@ -1,5 +1,5 @@
 #include <stdint.h>
-#include "fetch.c"
+#include "../../apps/fetch/fetch.c"
 
 #define KEY_DOWN_SCANCODE_LIMIT 57
 #define BACKSPACE 0x0e

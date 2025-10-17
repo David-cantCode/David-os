@@ -2,7 +2,7 @@
 
 
 #include "cpu/idt.c"
-#include "../libary/stdconsole.h"
+#include "../libary/include/stdconsole.h"
 #include "cpu/isr.h"
 #include "shell/shell.c"
 

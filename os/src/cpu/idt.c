@@ -1,5 +1,5 @@
 #include "idt.h"
-#include "../../libary/stdport.h"
+#include "../../libary/include/stdport.h"
 
 IDT_gate g_IDT[256];
 

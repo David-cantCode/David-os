@@ -1,3 +1,5 @@
+#include "../include/util.h"
+
 
 void memory_copy(unsigned char *source, unsigned char *dest, unsigned long no_of_bytes) {
     int i;
