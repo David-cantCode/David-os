@@ -55,7 +55,7 @@ CODE_SEG            equ 0x08
 DATA_SEG            equ 0x10
 KERN_LOAD_PHYS      equ 0x00010000        ; 64 KiB
 KERNEL_START_ADDR   equ 0x00100000        ; 1 mib not mb lol
-KERNEL_SECTORS      equ 9               ; kernel size 
+KERNEL_SECTORS      equ 9              ; kernel size 
 
 start:
 

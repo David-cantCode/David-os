@@ -28,3 +28,10 @@ void io_wait(void)
 void insw(uint16_t port, void* addr, uint32_t count) {
     asm volatile ("rep insw" : "+D"(addr), "+c"(count) : "d"(port) : "memory");
 }
+
+
+uint16_t inw(uint16_t port) {
+    uint16_t ret;
+    __asm__ volatile ("inw %1, %0" : "=a"(ret) : "Nd"(port));
+    return ret;
+}

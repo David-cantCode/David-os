@@ -1,5 +1,6 @@
 #include <stdint.h>
 #include "../../apps/fetch/fetch.c"
+#include "../../apps/help/help.c"
 
 #define KEY_DOWN_SCANCODE_LIMIT 57
 #define BACKSPACE 0x0e
@@ -31,13 +32,9 @@ void execute_command(char *input) {
         fetch();
     
     }
-    else if (compare_string(input, "IS AMOROUS A NIGGER?")==0){
-        print("yes \n" );
+    else if (compare_string(input, "HELP")==0){
+        show_commands();
     }
-
-
-
-
     
 }
     

@@ -9,4 +9,6 @@
  void outb(uint16_t port, uint8_t val);
  void io_wait(void);
 void insw(uint16_t port, void* addr, uint32_t count);
+uint16_t inw(uint16_t port);
+
 #endif
