@@ -27,7 +27,13 @@ have 3 terminals open:
 terminal one:
 
     run this line once in the bootloader folder and your done: 
-        qemu-system-i386 -drive format=raw,file=./bin/os.bin -s -S
+    new since we can now produce a .img file:
+
+    qemu-system-i386 -hda bin/davidos.img
+    
+    old:
+     
+    qemu-system-i386 -drive format=raw,file=./bin/os.bin -s -S
 
 
 terminal 2:

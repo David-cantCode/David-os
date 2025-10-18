@@ -16,17 +16,43 @@
 ;cli - disable interupts
 ; sti - enable interupts
 
-
-
-
-
-
 [BITS 16]
 [ORG 0x7C00]
 
+;***************
+;FAT 12 header**
+;***************
+jmp short start
+nop
+bdb_oem db 'MSWIN4.1'
+bdb_bytes_per_sector: dw 512 
+bdb_sectors_per_cluster: db 4
+bdb_reserved_sectors: dw 4
+bdb_fat_count: db 2
+bdb_dir_entries_count: dw 512
+
+bdb_total_sectors: dw 0
+
+bdb_media_descriptor_type: db 0F8h
+bdb_sectors_per_fat: dw 24
+
+bdb_sectors_per_track: dw 32
+bdb_heads: dw 2
+bdb_hidden_sectors: dd 0 
+bdb_large_sector_count: dd 24576
+
+;extent boot record 
+ebr_drive_number: db 0 
+db 0 ;reserved
+ebr_signature: db 29h
+ebr_volume_id: db 12h, 34h, 56h, 78h
+ebr_volume_label: db 'DAVID OS   ' ;keep this size (11 bytes)
+ebr_system_id: db 'FAT16   ' ; 8 bytes
+
+
+
 CODE_SEG            equ 0x08
 DATA_SEG            equ 0x10
-
 KERN_LOAD_PHYS      equ 0x00010000        ; 64 KiB
 KERNEL_START_ADDR   equ 0x00100000        ; 1 mib not mb lol
 KERNEL_SECTORS      equ 9               ; kernel size 
@@ -45,6 +71,7 @@ start:
     mov [BootDrive], dl            ; preserve bios boot drive
 
 ; --- read kernel to 0x10000 (ES:BX must point there) ---
+
     mov ax, KERN_LOAD_PHYS >> 4    ; ES = 0x1000
     mov es, ax
     xor bx, bx                     ; BX = 0
@@ -131,6 +158,8 @@ gdt_descriptor:
     dd gdt_start
 
 BootDrive db 0
+
+
 
 times 510 - ($-$$) db 0 ;fill all bytes to 510 with 0s 
 

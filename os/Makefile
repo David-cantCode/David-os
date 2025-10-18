@@ -33,10 +33,9 @@ OBJS = $(BUILD_DIR)/kernel.asm.o \
 
 .PHONY: all clean run gdb-instructions
 
-all: $(BIN_DIR)/os.bin $(BUILD_DIR)/completeKernel.o
+all: $(BIN_DIR)/davidos.img $(BUILD_DIR)/completeKernel.o
 
 $(BUILD_DIR)/libary/%.o: libary/%.c
-	@echo "Building $< -> $@"
 	@mkdir -p $(dir $@)
 	$(CC) $(FLAGS) -std=gnu99 -c $< -o $@
 	
@@ -84,24 +83,16 @@ $(BUILD_DIR)/completeKernel.o: $(OBJS) | $(BUILD_DIR)
 
 
 
-# Build OS image: bootloader (512 bytes) + kernel (raw binary) + padding
-$(BIN_DIR)/os.bin: $(BIN_DIR)/boot.bin $(BIN_DIR)/kernel.bin
-	dd if=$(BIN_DIR)/boot.bin of=$@ bs=512 conv=notrunc
-	dd if=$(BIN_DIR)/kernel.bin of=$@ bs=512 seek=1 conv=notrunc
-	dd if=/dev/zero bs=512 count=8 >> $@
-
-$(BIN_DIR)/os.iso: $(BIN_DIR)/os.bin
-	mkdir -p $(BIN_DIR)/iso_root/boot
-	cp $(BIN_DIR)/os.bin $(BIN_DIR)/iso_root/boot/os.bin
-	xorriso -as mkisofs \
-		-b boot/os.bin \
-		-no-emul-boot \
-		-boot-load-size 9 \
-		-boot-info-table \
-		-o $@ \
-		$(BIN_DIR)/iso_root
+# New: 
+$(BIN_DIR)/davidos.img: $(BIN_DIR)/boot.bin $(BIN_DIR)/kernel.bin
+	cat $(BIN_DIR)/boot.bin $(BIN_DIR)/kernel.bin > $(BIN_DIR)/davidos.img
 
 
+#old:
+#$(BIN_DIR)/davidos.img: $(BIN_DIR)/boot.bin $(BIN_DIR)/kernel.bin
+#	dd if=$(BIN_DIR)/boot.bin of=$@ bs=512 conv=notrunc
+#	dd if=$(BIN_DIR)/kernel.bin of=$@ bs=512 seek=1 conv=notrunc
+#	dd if=/dev/zero bs=512 count=8 >> $@
 
 clean:
 	rm -rf $(BIN_DIR) $(BUILD_DIR)
