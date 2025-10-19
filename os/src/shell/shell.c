@@ -13,8 +13,18 @@ char key_buffer[256];
 volatile uint8_t scancode;
 
 
-uint8_t buf[512];
+uint8_t buff[512];
 
+
+#define TEST_SECTOR 1
+#define SECTOR_SIZE 512
+uint8_t write_buf[SECTOR_SIZE];
+
+void fill_test_pattern(uint8_t* buf, uint8_t pattern) {
+    for (int i = 0; i < SECTOR_SIZE; i++) {
+        buf[i] = pattern;
+    }
+}
 
 const char scancode_to_char[] = {
     '?', '?', '1', '2', '3', '4', '5',
@@ -40,8 +50,29 @@ void execute_command(char *input) {
         show_commands();
     }
     else if(compare_string(input, "READ BOOT") == 0){
-        ata_read_sector(0, buf);
-        dump_sector(buf);
+        read_sector(0, buff);
+        dump_sector(buff);
+    }
+
+    else if (compare_string(input, "WRITE TEST") == 0){
+    fill_test_pattern(write_buf, 0xAB);  
+    write_sector(TEST_SECTOR, write_buf);
+
+    print("Sector 1 was overwritten\n");
+    }
+    else if (compare_string(input, "READ TEST") ==0){
+
+        read_sector(TEST_SECTOR, buff);
+        dump_sector(buff);
+    }
+
+
+
+
+    else{
+        print("unknown command '");
+        print(input);
+        print("' \ntype 'help' for info\n \n");
     }
     
 }

@@ -99,7 +99,7 @@ void print_hex(uint8_t val) {
     out[0] = hex[(val >> 4) & 0xF];
     out[1] = hex[val & 0xF];
     out[2] = '\0';
-    print(out); // or however your OS prints
+    print(out); 
 }
 
 void dump_sector(uint8_t *buf) {

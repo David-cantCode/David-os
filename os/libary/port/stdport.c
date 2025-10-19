@@ -35,3 +35,8 @@ uint16_t inw(uint16_t port) {
     __asm__ volatile ("inw %1, %0" : "=a"(ret) : "Nd"(port));
     return ret;
 }
+
+void outsw(uint16_t port, const void* buffer, uint32_t count) {
+    const uint16_t* buf = (const uint16_t*)buffer;
+    __asm__ volatile ("cld\n\t" "rep outsw": "+S"(buf), "+c"(count) : "d"(port): "memory");
+}

@@ -64,11 +64,11 @@ terminal: 3
         info frame - info on rip register nessary for checing return function and current function
         x/1bx *memmory* 
 
-optional:
+optional debug:
     in a terminal run:
-        bless os.bin
-    you see some cool shit
+        bless bin/davidos.img 
 
+        youll be able to see the hex of the  .img
 
 
 

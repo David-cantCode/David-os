@@ -116,7 +116,7 @@ _start:
 
 
 
-     mov esp, __stack_end
+    mov esp, __stack_end
     mov ebp, esp
 
 

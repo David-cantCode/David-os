@@ -34,9 +34,8 @@
 
 
 
-//funcs
-void ata_wait_ready();
-void ata_read_sector(uint32_t lba, uint8_t* buffer);
-
+void ata_wait();
+void read_sector(uint32_t lba, uint8_t* buffer);
+void write_sector(uint32_t lba, uint8_t* buffer);
 
 #endif
