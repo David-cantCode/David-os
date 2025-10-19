@@ -25,4 +25,7 @@ int scroll_screen(int memory_offset);
 void print(char *string);
 void print_backspace();
 void clear_screen();
+
+void print_hex(uint8_t val);
+void dump_sector(uint8_t *buf);
 #endif

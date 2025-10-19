@@ -7,7 +7,7 @@ extern volatile int key_down; // 0 f 1 true
 extern volatile uint8_t scancode;
 
 
-
+//assigns scancode to port 0x60 to get last key pressed
 
 void keyboard_callback(){
     key_down = 1;

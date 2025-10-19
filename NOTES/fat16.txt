@@ -1,0 +1,46 @@
+#include "../include/fat16.h"
+#include "../include/ata.h"
+
+
+FAT16_BPB bpb;
+FAT16Entry rootDir[MAX_ROOT_DIR];
+uint8_t fatTable[SECTOR_SIZE*24]; // adjust sectorsPerFAT for your disk
+
+
+uint32_t cluster_to_lba(uint16_t cluster) {
+    uint16_t rootSectors = ((bpb.rootDirEntries*32) + (bpb.bytesPerSector-1))/bpb.bytesPerSector;
+    return bpb.reservedSectors + bpb.fatCount*bpb.sectorsPerFAT + rootSectors + (cluster-2)*bpb.sectorsPerCluster;
+}
+
+uint16_t get_fat_entry(uint16_t cluster) {
+    return ((uint16_t*)fatTable)[cluster];
+}
+int filename_equal(const char* a, const char* b) {
+    for (int i = 0; i < 11; i++) {
+        if (a[i] != b[i]) return 0;
+    }
+    return 1;
+}
+
+int read_file(const char* filename, uint8_t* dest, uint32_t max_size) {
+    for (int i = 0; i < MAX_ROOT_DIR; i++) {
+        if (filename_equal(rootDir[i].name, filename)) {
+            uint16_t cluster = rootDir[i].firstClusterLow;
+            uint32_t remaining = rootDir[i].fileSize;
+            if (remaining > max_size) return -1;
+
+            while (cluster < 0xFFF8) {  // end-of-chain
+                uint32_t lba = cluster_to_lba(cluster);
+                for (int s = 0; s < bpb.sectorsPerCluster; s++) {
+                    ata_read_sector(lba + s, dest);
+                    dest += SECTOR_SIZE;
+                    if (remaining <= SECTOR_SIZE) return 0;
+                    remaining -= SECTOR_SIZE;
+                }
+                cluster = get_fat_entry(cluster);
+            }
+            return 0;
+        }
+    }
+    return -1; // file not found
+}

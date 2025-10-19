@@ -30,6 +30,9 @@ terminal one:
     new since we can now produce a .img file:
 
     qemu-system-i386 -hda bin/davidos.img
+
+    or: qemu-system-i386 -drive file=./bin/davidos.img,format=raw,if=ide -s -S 
+    if you wanna use gdb to debug
     
     old:
      

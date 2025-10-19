@@ -1,6 +1,5 @@
 // kernel.c AUG 14
 
-
 #include "cpu/idt.c"
 #include "../libary/include/stdconsole.h"
 #include "cpu/isr.h"
@@ -36,7 +35,7 @@ void kernel_ini() {
     // *********INITIALLIZE*****
     // *************************
      __asm__ volatile ("cli");
-    char msgKernel[] = "Kernel was loaded!";
+    char msgKernel[] = "Kernel was loaded";
     print_string(msgKernel, 0x07, 0, 1);
     
     IDT_Initialize();

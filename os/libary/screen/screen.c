@@ -88,3 +88,25 @@ void clear_screen() {
     set_cursor(get_offset(0, control_row));
     print("David OS: ");
 }
+
+
+
+
+
+void print_hex(uint8_t val) {
+    const char *hex = "0123456789ABCDEF";
+    char out[3];
+    out[0] = hex[(val >> 4) & 0xF];
+    out[1] = hex[val & 0xF];
+    out[2] = '\0';
+    print(out); // or however your OS prints
+}
+
+void dump_sector(uint8_t *buf) {
+    for (int i = 0; i < 512; i++) {
+        print_hex(buf[i]);
+        print(" ");
+        if ((i + 1) % 16 == 0)
+            print("\n");
+    }
+}

@@ -2,6 +2,8 @@
 #include "../../apps/fetch/fetch.c"
 #include "../../apps/help/help.c"
 
+#include "../../drivers/include/ata.h"
+
 #define KEY_DOWN_SCANCODE_LIMIT 57
 #define BACKSPACE 0x0e
 #define ENTER 0x1C
@@ -10,6 +12,8 @@ char key_buffer[256];
 
 volatile uint8_t scancode;
 
+
+uint8_t buf[512];
 
 
 const char scancode_to_char[] = {
@@ -34,6 +38,10 @@ void execute_command(char *input) {
     }
     else if (compare_string(input, "HELP")==0){
         show_commands();
+    }
+    else if(compare_string(input, "READ BOOT") == 0){
+        ata_read_sector(0, buf);
+        dump_sector(buf);
     }
     
 }
@@ -80,4 +88,7 @@ void shell_main(uint8_t scancode){
 
 void shell_ini(){
     print("> ");
+    
+
+
 }

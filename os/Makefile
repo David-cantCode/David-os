@@ -16,8 +16,9 @@ FLAGS = -g -ffreestanding -nostdlib -nostartfiles -nodefaultlibs -Wall -O0 -Iinc
 
 LIB_SRCS := $(shell find libary -type f -name "*.c") #update; includes all c files ine every folder under libary
 LIB_OBJS := $(patsubst libary/%.c, $(BUILD_DIR)/libary/%.o, $(LIB_SRCS))
-DRI_SRCS := $(wildcard drivers/*.c)
-DRI_OBJS := $(patsubst drivers/%.c,$(BUILD_DIR)/%.o,$(DRI_SRCS))
+
+DRI_SRCS := $(shell find drivers -type f -name "*.c")
+DRI_OBJS := $(patsubst drivers/%.c, $(BUILD_DIR)/drivers/%.o,$(DRI_SRCS))
 
 SRC_C := $(wildcard $(SRC_DIR)/**/*.c)
 OBJS_C := $(patsubst $(SRC_DIR)/%.c,$(BUILD_DIR)/%.o,$(SRC_C))
@@ -39,7 +40,8 @@ $(BUILD_DIR)/libary/%.o: libary/%.c
 	@mkdir -p $(dir $@)
 	$(CC) $(FLAGS) -std=gnu99 -c $< -o $@
 	
-$(BUILD_DIR)/%.o: drivers/%.c | $(BUILD_DIR)
+$(BUILD_DIR)/drivers/%.o: drivers/%.c
+	@mkdir -p $(dir $@)
 	$(CC) $(FLAGS) -std=gnu99 -c $< -o $@
 
 
