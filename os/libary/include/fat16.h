@@ -18,6 +18,11 @@
 
 #define CLUSTER_COUNT ((TOTAL_SECTORS - FIRST_DATA_SECTOR) / SECTORS_PER_CLUSTER)
 
+#define KERNEL_FIRST_SECTOR  (FIRST_DATA_SECTOR + 4000)  
+#define KERNEL_SECTORS       20                          //fix? kernel keeps getting overwritten when os restarts
+
+
+
 void fat16_init();
 uint32_t find_safe_cluster();
 

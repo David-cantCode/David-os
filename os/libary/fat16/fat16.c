@@ -6,8 +6,6 @@
 uint8_t sector_buf[SECTOR_SIZE];
 
 
-#define KERNEL_FIRST_SECTOR  (FIRST_DATA_SECTOR + 4000)  
-#define KERNEL_SECTORS       17                            
 
 
 static int find_free_root_slot(uint32_t *out_sector_lba, int *out_offset_in_sector) {
@@ -194,7 +192,6 @@ void make_fat_name(const char* input, char* output) {
 
     //NEEDS TO FIXED
 
-    // pad with spaces
     int i = 0;
     for (; i < 8; i++) output[i] = ' ';
     

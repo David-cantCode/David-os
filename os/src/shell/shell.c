@@ -65,7 +65,7 @@ void execute_command(char *input) {
         dump_sector(buff);
     }
 
-    else if (compare_string(input, "WRITE TEST") == 0){
+    else if (compare_string(input, "WRITE SECTOR") == 0){
     fill_test_pattern(write_buf, 0xAB);  
     write_sector(TEST_SECTOR, write_buf);
 
