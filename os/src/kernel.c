@@ -54,6 +54,11 @@ void kernel_ini() {
     print_string(msgShell, 0x07, 0, 4);
 
 
+    fat16_init();
+    char msgFat[] = "FAT table was loaded";
+    print_string(msgFat, 0x07, 0, 5);
+    
+
 
     kernel_main();
 }

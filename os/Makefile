@@ -87,8 +87,9 @@ $(BUILD_DIR)/completeKernel.o: $(OBJS) | $(BUILD_DIR)
 
 # New: 
 $(BIN_DIR)/davidos.img: $(BIN_DIR)/boot.bin $(BIN_DIR)/kernel.bin
-	cat $(BIN_DIR)/boot.bin $(BIN_DIR)/kernel.bin > $(BIN_DIR)/davidos.img
-
+	dd if=/dev/zero of=$@ bs=512 count=65536
+	dd if=$(BIN_DIR)/boot.bin of=$@ bs=512 seek=0 conv=notrunc
+	dd if=$(BIN_DIR)/kernel.bin of=$@ bs=512 seek=1 conv=notrunc
 
 #old:
 #$(BIN_DIR)/davidos.img: $(BIN_DIR)/boot.bin $(BIN_DIR)/kernel.bin

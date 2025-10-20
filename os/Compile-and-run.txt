@@ -71,4 +71,5 @@ optional debug:
         youll be able to see the hex of the  .img
 
 
+    position of root 0x10800
 
