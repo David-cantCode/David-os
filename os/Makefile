@@ -34,7 +34,7 @@ OBJS = $(BUILD_DIR)/kernel.asm.o \
 
 .PHONY: all clean run gdb-instructions
 
-all: $(BIN_DIR)/davidos.img $(BUILD_DIR)/completeKernel.o
+all: $(BIN_DIR)/davidos.iso $(BUILD_DIR)/completeKernel.o
 
 $(BUILD_DIR)/libary/%.o: libary/%.c
 	@mkdir -p $(dir $@)
@@ -86,7 +86,7 @@ $(BUILD_DIR)/completeKernel.o: $(OBJS) | $(BUILD_DIR)
 
 
 # New: 
-$(BIN_DIR)/davidos.img: $(BIN_DIR)/boot.bin $(BIN_DIR)/kernel.bin
+$(BIN_DIR)/davidos.iso: $(BIN_DIR)/boot.bin $(BIN_DIR)/kernel.bin 
 	dd if=/dev/zero of=$@ bs=512 count=65536
 	dd if=$(BIN_DIR)/boot.bin of=$@ bs=512 seek=0 conv=notrunc
 	dd if=$(BIN_DIR)/kernel.bin of=$@ bs=512 seek=1 conv=notrunc
