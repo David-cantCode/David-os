@@ -4,7 +4,7 @@
 
 #include <stdint.h>
 #define SECTOR_SIZE 512
-#define RESERVED_SECTORS 4
+#define RESERVED_SECTORS 20 //includes kernel. increase when kernel sectors get increased in boot.asn
 #define FAT_COUNT 2
 #define SECTORS_PER_FAT 64
 #define ROOT_DIR_ENTRIES 512
@@ -17,9 +17,6 @@
 #define FIRST_DATA_SECTOR (FIRST_ROOT_DIR_SECTOR + ROOT_DIR_SECTORS)
 
 #define CLUSTER_COUNT ((TOTAL_SECTORS - FIRST_DATA_SECTOR) / SECTORS_PER_CLUSTER)
-
-#define KERNEL_FIRST_SECTOR  (FIRST_DATA_SECTOR + 4000)  
-#define KERNEL_SECTORS       20                          //fix? kernel keeps getting overwritten when os restarts
 
 
 

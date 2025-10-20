@@ -73,3 +73,7 @@ optional debug:
 
     position of root 0x10800
 
+
+
+    cd Documents/GitHub/Operating-System/os 
+    just for me

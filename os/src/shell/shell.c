@@ -23,6 +23,8 @@ uint8_t write_buf[SECTOR_SIZE];
 uint16_t current_dir_cluster = 0; //0 = root
 
 
+//in futer add buffer for last command so when user press arrow up; that command gets thrown into the keybuffer
+
 
 void fill_test_pattern(uint8_t* buf, uint8_t pattern) {
     for (int i = 0; i < SECTOR_SIZE; i++) {

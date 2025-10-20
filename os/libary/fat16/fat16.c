@@ -28,13 +28,13 @@ static int find_free_root_slot(uint32_t *out_sector_lba, int *out_offset_in_sect
 
 static uint8_t fatbuf[SECTORS_PER_FAT * SECTOR_SIZE];
 
-static void fat_read_full(void) {
+void fat_read_full() {
     for (int i = 0; i < SECTORS_PER_FAT; i++) {
         read_sector(FIRST_FAT_SECTOR + i, fatbuf + i * SECTOR_SIZE);
     }
 }
 
-static void fat_write_full_to_both(void) {
+static void fat_write_full_to_both() {
     for (int copy = 0; copy < FAT_COUNT; copy++) {
         uint32_t fat_start = FIRST_FAT_SECTOR + copy * SECTORS_PER_FAT;
         for (int i = 0; i < SECTORS_PER_FAT; i++) {
@@ -74,6 +74,17 @@ void init_root_dir() {
     }
 }
 
+void fat_flush() {
+    // writes fatbuf (the fat in memmory) to the disk
+    for (int copy = 0; copy < FAT_COUNT; copy++) {
+        uint32_t fat_start = FIRST_FAT_SECTOR + copy * SECTORS_PER_FAT;
+        for (int i = 0; i < SECTORS_PER_FAT; i++) {
+            write_sector(fat_start + i, fatbuf + i * SECTOR_SIZE);
+        }
+    }
+}
+
+
 void write_test_file() {
     memoryset(sector_buf, 0, SECTOR_SIZE);
     memorycpy(sector_buf, "TEST    ", 8);
@@ -105,7 +116,7 @@ uint32_t find_safe_cluster() {
     uint32_t cluster = 2;
     uint32_t lba = FIRST_DATA_SECTOR + (cluster - 2)*SECTORS_PER_CLUSTER;
 
-    while (lba < KERNEL_FIRST_SECTOR + KERNEL_SECTORS) {
+    while (lba < FIRST_DATA_SECTOR + RESERVED_SECTORS) {
         cluster++;
         lba = FIRST_DATA_SECTOR + (cluster - 2)*SECTORS_PER_CLUSTER;
     }
@@ -122,6 +133,7 @@ static void fat_set_entry_full(uint32_t cluster, uint16_t value) {
 }
 
 void create_directory(const char* name , uint16_t parent_cluster, int is_root_parent) {
+
     
     uint32_t new_cluster = find_safe_cluster();
     if (new_cluster == 0xFFFFFFFF) return; //if !cluster can be found
@@ -179,11 +191,15 @@ void create_directory(const char* name , uint16_t parent_cluster, int is_root_pa
 
     uint32_t new_dir_lba = FIRST_DATA_SECTOR + (new_cluster - 2) * SECTORS_PER_CLUSTER;
     write_sector(new_dir_lba, sector_buf);
+    fat_flush();
 }
+
+
 
 void fat16_init() {
     write_fats();
     init_root_dir();
+    
     write_test_file();
 
 }

@@ -8,6 +8,23 @@
 volatile int key_down;
 
 
+
+
+void format_disk(){
+   // in future add a special byte somewheres which controls whether the disk was formated
+   //this will allow the user to mkdirs without them disapearing upond restart of the os
+
+
+
+    fat16_init(); 
+    
+    char msgFat[] = "Disk was formated";
+    print_string(msgFat, 0x07, 0, 5);
+}
+
+
+
+
 void kernel_main(){
 
     //*******************
@@ -54,11 +71,8 @@ void kernel_ini() {
     print_string(msgShell, 0x07, 0, 4);
 
 
-    fat16_init();
-    char msgFat[] = "FAT table was loaded";
-    print_string(msgFat, 0x07, 0, 5);
     
-
+    format_disk();
 
     kernel_main();
 }
