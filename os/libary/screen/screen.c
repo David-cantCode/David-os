@@ -86,7 +86,6 @@ void clear_screen() {
     }
 
     set_cursor(get_offset(0, control_row));
-    print("David OS: ");
 }
 
 

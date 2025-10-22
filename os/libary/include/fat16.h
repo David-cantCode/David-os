@@ -4,7 +4,7 @@
 
 #include <stdint.h>
 #define SECTOR_SIZE 512
-#define RESERVED_SECTORS 20 //includes kernel. increase when kernel sectors get increased in boot.asn
+#define RESERVED_SECTORS 21 //includes kernel. increase when kernel sectors get increased in boot.asn
 #define FAT_COUNT 2
 #define SECTORS_PER_FAT 64
 #define ROOT_DIR_ENTRIES 512
@@ -26,5 +26,5 @@ uint32_t find_safe_cluster();
 void create_directory(const char* name, uint16_t parent_cluster, int is_root_parent);
 void list_directory(uint16_t dir_cluster);
 uint16_t find_directory_cluster(const char* name, uint16_t parent_cluster) ;
-void make_fat_name(const char* input, char* output);
+char* conv_fat_name(const char* input);
 #endif

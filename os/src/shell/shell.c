@@ -4,6 +4,7 @@
 #include "../../libary/include/fat16.h"
 #include "../../drivers/include/ata.h"
 
+
 #define KEY_DOWN_SCANCODE_LIMIT 57
 #define BACKSPACE 0x0e
 #define ENTER 0x1C
@@ -13,14 +14,18 @@ char key_buffer[256];
 volatile uint8_t scancode;
 
 
-uint8_t buff[512];
+uint8_t sector_buff[512];
 
 #define TEST_SECTOR 1
 #define SECTOR_SIZE 512
 uint8_t write_buf[SECTOR_SIZE];
 
 
-uint16_t current_dir_cluster = 0; //0 = root
+uint16_t cur_dir_cluster = 0; //0 = root
+char cur_dir_name[8]; //to clear stuff up cuz i gonna forget, dir name; 8 bytes, 11 total with extention which i add on in make_dir func
+
+char alias[8];
+
 
 
 //in futer add buffer for last command so when user press arrow up; that command gets thrown into the keybuffer
@@ -51,7 +56,12 @@ const char scancode_to_char[] = {
     '?', ' '
 };
 
+
+
 void execute_command(char *input) {
+    //*******************************
+    // ***********commands*************
+    //*********************************
     if (compare_string(input, "CLEAR") == 0) {
         clear_screen();
     }
@@ -62,9 +72,18 @@ void execute_command(char *input) {
     else if (compare_string(input, "HELP")==0){
         show_commands();
     }
+
+
+    else if (compare_string(input, "FORMAT")==0){
+        fat16_init();
+        print("Disc was formated\n");
+
+    }
+
+
     else if(compare_string(input, "READ BOOT") == 0){
-        read_sector(0, buff);
-        dump_sector(buff);
+        read_sector(0, sector_buff);
+        dump_sector(sector_buff);
     }
 
     else if (compare_string(input, "WRITE SECTOR") == 0){
@@ -75,21 +94,22 @@ void execute_command(char *input) {
     }
     else if (compare_string(input, "READ SECTOR") ==0){
 
-        read_sector(TEST_SECTOR, buff);
-        dump_sector(buff);
+        read_sector(TEST_SECTOR, sector_buff);
+        dump_sector(sector_buff);
     }
+
 
     else if (compare_string(input, "READ TEST TEXT")==0){
         uint32_t test_file_lba = FIRST_DATA_SECTOR + (2 - 2) * SECTORS_PER_CLUSTER;
-        read_sector(test_file_lba, buff);
-        dump_sector(buff);
+        read_sector(test_file_lba, sector_buff);
+        dump_sector(sector_buff);
     }
 
     else if (starts_with(input, "MKDIR ")) {
     char* name = input + 6;
-    
+    name = conv_fat_name(name);
 
-    create_directory(name, current_dir_cluster, current_dir_cluster == 0);
+    create_directory(name, cur_dir_cluster, cur_dir_cluster == 0);
     print("Created directory: ");
     print(name);
     print("\n \n");
@@ -97,18 +117,27 @@ void execute_command(char *input) {
     
     else if (starts_with(input, "CD ")) {
         char* name = input + 3;
-        uint16_t new_cluster = find_directory_cluster(name, current_dir_cluster);
+        name = conv_fat_name(name);
+
+        uint16_t new_cluster = find_directory_cluster(name, cur_dir_cluster);
 
         if (new_cluster != 0xFFFF) {
-            current_dir_cluster = new_cluster;
+            cur_dir_cluster = new_cluster;
             print("Entered directory: ");
             print(name);
-            print("\n");}else {
-            print("Directory not found.\n");}
-        }
+            memorycpy(cur_dir_name, name, 8);
+
+
+            print("\n");}
+        else {
+            print("Directory '");
+            print(input + 3); 
+            print("' not found.\n");}
+                
+    }
 
     else if (compare_string(input, "LS") == 0) {
-    list_directory(current_dir_cluster);
+    list_directory(cur_dir_cluster);
     print("\n");
     }
 
@@ -136,11 +165,11 @@ int backspace(char buffer[]) {
 
 
 void shell_main(uint8_t scancode){
-
+    //runs when key is pressed
     if (scancode > KEY_DOWN_SCANCODE_LIMIT) return;
 
 
-
+    //deafult commands, backspace n enter
     if (scancode == BACKSPACE) {
        if (backspace(key_buffer)) print_backspace();
     }
@@ -149,11 +178,19 @@ void shell_main(uint8_t scancode){
         print("\n");
         execute_command(key_buffer);
         key_buffer[0] = '\0';
-        print("> ");
+
+
+        if (cur_dir_cluster == 0){
+        memoryset(cur_dir_name, '~', 1); //fix to delete spaces inbetween ~ and/ 
+        }
+        print(cur_dir_name);
+        print("/ $ ");
+
     }
 
     else{
         char letter = scancode_to_char[(int) scancode];
+        //print alias
         append(key_buffer, letter);
         char str[2] = {letter, '\0'};
         print(str);
@@ -162,7 +199,9 @@ void shell_main(uint8_t scancode){
 }
 
 void shell_ini(){
-    print("> ");
+    print("~/ $ ");
+
+
     
 
 

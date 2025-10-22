@@ -1,0 +1,1 @@
+incase anything is just not working randomly just increase kernel sectors in boot.asm and fat16.h, to much increase makes the os mad tho.

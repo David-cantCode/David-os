@@ -47,7 +47,7 @@ static void fat_write_full_to_both() {
 void init_fat(uint8_t* fat) {
     memoryset(fat, 0, SECTORS_PER_FAT * SECTOR_SIZE);
 
-    // reseved entries
+    // reseved entries basically tells the disc the disc type and that these areas cant be used for data
     fat[0] = 0xF8; 
     fat[1] = 0xFF;
     fat[2] = 0xFF;
@@ -74,35 +74,26 @@ void init_root_dir() {
     }
 }
 
-void fat_flush() {
-    // writes fatbuf (the fat in memmory) to the disk
-    for (int copy = 0; copy < FAT_COUNT; copy++) {
-        uint32_t fat_start = FIRST_FAT_SECTOR + copy * SECTORS_PER_FAT;
-        for (int i = 0; i < SECTORS_PER_FAT; i++) {
-            write_sector(fat_start + i, fatbuf + i * SECTOR_SIZE);
-        }
-    }
-}
-
 
 void write_test_file() {
     memoryset(sector_buf, 0, SECTOR_SIZE);
     memorycpy(sector_buf, "TEST    ", 8);
     memorycpy(sector_buf + 8, "TXT", 3);       
-    sector_buf[11] = 0x20;// normal file attr
-    sector_buf[26] = 2;// starting cluster
-    sector_buf[28] = 512;// size
+    sector_buf[11] = 0x20;
+    sector_buf[26] = 2;
+    sector_buf[28] = 512;
+    
+    
     write_sector(FIRST_ROOT_DIR_SECTOR, sector_buf);
-
     for (int i = 0; i < SECTOR_SIZE; i++) sector_buf[i] = 0xAA;
 
-    // calc lba of cluster 2
+    //data n data
     uint32_t lba = FIRST_DATA_SECTOR + (2 - 2) * SECTORS_PER_CLUSTER; 
     for (int i = 0; i < SECTORS_PER_CLUSTER; i++) {
         write_sector(lba + i, sector_buf);
     }
 
-    //  mark cluster 2 as EOF (0xFFFF)
+    //  mark cluster as eof (0xFFFF)
     uint8_t fat[SECTORS_PER_FAT * SECTOR_SIZE];
     read_sector(FIRST_FAT_SECTOR, fat); 
     fat[2*2] = 0xFF; 
@@ -170,7 +161,7 @@ void create_directory(const char* name , uint16_t parent_cluster, int is_root_pa
         //in future i need to add mkdirs for non root directories
     }
 
-    // add . and .. to dir
+    // add . and .. to dir (self and parent like godot nodes lol)
     memoryset(sector_buf, 0, SECTOR_SIZE);
 
     // .
@@ -191,28 +182,31 @@ void create_directory(const char* name , uint16_t parent_cluster, int is_root_pa
 
     uint32_t new_dir_lba = FIRST_DATA_SECTOR + (new_cluster - 2) * SECTORS_PER_CLUSTER;
     write_sector(new_dir_lba, sector_buf);
-    fat_flush();
 }
 
 
 
 void fat16_init() {
+    //format disc
     write_fats();
     init_root_dir();
-    
     write_test_file();
 
 }
+char* conv_fat_name(const char* input) {
+    static char out[11];
+    for (int k = 0; k < 11; k++) out[k] = ' ';
 
-void make_fat_name(const char* input, char* output) {
-
-    //NEEDS TO FIXED
-
-    int i = 0;
-    for (; i < 8; i++) output[i] = ' ';
-    
- 
+    int i = 0, j = 0;
+    while (input[i] != '\0' && j < 8) {
+        char c = input[i++];
+        out[j++] = c;
+    }
+   
+    return out;
 }
+
+
 
 void list_directory(uint16_t dir_cluster) {
     //works fire
@@ -238,27 +232,57 @@ void list_directory(uint16_t dir_cluster) {
     }
 }
 
+uint16_t get_fat_entry(uint16_t cluster) {
+    fat_read_full();
+    uint32_t idx = cluster * 2;
+    uint16_t val = fatbuf[idx] | (fatbuf[idx + 1] << 8);
+
+    return val;
+}
+
 
 uint16_t find_directory_cluster(const char* name, uint16_t parent_cluster) {
     uint8_t buf[SECTOR_SIZE];
-    uint32_t lba;
 
-    if (parent_cluster == 0)
-        lba = FIRST_ROOT_DIR_SECTOR;
-    else
-        lba = FIRST_DATA_SECTOR + (parent_cluster - 2) * SECTORS_PER_CLUSTER;
-    read_sector(lba, buf);
-
-    for (int i = 0; i < SECTOR_SIZE; i += 32) {
-        if (buf[i] == 0x00) break;  // end of dir
-        if (buf[i] == 0xE5) continue; // deleted entry
-
-        // cmp name
-        if (memorycompare(name, &buf[i], 11) == 0) {
-            uint16_t cluster = buf[i + 26] | (buf[i + 27] << 8);
-            return cluster;
+    //if root dir
+    if (parent_cluster == 0) {
+        uint32_t sector = FIRST_ROOT_DIR_SECTOR;
+        for (int s = 0; s < ROOT_DIR_SECTORS; s++, sector++) {
+            read_sector(sector, buf);
+            for (int off = 0; off < SECTOR_SIZE; off += 32) {
+                //no more entries
+                if (buf[off] == 0x00) {return 0xFFFF;} 
+                //if deleted entry
+                if (buf[off] == 0xE5) {continue;}      
+                if (memorycompare(name, &buf[off], 11) == 0) {
+                    uint16_t cluster = buf[off + 26] | (buf[off + 27] << 8);
+                    return cluster;
+                }
+            }
         }
+        return 0xFFFF;
     }
 
-    return 0xFFFF; // not found
+    //for non root dirs
+    uint16_t cluster = parent_cluster;
+    while (cluster >= 0x0002 && cluster < 0xFFF8) { // data cluster range
+        uint32_t first_sector = FIRST_DATA_SECTOR + (cluster - 2) * SECTORS_PER_CLUSTER;
+        for (int s = 0; s < SECTORS_PER_CLUSTER; s++) {
+            read_sector(first_sector + s, buf);
+            for (int offset = 0; offset < SECTOR_SIZE; offset += 32) {
+
+                if (buf[offset] == 0x00) return 0xFFFF; 
+                
+                if (buf[offset] == 0xE5) continue;
+
+                if (memorycompare(name, &buf[offset], 11) == 0) {
+                    uint16_t found_dir = buf[offset + 26] | (buf[offset + 27] << 8);
+                    return found_dir;
+                }
+            }
+        }
+        cluster = get_fat_entry(cluster);
+    }
+
+    return 0xFFFF;  
 }
