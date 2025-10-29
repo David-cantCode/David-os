@@ -29,7 +29,11 @@ DATA_SEG            equ 0x10
 
 KERN_LOAD_PHYS      equ 0x00010000        ; 64 KiB
 KERNEL_START_ADDR   equ 0x00100000        ; 1 mib not mb lol
+<<<<<<< Updated upstream
 KERNEL_SECTORS      equ 9               ; kernel size 
+=======
+KERNEL_SECTORS      equ 21        ; kernel size, if os doesnt load fully just increase this lol, to much increase makes the os not load too 
+>>>>>>> Stashed changes
 
 start:
 
@@ -44,7 +48,111 @@ start:
 
     mov [BootDrive], dl            ; preserve bios boot drive
 
+<<<<<<< Updated upstream
 ; --- read kernel to 0x10000 (ES:BX must point there) ---
+=======
+
+    ;setup vbe framebuffer
+
+
+    mov ax, 0x0000
+    mov es, ax 
+    mov di, 0x0500
+
+
+    mov ax, 0x4F02
+    mov bx, 0x11A
+    or  bx, 0x4000    
+    int 0x10
+
+
+    ;check if vbe success
+    cmp ax, 0x004F
+    jne vbe_set_failed
+
+
+    ; get mode info into ES:DI (AX=0x4F01, CX=mode)
+    mov ax, 0x4F01
+    mov cx, 0x0118
+    int 0x10
+    cmp ax, 0x004F
+    jne vbe_getmode_failed
+
+
+    mov ax, 0x0000
+    mov ds, ax
+    mov si, 0x0500
+
+
+    mov bx, [si + 0x12]
+    mov ax, 0x0000
+    mov es, ax
+    mov di, 0x0404
+    mov [di], bx
+    mov word [di+2], 0      ; zero upper word to make dword (safe)
+
+    ; Read YResolution (word)   -> store as dword at 0x0408
+    mov bx, [si + 0x14]
+    mov di, 0x0408
+    mov [di], bx
+    mov word [di+2], 0
+
+    ; Read BytesPerScanLine (word) -> store as dword at 0x040C
+    mov bx, [si + 0x16]
+    mov di, 0x040C
+    mov [di], bx
+    mov word [di+2], 0
+
+    ; Read BitsPerPixel (byte) -> store as dword at 0x0410
+    mov al, [si + 0x19]
+    mov di, 0x0410
+    mov [di], ax      ; stores lower byte; higher bytes zeroed in next write step
+    mov byte [di+1], 0
+    mov byte [di+2], 0
+    mov byte [di+3], 0
+
+    ; Read PhysBasePtr (dword) -> offset 0x28 (40)
+    ; it's a dword at si+0x28; copy 4 bytes
+    mov di, 0x0400        ; destination for fb_addr
+    mov al, [si + 0x28]
+    mov [di], al
+    mov al, [si + 0x29]
+    mov [di+1], al
+    mov al, [si + 0x2A]
+    mov [di+2], al
+    mov al, [si + 0x2B]
+    mov [di+3], al
+
+    ; store mode number used at 0x0414 (dword)
+    mov di, 0x0414
+    mov ax, 0x0118
+    mov [di], ax
+    mov word [di+2], 0
+
+    jmp vbe_done
+
+vbe_error:
+    ; clear the framebuffer info so kernel knows failure (add way to read it in future)
+    mov ax, 0x0000
+    mov es, ax
+    mov di, 0x0400
+    mov dword [di], 0
+    mov dword [di+4], 0
+    mov dword [di+8], 0
+    mov dword [di+12], 0
+    mov dword [di+16], 0
+    mov dword [di+20], 0
+    jmp .vbe_done
+
+
+vbe_done:
+
+
+
+;read kernel to 0x10000 (ES:BX must point there)
+
+
+>>>>>>> Stashed changes
     mov ax, KERN_LOAD_PHYS >> 4    ; ES = 0x1000
     mov es, ax
     xor bx, bx                     ; BX = 0

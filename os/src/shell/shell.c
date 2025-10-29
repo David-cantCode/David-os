@@ -38,6 +38,73 @@ void execute_command(char *input) {
 
 
 
+<<<<<<< Updated upstream
+=======
+    else if(compare_string(input, "READ BOOT") == 0){
+        read_sector(0, sector_buff);
+        dump_sector(sector_buff);
+    }
+
+    else if (compare_string(input, "WRITE SECTOR") == 0){
+    fill_test_pattern(write_buf, 0xAB);  
+    write_sector(TEST_SECTOR, write_buf);
+
+    print("Sector 1 was overwritten\n");
+    }
+    else if (compare_string(input, "READ SECTOR") ==0){
+
+        read_sector(TEST_SECTOR, sector_buff);
+        dump_sector(sector_buff);
+    }
+
+
+    else if (compare_string(input, "READ TEST TEXT")==0){
+        uint32_t test_file_lba = FIRST_DATA_SECTOR + (2 - 2) * SECTORS_PER_CLUSTER;
+        read_sector(test_file_lba, sector_buff);
+        dump_sector(sector_buff);
+    }
+
+    else if (starts_with(input, "MKDIR ")) {
+    char* name = input + 6;
+    name = conv_fat_name(name);
+
+    create_directory(name, cur_dir_cluster, cur_dir_cluster == 0);
+    print("Created directory: ");
+    print(name);
+    print("\n \n");
+    }
+    
+    else if (starts_with(input, "CD ")) {
+        char* name = input + 3;
+        name = conv_fat_name(name);
+
+        uint16_t new_cluster = find_directory_cluster(name, cur_dir_cluster);
+
+        if (new_cluster != 0xFFFF) {
+            cur_dir_cluster = new_cluster;
+            memorycpy(cur_dir_name, name, 8); //set it for the alias
+
+
+            print("\n");}
+        else {
+            print("Directory '");
+            print(input + 3); 
+            print("' not found.\n");}
+                
+    }
+
+    else if (compare_string(input, "LS") == 0) {
+    list_directory(cur_dir_cluster);
+    print("\n");
+    }
+
+
+    else{
+        print("unknown command '");
+        print(input);
+        print("' \ntype 'help' for info\n \n");
+    }
+>>>>>>> Stashed changes
     
 }
     

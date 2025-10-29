@@ -9,6 +9,15 @@
 volatile int key_down;
 
 
+<<<<<<< Updated upstream
+=======
+extern uint32_t fb_addr;
+extern uint32_t pitch;
+extern uint32_t screen_width;
+extern uint32_t screen_height;
+#define VBE_INFO_ADDR 0x400
+
+>>>>>>> Stashed changes
 void kernel_main(){
 
     //*******************
@@ -36,7 +45,23 @@ void kernel_ini() {
     // *********INITIALLIZE*****
     // *************************
      __asm__ volatile ("cli");
+<<<<<<< Updated upstream
     char msgKernel[] = "Kernel was loaded!";
+=======
+    uint32_t* vbe = (uint32_t*)VBE_INFO_ADDR;
+
+    fb_addr       = vbe[0]; // 0x0400
+    screen_width  = vbe[1]; // 0x0404
+    screen_height = vbe[2]; // 0x0408
+    pitch         = vbe[3]; // 0x040C
+
+
+    for (int x =0; x <10; x ++){
+    put_pixel(x, 5, 0x0000FF00);
+    }
+
+    char msgKernel[] = "Kernel was loaded";
+>>>>>>> Stashed changes
     print_string(msgKernel, 0x07, 0, 1);
     
     IDT_Initialize();
@@ -53,6 +78,7 @@ void kernel_ini() {
     shell_ini();
     char msgShell[] = "Shell was Loaded";
     print_string(msgShell, 0x07, 0, 4);
+
 
 
 

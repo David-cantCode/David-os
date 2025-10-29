@@ -5,6 +5,10 @@
 
 
 
+uint32_t fb_addr = 0;
+uint32_t pitch = 0;
+uint32_t screen_width = 0;
+uint32_t screen_height = 0;
 
 void print_char(char character, unsigned char attribute, int posX, int posY) { 
    
@@ -34,5 +38,12 @@ static char* byte_to_hex(uint8_t b, char* buffer) {
     return buffer;
 
 }
+
+void put_pixel(int x, int y, uint32_t color) {
+    uint8_t* fb = (uint8_t*)fb_addr;
+    uint32_t* pixel = (uint32_t*)(fb + y * pitch + x * 4);
+    *pixel = color;
+}
+
 
 
