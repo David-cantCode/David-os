@@ -2,22 +2,21 @@
 
 
 #include "cpu/idt.c"
-#include "../libary/stdconsole.h"
+#include "../libary/include/stdconsole.h"
 #include "cpu/isr.h"
 #include "shell/shell.c"
 
 volatile int key_down;
 
 
-<<<<<<< Updated upstream
-=======
+
 extern uint32_t fb_addr;
 extern uint32_t pitch;
 extern uint32_t screen_width;
 extern uint32_t screen_height;
 #define VBE_INFO_ADDR 0x400
 
->>>>>>> Stashed changes
+
 void kernel_main(){
 
     //*******************
@@ -45,9 +44,7 @@ void kernel_ini() {
     // *********INITIALLIZE*****
     // *************************
      __asm__ volatile ("cli");
-<<<<<<< Updated upstream
-    char msgKernel[] = "Kernel was loaded!";
-=======
+
     uint32_t* vbe = (uint32_t*)VBE_INFO_ADDR;
 
     fb_addr       = vbe[0]; // 0x0400
@@ -61,7 +58,7 @@ void kernel_ini() {
     }
 
     char msgKernel[] = "Kernel was loaded";
->>>>>>> Stashed changes
+
     print_string(msgKernel, 0x07, 0, 1);
     
     IDT_Initialize();
