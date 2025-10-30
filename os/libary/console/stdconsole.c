@@ -39,6 +39,36 @@ static char* byte_to_hex(uint8_t b, char* buffer) {
 
 }
 
+
+
+
+//vbe shit
+
+void draw_char( int x, int y, uint32_t fg, uint32_t bg) {
+    // Hardcode the letter 'A' bitmap for now
+    uint8_t glyph[8] = {
+    0b00011000,
+    0b00100100,
+    0b01000010,
+    0b01111110,
+    0b01000010,
+    0b01000010,
+    0b01000010,
+    0b00000000
+    };
+
+    for (int row = 0; row < 8; row++) {
+        uint8_t bits = glyph[row];   
+        for (int col = 0; col < 8; col++) {
+        
+            uint32_t color = (bits & (1 << (7 - col))) ? fg : bg;
+
+            put_pixel(x + col, y + row,color);
+        }
+    }
+}
+
+
 void put_pixel(int x, int y, uint32_t color) {
     uint8_t* fb = (uint8_t*)fb_addr;
     uint32_t* pixel = (uint32_t*)(fb + y * pitch + x * 4);

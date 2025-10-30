@@ -15,11 +15,14 @@ extern uint32_t pitch;
 extern uint32_t screen_width;
 extern uint32_t screen_height;
 
-void put_pixel(int x, int y, uint32_t color);
+
 void print_string(char* string, unsigned char attribute, int posX, int posY);
 void print_char(char character, unsigned char attribute, int posX, int posY);
 static char* byte_to_hex(uint8_t b, char* buffer);
-void draw_string(const char* str, int x, int y, uint32_t fg, uint32_t bg) ;
 
-void dump_vbe_info(uint32_t *vbe);
+
+void put_pixel(int x, int y,uint32_t color);
+void draw_char( int x, int y, uint32_t fg, uint32_t bg);
+
+
 #endif

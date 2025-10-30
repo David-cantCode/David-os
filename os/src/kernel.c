@@ -53,9 +53,7 @@ void kernel_ini() {
     pitch         = vbe[3]; // 0x040C
 
 
-    for (int x =0; x <10; x ++){
-    put_pixel(x, 5, 0x0000FF00);
-    }
+    draw_char( 5, 10, 0xFFFFFFFF, 0x00000000);
 
     char msgKernel[] = "Kernel was loaded";
 

@@ -60,7 +60,7 @@ DATA_SEG            equ 0x10
 KERN_LOAD_PHYS      equ 0x00010000        ; 64 KiB
 KERNEL_START_ADDR   equ 0x00100000        ; 1 mib not mb lol
 
-KERNEL_SECTORS      equ 21        ; kernel size, if os doesnt load fully just increase this lol, to much increase makes the os not load too 
+KERNEL_SECTORS      equ 22        ; kernel size, if os doesnt load fully just increase this lol, to much increase makes the os not load too 
 
 
 start:
@@ -111,37 +111,36 @@ start:
     mov ds, ax
     mov si, 0x0500
 
-
+    ;x res
     mov bx, [si + 0x12]
     mov ax, 0x0000
     mov es, ax
     mov di, 0x0404
     mov [di], bx
-    mov word [di+2], 0      ; zero upper word to make dword (safe)
+    mov word [di+2], 0      
 
-    ; Read YResolution (word)   -> store as dword at 0x0408
+    ; Yres
     mov bx, [si + 0x14]
     mov di, 0x0408
     mov [di], bx
     mov word [di+2], 0
 
-    ; Read BytesPerScanLine (word) -> store as dword at 0x040C
+    ; pitch
     mov bx, [si + 0x16]
     mov di, 0x040C
     mov [di], bx
     mov word [di+2], 0
 
-    ; Read BitsPerPixel (byte) -> store as dword at 0x0410
+    ; bytes per pixle
     mov al, [si + 0x19]
     mov di, 0x0410
-    mov [di], ax      ; stores lower byte; higher bytes zeroed in next write step
+    mov [di], ax     ;store low byte zero high bytes
     mov byte [di+1], 0
     mov byte [di+2], 0
     mov byte [di+3], 0
 
-    ; Read PhysBasePtr (dword) -> offset 0x28 (40)
-    ; it's a dword at si+0x28; copy 4 bytes
-    mov di, 0x0400        ; destination for fb_addr
+
+    mov di, 0x0400        
     mov al, [si + 0x28]
     mov [di], al
     mov al, [si + 0x29]
@@ -151,7 +150,7 @@ start:
     mov al, [si + 0x2B]
     mov [di+3], al
 
-    ; store mode number used at 0x0414 (dword)
+    ; store mode num a 0x0414 
     mov di, 0x0414
     mov ax, 0x0118
     mov [di], ax
