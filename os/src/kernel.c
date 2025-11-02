@@ -13,7 +13,7 @@ extern uint32_t fb_addr;
 extern uint32_t pitch;
 extern uint32_t screen_width;
 extern uint32_t screen_height;
-#define VBE_INFO_ADDR 0x400
+#define VBE_ADDR 0x400
 
 
 void kernel_main(){
@@ -44,7 +44,7 @@ void kernel_ini() {
     // *************************
      __asm__ volatile ("cli");
 
-    uint32_t* vbe = (uint32_t*)VBE_INFO_ADDR;
+    uint32_t* vbe = (uint32_t*)VBE_ADDR;
 
     fb_addr       = vbe[0]; // 0x0400
     screen_width  = vbe[1]; // 0x0404

@@ -9,4 +9,8 @@ int compare_string(char s1[], char s2[]);
 void *memoryset(void *ptr, int value, unsigned int num);
 void *memorycpy(void *dst, const void *src, unsigned int num) ;
 int memorycompare(const void *ptr1, const void *ptr2, uint32_t n);
+
+
+
+
 #endif

@@ -21,5 +21,6 @@ void clear_screen();
 void dump_sector(uint8_t *buf);
 void print_backspace();
 
+extern const char scancode_to_char[];
 
 #endif

@@ -23,6 +23,9 @@ uint8_t sector_buff[512];
 uint8_t write_buf[SECTOR_SIZE];
 
 
+extern const char scancode_to_char[];
+
+
 uint16_t cur_dir_cluster = 0; //0 = root
 char cur_dir_name[8]; //to clear stuff up cuz i gonna forget, dir name; 8 bytes, 11 total with extention which i add on in make_dir func
 
@@ -46,17 +49,6 @@ int starts_with(const char* a, const char* b) {
     return 1;
 }
 
-const char scancode_to_char[] = {
-    '?', '?', '1', '2', '3', '4', '5',
-    '6', '7', '8', '9', '0', '?', '?',
-    '?', '?', 'q', 'w', 'e', 'r', 't',
-    'y', 'u', 'i', 'o', 'p', '?', '?',
-    '?', '?', 'a', 's', 'd', 'f', 'g',
-    'h', 'j', 'k', 'l', '?', '?', '?',
-    '?', '?', 'z', 'x', 'c', 'v', 'b',
-    'n', 'm', '?', '.', '?', '?', '?',
-    '?', ' '
-};
 
 
 void execute_command(char *input) {
@@ -220,3 +212,5 @@ void shell_ini(){
 
 
 }
+
+
