@@ -8,6 +8,6 @@ DATE STARTED AUGUST 12 2025
 things to do:
 
 
-graphics libary
-display server
+
+display server,
 text editer 
