@@ -16,8 +16,14 @@
 ;cli - disable interupts
 ; sti - enable interupts
 
+
+
+
+
+
 [BITS 16]
 [ORG 0x7C00]
+
 
 ;********************************
 ;FAT 16 BIOS PARAMERTER BLOCK**
@@ -48,17 +54,18 @@ ebr_volume_id: db 12h, 34h, 56h, 78h
 ebr_volume_label: db 'DAVID OS   ' ;keep this size (11 bytes)
 ebr_system_id: db 'FAT16   ' ; 8 bytes
 
-
-
 CODE_SEG            equ 0x08
 DATA_SEG            equ 0x10
+
 KERN_LOAD_PHYS      equ 0x00010000        ; 64 KiB
 KERNEL_START_ADDR   equ 0x00100000        ; 1 mib not mb lol
-KERNEL_SECTORS      equ 19        ; kernel size, if os doesnt load fully just increase this lol, to much increase makes the os not load too 
+
+KERNEL_SECTORS      equ 26        ; kernel size, if os doesnt load fully just increase this lol, to much increase makes the os not load too 
+
 
 start:
 
-;----clear memmory segments--------
+;clear mem segs
     cli
     xor ax, ax
     mov ds, ax
@@ -69,7 +76,110 @@ start:
 
     mov [BootDrive], dl            ; preserve bios boot drive
 
-; --- read kernel to 0x10000 (ES:BX must point there) ---
+
+;read kernel to 0x10000
+
+
+    ;setup vbe framebuffer
+
+
+    mov ax, 0x0000
+    mov es, ax 
+    mov di, 0x0500
+
+
+    mov ax, 0x4F02
+    mov bx, 0x11A
+    or  bx, 0x4000    
+    int 0x10
+
+
+    ;check if success
+    cmp ax, 0x004F
+    jne vbe_error
+
+
+    ; get mode info into ES:DI (AX=0x4F01, CX=mode)
+    mov ax, 0x4F01
+    mov cx, 0x0118
+    int 0x10
+    cmp ax, 0x004F
+    jne vbe_error
+
+
+    mov ax, 0x0000
+    mov ds, ax
+    mov si, 0x0500
+
+    ;x res
+    mov bx, [si + 0x12]
+    mov ax, 0x0000
+    mov es, ax
+    mov di, 0x0404
+    mov [di], bx
+    mov word [di+2], 0      
+
+    ; Yres
+    mov bx, [si + 0x14]
+    mov di, 0x0408
+    mov [di], bx
+    mov word [di+2], 0
+
+    ; pitch
+    mov bx, [si + 0x16]
+    mov di, 0x040C
+    mov [di], bx
+    mov word [di+2], 0
+
+    ; bytes per pixle
+    mov al, [si + 0x19]
+    mov di, 0x0410
+    mov [di], ax     ;store low byte zero high bytes
+    mov byte [di+1], 0
+    mov byte [di+2], 0
+    mov byte [di+3], 0
+
+
+    mov di, 0x0400        
+    mov al, [si + 0x28]
+    mov [di], al
+    mov al, [si + 0x29]
+    mov [di+1], al
+    mov al, [si + 0x2A]
+    mov [di+2], al
+    mov al, [si + 0x2B]
+    mov [di+3], al
+
+    ; store mode num a 0x0414 
+    mov di, 0x0414
+    mov ax, 0x0118
+    mov [di], ax
+    mov word [di+2], 0
+
+    jmp vbe_done
+
+vbe_error:
+    ; clear the framebuffer info so kernel knows failure (add way to read it in future)
+    mov ax, 0x0000
+    mov es, ax
+    mov di, 0x0400
+    mov dword [di], 0
+    mov dword [di+4], 0
+    mov dword [di+8], 0
+    mov dword [di+12], 0
+    mov dword [di+16], 0
+    mov dword [di+20], 0
+    jmp vbe_done
+
+
+vbe_done:
+
+
+
+;read kernel to 0x10000
+;make sure es points there
+
+
 
     mov ax, KERN_LOAD_PHYS >> 4    ; ES = 0x1000
     mov es, ax
@@ -91,12 +201,12 @@ start:
     lgdt [gdt_descriptor]
 
     mov eax, cr0
-    or  eax, 1       ;Enable protected mode (set to 00001)
+    or  eax, 1       ;enable protected mode 
     mov cr0, eax
     jmp CODE_SEG:init_pm
 
 
-;----Allow cpu to use memmory > 1MB 
+
 
 enable_a20:
     in   al, 0x92
@@ -120,17 +230,17 @@ init_pm:
     mov esp, 0x90000
     
 
-; --- Copy kernel from 0x00010000 -> 0x00100000 ---
+;copy kernel from 0x00010000 -> 0x00100000 
     mov esi, KERN_LOAD_PHYS        ; src
     mov edi, KERNEL_START_ADDR     ; dst
-    mov ecx, (KERNEL_SECTORS*512)/4 ; dwords to copy
+    mov ecx, (KERNEL_SECTORS*512)/4 ;size in dwords
     rep movsd
 
-; --- Enter kernel ---
+;ent kernel
     jmp KERNEL_START_ADDR
 
 
-; --- Made by chatgpt im not complaing cuz it works--
+;made by chatgpt im not complaing cuz it works
 disk_read_error:
     
     cli
@@ -158,9 +268,5 @@ gdt_descriptor:
 
 BootDrive db 0
 
-
-
 times 510 - ($-$$) db 0 ;fill all bytes to 510 with 0s 
-
-; dw 0x55AA           ;changed from 0xAA55 -> for iso 
 dw 0xAA55 ;fill last bytes 510-512 with special numbers so bios knows its bootable

@@ -7,115 +7,12 @@ global _start
 extern kernel_ini
 extern __stack_end 
 section .text
+
+
 _start:
    
-   
-    ;******************************
-    ;************Clear screen******
-    ;*******************************
-    mov edi, 0xB8000           ; VGA text buffer base
-    mov ecx, 80*25             ; # of cells
-    mov ax, 0x0720             ; store the ascii code ' '
 
-
-.clear_loop:
-    stosw                      ; store ax and inc by 2  
-    loop .clear_loop
-
-
-
-    ;******************************
-    ;******PRINT 'LOADING KERNEL'***
-    ;*******************************
-    mov edi, 0xB8000  ;point to first cell
-
-
-    ;should change to a better loop
-    mov al, 'L'
-    mov ah, 0x07
-    mov [edi], ax
-
-    add edi, 2
-    mov al, 'O'
-    mov ah, 0x07
-    mov [edi], ax
-
-    add edi, 2
-    mov al, 'A'
-    mov ah, 0x07
-    mov [edi], ax
-
-
-    add edi, 2
-    mov al, 'D'
-    mov ah, 0x07
-    mov [edi], ax
-
-
-    add edi, 2
-    mov al, 'I'
-    mov ah, 0x07
-    mov [edi], ax
-
-    add edi, 2
-    mov al, 'N'
-    mov ah, 0x07
-    mov [edi], ax
-
-
-    add edi, 2
-    mov al, 'G'
-    mov ah, 0x07
-    mov [edi], ax
-
-
-    add edi, 2
-    mov al, ' '
-    mov ah, 0x07
-    mov [edi], ax
-
-
-
-    add edi, 2
-    mov al, 'K'
-    mov ah, 0x07
-    mov [edi], ax
-
-
-
-    add edi, 2
-    mov al, 'E'
-    mov ah, 0x07
-    mov [edi], ax
-
-
-
-    add edi, 2
-    mov al, 'R'
-    mov ah, 0x07
-    mov [edi], ax
-
-
-    add edi, 2
-    mov al, 'N'
-    mov ah, 0x07
-    mov [edi], ax
-
-
-    add edi, 2
-    mov al, 'E'
-    mov ah, 0x07
-    mov [edi], ax
-    
-
-    add edi, 2
-    mov al, 'L'
-    mov ah, 0x07
-    mov [edi], ax
-
-
-
-
+ 
     mov esp, __stack_end
     mov ebp, esp
 
@@ -125,4 +22,4 @@ _start:
     jmp $                       
 
 
-times 512 - ($ - $$) db 0
+

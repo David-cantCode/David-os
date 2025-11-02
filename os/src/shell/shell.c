@@ -3,11 +3,13 @@
 #include "../../apps/help/help.c"
 #include "../../libary/include/fat16.h"
 #include "../../drivers/include/ata.h"
-
+#include "../../libary/include/util.h"
 
 #define KEY_DOWN_SCANCODE_LIMIT 57
 #define BACKSPACE 0x0e
 #define ENTER 0x1C
+#define SHIFT_KEY_P 0x2A
+volatile int shift_down;
 
 char key_buffer[256];
 
@@ -47,29 +49,31 @@ int starts_with(const char* a, const char* b) {
 const char scancode_to_char[] = {
     '?', '?', '1', '2', '3', '4', '5',
     '6', '7', '8', '9', '0', '?', '?',
-    '?', '?', 'Q', 'W', 'E', 'R', 'T',
-    'Y', 'U', 'I', 'O', 'P', '?', '?',
-    '?', '?', 'A', 'S', 'D', 'F', 'G',
-    'H', 'J', 'K', 'L', '?', '?', '?',
-    '?', '?', 'Z', 'X', 'C', 'V', 'B',
-    'N', 'M', '?', '.', '?', '?', '?',
+    '?', '?', 'q', 'w', 'e', 'r', 't',
+    'y', 'u', 'i', 'o', 'p', '?', '?',
+    '?', '?', 'a', 's', 'd', 'f', 'g',
+    'h', 'j', 'k', 'l', '?', '?', '?',
+    '?', '?', 'z', 'x', 'c', 'v', 'b',
+    'n', 'm', '?', '.', '?', '?', '?',
     '?', ' '
 };
-
 
 
 void execute_command(char *input) {
     //*******************************
     // ***********commands*************
     //*********************************
-    if (compare_string(input, "CLEAR") == 0) {
+    
+    if (compare_string(input, "clear") == 0) {
         clear_screen();
     }
-    else if (compare_string(input, "FETCH")==0) {
+  
+
+    else if (compare_string(input, "fetch")==0) {
         fetch();
     
     }
-    else if (compare_string(input, "HELP")==0){
+    else if (compare_string(input, "help")==0){
         show_commands();
     }
 
@@ -105,7 +109,7 @@ void execute_command(char *input) {
         dump_sector(sector_buff);
     }
 
-    else if (starts_with(input, "MKDIR ")) {
+    else if (starts_with(input, "mkdir ")) {
     char* name = input + 6;
     name = conv_fat_name(name);
 
@@ -115,8 +119,10 @@ void execute_command(char *input) {
     print("\n \n");
     }
     
-    else if (starts_with(input, "CD ")) {
+    else if (starts_with(input, "cd ")) {
         char* name = input + 3;
+     if (*name == '.' && name[1] == '\0') {return;}
+
         name = conv_fat_name(name);
 
         uint16_t new_cluster = find_directory_cluster(name, cur_dir_cluster);
@@ -136,7 +142,7 @@ void execute_command(char *input) {
                 
     }
 
-    else if (compare_string(input, "LS") == 0) {
+    else if (compare_string(input, "ls") == 0) {
     list_directory(cur_dir_cluster);
     print("\n");
     }
@@ -188,9 +194,16 @@ void shell_main(uint8_t scancode){
 
     }
 
+    else if (scancode == SHIFT_KEY_P){ //so we dont show ? when shift pressed
+    }
+
     else{
         char letter = scancode_to_char[(int) scancode];
-        //print alias
+
+        //freaky ah way of shift control, im not compaling tho
+        if (shift_down && letter >= 'a' && letter <= 'z') letter -= 32;
+        else if (!shift_down && letter >= 'A' && letter <= 'Z') letter += 32;
+
         append(key_buffer, letter);
         char str[2] = {letter, '\0'};
         print(str);
@@ -199,7 +212,8 @@ void shell_main(uint8_t scancode){
 }
 
 void shell_ini(){
-    print("~/ $ ");
+    print(cur_dir_name);
+        print("~/ $ ");
 
 
     
