@@ -1,6 +1,6 @@
 #include <stdint.h>
 
-
+#include "../include/util.h"
 
 extern volatile unsigned int tick;  
 extern uint32_t screen_width;
@@ -65,7 +65,7 @@ void screen_clear() {
         back_buffer[i] = 0x00000000; 
 }
 
-void pixel(int x, int y, uint32_t color) {
+void draw_pixel(int x, int y, uint32_t color) {
     if (x < 0 || x >= SCREEN_W || y < 0 || y >= SCREEN_H) return;
     back_buffer[y * SCREEN_W + x] = color;
 
@@ -87,7 +87,7 @@ void flip() {
 void draw_rect(int x, int y, int w, int h, uint32_t color) {
     for (int row = 0; row < h; row++) {
         for (int col = 0; col < w; col++) {
-            pixel(x + col, y + row, color);
+            draw_pixel(x + col, y + row, color);
         }
     }
 }
@@ -98,14 +98,14 @@ void draw_circle(int cx, int cy, int radius, uint32_t color) {
     int err = 0;
 
     while (x >= y) {
-        pixel(cx + x, cy + y, color);
-        pixel(cx + y, cy + x, color);
-        pixel(cx - y, cy + x, color);
-        pixel(cx - x, cy + y, color);
-        pixel(cx - x, cy - y, color);
-        pixel(cx - y, cy - x, color);
-        pixel(cx + y, cy - x, color);
-        pixel(cx + x, cy - y, color);
+        draw_pixel(cx + x, cy + y, color);
+        draw_pixel(cx + y, cy + x, color);
+        draw_pixel(cx - y, cy + x, color);
+        draw_pixel(cx - x, cy + y, color);
+        draw_pixel(cx - x, cy - y, color);
+        draw_pixel(cx - y, cy - x, color);
+        draw_pixel(cx + y, cy - x, color);
+        draw_pixel(cx + x, cy - y, color);
 
         y++;
         if (err <= 0) err += 2 * y + 1;
@@ -137,7 +137,7 @@ void d_char(int x, int y, char c, uint32_t color, int size) {
                 //scale it
                 for (int dy = 0; dy < size; dy++) {
                     for (int dx = 0; dx < size; dx++) {
-                        pixel(x + col * size + dx, y + row * size + dy, color);
+                        draw_pixel(x + col * size + dx, y + row * size + dy, color);
                     }
                 }
             }
@@ -150,5 +150,20 @@ void draw_text(int x, int y, const char* str, uint32_t color, int size) {
         d_char(cursor_x, y, *str, color, size);
         cursor_x += 8 * size; 
         str++;
+    }
+}
+
+
+void draw_line(int x0, int y0, int x1, int y1, uint32_t color) {
+    int dx = absolute(x1 - x0), sx = x0 < x1 ? 1 : -1;
+    int dy = -absolute(y1 - y0), sy = y0 < y1 ? 1 : -1;
+    int err = dx + dy, e2;
+    
+    while (1) {
+        draw_pixel(x0, y0, color);
+        if (x0 == x1 && y0 == y1) break;
+        e2 = 2 * err;
+        if (e2 >= dy) { err += dy; x0 += sx; }
+        if (e2 <= dx) { err += dx; y0 += sy; }
     }
 }

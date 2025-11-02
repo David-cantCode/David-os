@@ -16,6 +16,7 @@ void set_fps(unsigned int fps);
 int should_update();
 
 void draw_text(int x, int y, const char* str, uint32_t color, int size);
+void draw_pixel(int x, int y, uint32_t color);
 void flip();
 
 #endif

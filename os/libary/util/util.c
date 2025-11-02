@@ -98,3 +98,7 @@ void int_to_str(int num, char* buffer) {
     reverse_str(buffer, i);
 }
 
+int absolute(int x) {
+    return x < 0 ? -x : x;
+}
+

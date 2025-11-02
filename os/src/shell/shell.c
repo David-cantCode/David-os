@@ -6,7 +6,7 @@
 #include "../../libary/include/util.h"
 #include "../../apps/pong/pong.h"
 #include "../../libary/include/stdconsole.h"
-#include "../../libary/include/davidgl.h"
+#include "../../apps/dserver/display.h"
 
 #define KEY_DOWN_SCANCODE_LIMIT 57
 #define BACKSPACE 0x0e
@@ -146,8 +146,8 @@ void execute_command(char *input) {
     else if (compare_string(input, "pong") == 0)
     {pong_on_start();}
 
-    else if (compare_string(input, "rec")==0){
-        draw_rect(1, 1, 10,5, 0xFFFFFFFF);
+    else if (compare_string(input, "startd")==0){
+        display_main();
     }
 
     else{

@@ -185,9 +185,9 @@ void main_loop() {
 void pong_on_start(){
     set_fps(60); 
     player_1.pos.x = 8; player_1.pos.y = screen_height /2;
-
+    player_1.score = 0;
     player_2.pos.x = screen_width /1.65 ; player_2.pos.y = screen_height /2;
-
+    player_2.score = 0;
     ball.pos.x = screen_width /3.15; ball.pos.y = screen_height /2;
     ball.velocity.x = 3;ball.velocity.y = 3;
     ball.dir.x = 1; ball.dir.y = 1;
