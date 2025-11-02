@@ -36,6 +36,7 @@ uint8_t char_to_scancode(char c) {
         case 'q': return 0x10;
         case 'e': return 0x12;
         case 'p': return 0x19;
+        case '\n':return 0x1C;
         default: return 0; 
     }
 }

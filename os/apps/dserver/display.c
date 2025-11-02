@@ -9,8 +9,9 @@ extern uint32_t pitch;
 extern uint32_t screen_width;
 extern uint32_t screen_height;
 
+volatile int mod_down;
 
-#define MAX_WINDOWS 2
+#define MAX_WINDOWS 4
 
 int window_count;
 
@@ -48,14 +49,21 @@ void render_windows() {
     }
 }
 
+void event_check(){
+    if (mod_down == 1 && is_pressed('\n')){
+        create_window(420, 50, 200, 500);
+    }
+
+
+}
 
 
 void display_server_loop() {
     while (1) {
         if (should_update()) {
-
-
         screen_clear();
+
+        event_check();
         render_windows();
 
            
@@ -69,7 +77,6 @@ void display_server_loop() {
 void display_main() {
   
     Window* win1 = create_window(50, 50, 200, 500);
-    Window* win2 = create_window(420, 50, 200, 500);
 
 
     display_server_loop();
