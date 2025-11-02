@@ -1,9 +1,12 @@
 #include <stdint.h>
-#include "../../apps/fetch/fetch.c"
-#include "../../apps/help/help.c"
+#include "../../apps/fetch/fetch.h"
+#include "../../apps/help/help.h"
 #include "../../libary/include/fat16.h"
 #include "../../drivers/include/ata.h"
 #include "../../libary/include/util.h"
+#include "../../apps/pong/pong.h"
+#include "../../libary/include/stdconsole.h"
+#include "../../libary/include/davidgl.h"
 
 #define KEY_DOWN_SCANCODE_LIMIT 57
 #define BACKSPACE 0x0e
@@ -139,6 +142,13 @@ void execute_command(char *input) {
     print("\n");
     }
 
+    
+    else if (compare_string(input, "pong") == 0)
+    {pong_on_start();}
+
+    else if (compare_string(input, "rec")==0){
+        draw_rect(1, 1, 10,5, 0xFFFFFFFF);
+    }
 
     else{
         print("unknown command '");

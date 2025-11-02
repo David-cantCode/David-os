@@ -20,7 +20,12 @@ LIB_OBJS := $(patsubst libary/%.c, $(BUILD_DIR)/libary/%.o, $(LIB_SRCS))
 DRI_SRCS := $(shell find drivers -type f -name "*.c")
 DRI_OBJS := $(patsubst drivers/%.c, $(BUILD_DIR)/drivers/%.o,$(DRI_SRCS))
 
-SRC_C := $(wildcard $(SRC_DIR)/**/*.c)
+APP_DIR := ./apps
+APP_SRCS := $(shell find $(APP_DIR) -type f -name "*.c")
+APP_OBJS := $(patsubst $(APP_DIR)/%.c,$(BUILD_DIR)/apps/%.o,$(APP_SRCS))
+
+SRC_C := $(filter-out $(APP_DIR)/%,$(wildcard $(SRC_DIR)/**/*.c))
+
 OBJS_C := $(patsubst $(SRC_DIR)/%.c,$(BUILD_DIR)/%.o,$(SRC_C))
 
 
@@ -29,7 +34,8 @@ OBJS = $(BUILD_DIR)/kernel.asm.o \
        $(BUILD_DIR)/kernel.o \
        $(BUILD_DIR)/isr.o \
        $(LIB_OBJS) \
-       $(DRI_OBJS)
+       $(DRI_OBJS) \
+		$(APP_OBJS)
 	
 
 .PHONY: all clean run gdb-instructions
@@ -41,6 +47,10 @@ $(BUILD_DIR)/libary/%.o: libary/%.c
 	$(CC) $(FLAGS) -std=gnu99 -c $< -o $@
 	
 $(BUILD_DIR)/drivers/%.o: drivers/%.c
+	@mkdir -p $(dir $@)
+	$(CC) $(FLAGS) -std=gnu99 -c $< -o $@
+
+$(BUILD_DIR)/apps/%.o: $(APP_DIR)/%.c | $(BUILD_DIR)
 	@mkdir -p $(dir $@)
 	$(CC) $(FLAGS) -std=gnu99 -c $< -o $@
 

@@ -1,0 +1,46 @@
+
+
+idk why im writting docs for my own graphics libary that only works on my os,
+its kinda cool tho
+
+
+
+anyways
+
+
+drawing methods: 
+
+    void draw_rect(int x, int y, int w, int h, uint32_t color)
+    
+    draw_circle(int cx, int cy, int radius, uint32_t color)
+
+
+    for somereason you cant pass a variable for color fix later
+
+
+
+
+game loop:
+
+void main_loop() { 
+
+    while (1) {
+        if (should_update()) {
+            screen_clear();
+           
+           
+           //game logic
+
+            
+            flip(); 
+        }
+    }
+}
+
+extra:
+
+    set program target fps
+    set_fps(60);
+
+    
+need to be done: add quit method

@@ -1,7 +1,7 @@
 #include "../include/font.h"
 
 
- const uint8_t font8x8_basic[128][8] = {
+ const uint8_t font8x8[128][8] = {
     //empty chars
     [0 ... 31] = {0},
 

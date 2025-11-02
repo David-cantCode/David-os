@@ -5,6 +5,8 @@
 #include "../libary/include/stdconsole.h"
 #include "cpu/isr.h"
 #include "shell/shell.c"
+#include "../drivers/include/timer.h"
+
 
 volatile int key_down;
 
@@ -14,7 +16,7 @@ extern uint32_t pitch;
 extern uint32_t screen_width;
 extern uint32_t screen_height;
 #define VBE_ADDR 0x400
-
+#define INTERUPT_FREQ 100
 
 void kernel_main(){
 
@@ -66,13 +68,15 @@ void kernel_ini() {
     print("PIC was Remaped \n");
 
 
+    timer_set_frequency(INTERUPT_FREQ);
+
+
     print("Shell was Loaded \n");
     print("\n");
-
     shell_ini();
 
  
-
+    
 
 
     kernel_main();

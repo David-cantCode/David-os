@@ -11,6 +11,6 @@ void *memorycpy(void *dst, const void *src, unsigned int num) ;
 int memorycompare(const void *ptr1, const void *ptr2, uint32_t n);
 
 
-
+void int_to_str(int num, char* buffer);
 
 #endif

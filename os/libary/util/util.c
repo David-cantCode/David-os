@@ -57,3 +57,44 @@ int memorycompare(const void *ptr1, const void *ptr2, uint32_t n) {
     }
     return 0;
 }
+
+void reverse_str(char* str, int len) {
+    int i = 0, j = len - 1;
+    while (i < j) {
+        char tmp = str[i];
+        str[i] = str[j];
+        str[j] = tmp;
+        i++; j--;
+    }
+}
+
+void int_to_str(int num, char* buffer) {
+    int i = 0;
+    int is_negative = 0;
+
+    if (num == 0) {
+        buffer[i++] = '0';
+        buffer[i] = '\0';
+        return;
+    }
+
+    if (num < 0) {
+        is_negative = 1;
+        num = -num;
+    }
+
+    while (num != 0) {
+        int rem = num % 10;
+        buffer[i++] = '0' + rem;
+        num /= 10;
+    }
+
+    if (is_negative) {
+        buffer[i++] = '-';
+    }
+
+    buffer[i] = '\0';
+
+    reverse_str(buffer, i);
+}
+

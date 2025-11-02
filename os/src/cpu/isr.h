@@ -53,12 +53,15 @@ void ISR_Initialize()
 }
 
 extern void keyboard_callback();
+extern void timer_callback();
+
 
 void __attribute__((cdecl)) ISR_Handler(Registers *ptr)
 {
-    //if (ptr->interrupt==32) 
-    
-    
+    if (ptr->interrupt==32) {
+        timer_callback();
+    }
+
     if (ptr->interrupt==33) 
     {
         keyboard_callback();
