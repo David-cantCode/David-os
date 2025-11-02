@@ -9,7 +9,6 @@
 volatile int key_down;
 
 
-
 extern uint32_t fb_addr;
 extern uint32_t pitch;
 extern uint32_t screen_width;
@@ -50,30 +49,29 @@ void kernel_ini() {
     fb_addr       = vbe[0]; // 0x0400
     screen_width  = vbe[1]; // 0x0404
     screen_height = vbe[2]; // 0x0408
-    pitch         = vbe[3]; // 0x040C
+    pitch         =  2560; //pitch ≈ width * (bits_per_pixel / 8)
 
 
-    draw_char( 5, 10, 0xFFFFFFFF, 0x00000000);
 
-    char msgKernel[] = "Kernel was loaded";
 
-    print_string(msgKernel, 0x07, 0, 1);
+    //char msgKernel[] = "Kernel was loaded";
+
+    print("kernel was loaded \n");
     
     IDT_Initialize();
-    char msgIdt[] = "Interupt Descriptor Table was loaded";
-    print_string(msgIdt, 0x07, 0, 2);
+    print("Interupt Descriptor Table was loaded\n");
 
 
     ISR_Initialize();
-    char msgIsr[] = "PIC was Remaped";
-    print_string(msgIsr, 0x07, 0, 3);
+    print("PIC was Remaped \n");
 
 
+    print("Shell was Loaded \n");
+    print("\n");
 
     shell_ini();
-    char msgShell[] = "Shell was Loaded";
-    print_string(msgShell, 0x07, 0, 4);
 
+ 
 
 
 

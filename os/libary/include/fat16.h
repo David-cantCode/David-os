@@ -4,7 +4,7 @@
 
 #include <stdint.h>
 #define SECTOR_SIZE 512
-#define RESERVED_SECTORS 24 //includes kernel. increase when kernel sectors get increased in boot.asn (+2 of bootloader kernel secs)
+#define RESERVED_SECTORS 28 //includes kernel. increase when kernel sectors get increased in boot.asn (+2 of bootloader kernel secs)
 #define FAT_COUNT 2
 #define SECTORS_PER_FAT 64
 #define ROOT_DIR_ENTRIES 512

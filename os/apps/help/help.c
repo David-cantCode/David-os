@@ -1,5 +1,4 @@
-#include "../../libary/include/screen.h"
-
+#include "../../libary/include/stdconsole.h"
 
 void show_commands(){
 
@@ -11,12 +10,12 @@ void show_commands(){
     print("'ls' - List the files/directories in the current directory\n");
     print("'mkdir + dir' Makes a folder in the active directory\n");
     print("'cd + dir'  - change directory \n" );
-    print("'format' - formats the disc to allow. one time use, required to make dirs\n");
+    print("'FORMAT' - formats the disc to allow. one time use, required to make dirs\n");
 
-    print("'read boot' - Reads the Bootloader\n");
-    print("'write sector' - writes to sector 2\n");
-    print("'read sector' - reads sector 2\n");
-    print("'read test text' - reads the test.txt file \n");
+    print("'READ BOOT' - Reads the Bootloader\n");
+    print("'WRITE SECTOR' - writes to sector 2\n");
+    print("'READ SECTOR' - reads sector 2\n");
+    print("'READ TEST TEXT' - reads the test.txt file \n");
 
     print(" \n");
 }
