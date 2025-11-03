@@ -147,7 +147,7 @@ void execute_command(char *input) {
     {pong_on_start();}
 
     else if (compare_string(input, "startd")==0){
-        display_main();
+        display_init();
     }
 
     else{

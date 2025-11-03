@@ -101,7 +101,7 @@ void controls(){
         player_2.pos.y += speed;
     }
 
-    if (is_pressed('q')){
+    if (is_pressed('p')){
         running = 0;
     }
 }

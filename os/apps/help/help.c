@@ -10,6 +10,10 @@ void show_commands(){
     print("'ls' - List the files/directories in the current directory\n");
     print("'mkdir + dir' Makes a folder in the active directory\n");
     print("'cd + dir'  - change directory \n" );
+    print("'startd' - Starts Dserver\n");
+    print("'pong' - play pong \n");
+
+    print("\n");
     print("'FORMAT' - formats the disc to allow. one time use, required to make dirs\n");
 
     print("'READ BOOT' - Reads the Bootloader\n");
