@@ -1,8 +1,6 @@
 #ifndef DSERVER_H
 #define DSERVER_H
 
-
-#include "window.h"
 #include <stdint.h>
 
 
@@ -27,6 +25,7 @@ typedef struct Window {
     int x, y, width, height;
     int color;
     struct Program program; 
+    char *buffer[256];
 } Window;
 
 

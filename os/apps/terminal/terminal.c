@@ -4,6 +4,7 @@
 #include "../../libary/include/util.h"
 #include "../dserver/dserver.h"
 
+
 struct Terminal {
     struct Window* win;                  
     int cursor_row;
@@ -11,6 +12,12 @@ struct Terminal {
     char lines[128][128];            
     int num_lines;
     int control_row;
+
+
+    uint16_t cur_dir_cluster;
+    char cur_dir_name[8];
+
+    char buffer[256];
 };
 
 
@@ -19,8 +26,8 @@ struct Terminal self;
 #define CHAR_H 16
 
 
-char buf[256]; //change to in struct afetwards
-
+extern int shift_down;
+extern const char scancode_to_char[];
 //ret num cols and rows to fit win
 int terminal_fb_cols() {
     if (self.win && self.win->width > 0) return self.win->width / CHAR_W;
@@ -71,7 +78,7 @@ void terminal_draw(struct Window* win){
         if (c != '\0') {
             //set pos relative to win
         int x = win->x + col * c_width;
-        int y = win->y + row * c_height;
+        int y = win->y + row * c_height + 10;
 
         
         //set bounds
@@ -131,6 +138,16 @@ void terminal_print(const char *string) {
     self.cursor_col = cur_col;
 }
 
+void terminal_print_backspace() {
+    if (self.cursor_col > 0) {
+        self.cursor_col--;
+    } else if (self.cursor_row > 0) {
+        self.cursor_row--;
+        self.cursor_col = terminal_fb_cols() - 1;
+    }
+
+    terminal_set_char_at_video_memory(' ', self.cursor_col, self.cursor_row);
+}
 
 
 void run_cmd(){
@@ -144,13 +161,61 @@ void terminal_on_resize(struct Window* self_win, int new_width, int new_height){
     self.num_lines = terminal_fb_rows();
 }
 
+int terminal_backspace(char buffer[]) {
+    int len = string_length(buffer);
+    if (len > 0) {
+        buffer[len - 1] = '\0';
+        return 1;
+    } else {
+        return 0;
+    }
+}
+
 
 
 void terminal_on_input(uint8_t scancode){
-    terminal_print("typing");
-    
+    //runs when key is pressed
+    if (scancode > KEY_DOWN_SCANCODE_LIMIT) return;
 
-    
+
+    //deafult commands, backspace n enter
+    if (scancode == BACKSPACE) {
+       if (terminal_backspace(self.buffer)) terminal_print_backspace();
+    }
+
+    else if (scancode == ENTER) {
+        terminal_print("\n");
+        //execute_command(key_buffer);
+        self.buffer[0] = '\0';
+
+
+        if (self.cur_dir_cluster == 0){
+        memoryset(self.cur_dir_name, '~', 1); //fix to delete spaces inbetween ~ and/ 
+        }
+        terminal_print(self.cur_dir_name);
+        terminal_print("/ $ ");
+
+    }
+
+    else if (scancode == SHIFT_KEY_P){ //so we dont show ? when shift pressed
+    }
+
+    else{
+        char letter = scancode_to_char[(int) scancode];
+
+        //freaky ah way of shift control, im not compaling tho
+        if (shift_down && letter >= 'a' && letter <= 'z') letter -= 32;
+        else if (!shift_down && letter >= 'A' && letter <= 'Z') letter += 32;
+
+
+         append(self.buffer, letter);
+        char str[2] = {letter, '\0'};
+        terminal_print(str);
+    }
+
+
+
+
 
 }
 

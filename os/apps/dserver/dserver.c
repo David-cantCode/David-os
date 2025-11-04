@@ -28,9 +28,13 @@ static uint8_t prev_keys[256] = {0};
 
 
 #define KEY_COUNT 256
-extern const char scancode_to_char[256];
+
+extern uint8_t scancode;
+extern uint8_t key_state[256];
+extern int key_down;
 
 
+char buf[256];
 
 void tile_windows() {
     if (window_count == 0) return;
@@ -86,6 +90,7 @@ Window* create_terminal() {
     win->program.on_update = terminal_update;
     win->program.on_input = terminal_on_input;
     win->program.on_resize = terminal_on_resize;
+   // win->buffer = buf;
 
     window_count++;
     tile_windows();
@@ -198,20 +203,18 @@ int event_check() {
     return 1;
 }
 
-void input_handler(){
+void input_handler() {
+ 
+    if (key_down) {
+        key_down = 0; 
 
-    uint8_t scancode;
-
-    //add way to get scancode from keyboard driver
-   
-    if (window_count > 0) {
-    Window* w = &windows[focused_window];{      
-
-        w->program.on_input(scancode);}
+        if (window_count > 0) {
+            Window* w = &windows[focused_window];
+            if (w->program.on_input) {
+                w->program.on_input(scancode);
+            }
+        }
     }
-                
-        
-    
 }
 
 
