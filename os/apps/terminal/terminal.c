@@ -4,21 +4,7 @@
 #include "../../libary/include/util.h"
 #include "../dserver/dserver.h"
 
-
-struct Terminal {
-    struct Window* win;                  
-    int cursor_row;
-    int cursor_col;
-    char lines[128][128];            
-    int num_lines;
-    int control_row;
-
-
-    uint16_t cur_dir_cluster;
-    char cur_dir_name[8];
-
-    char buffer[256];
-};
+#include "../fetch/fetch.h"
 
 
 struct Terminal self;
@@ -67,6 +53,7 @@ void terminal_set_char_at_video_memory(struct Terminal* t, char c, int col, int 
 }
 
 void terminal_draw(struct Window* win){
+    //redraws the terminal each call
 
 
     int c_width = 8;   
@@ -78,11 +65,11 @@ void terminal_draw(struct Window* win){
         if (c != '\0') {
             //set pos relative to win
         int x = win->x + col * c_width +5;
-        int y = win->y + row * c_height + 10;
+        int y = win->y + row * c_height +10 ;
 
         
         //set bounds
-        if (x + c_width <= win->x + win->width && y + c_height <= win->y + win->height){
+        if (x + c_width <= win->x + win->width && y + c_height  <= win->y + win->height + 100){ //note the added ints are for padding
         d_char(x, y, c, 0xFFFFFFFF, 1);}
             
         }}}
@@ -98,7 +85,7 @@ void terminal_scroll_screen(struct Terminal* t) {
     memoryset(t->lines[t->num_lines - 1], 0, 128);
 
 
-    terminal_draw(t->win);
+   
 }
 
 
@@ -149,6 +136,17 @@ void terminal_print_backspace(struct Terminal* t ) {
     terminal_set_char_at_video_memory(t, ' ', self.cursor_col, self.cursor_row);
 }
 
+void terminal_clear(struct Terminal* t){
+    int cols = terminal_fb_cols(t);
+    int rows = terminal_fb_rows(t);
+    for (int r = t->control_row; r < rows; ++r) {
+        for (int c = 0; c < cols; ++c) {
+      
+        terminal_set_char_at_video_memory(t, ' ', c, r);
+        }
+    }
+   t->cursor_row =0; t->cursor_col =0;
+}
 
 void run_cmd(){
 
@@ -174,10 +172,21 @@ int terminal_backspace(char buffer[]) {
 void terminal_execute_command(char *input){
 
 
+    if (compare_string(input, "fetch")==0){
+        t_fetch(&self);
+    }
+
+    else if(compare_string(input, "clear")==0)
+    {
+        terminal_clear(&self);
+    }
+
+    else {
+
     terminal_print(&self, "unknown command '");
     terminal_print(&self, input);
     terminal_print(&self, "' \ntype 'help' for info\n \n");
-    
+    }
 
 }
 

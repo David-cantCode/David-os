@@ -35,6 +35,5 @@ void dump_sector(uint8_t *buf);
 void print_backspace();
 
 extern const char scancode_to_char[];
-void terminal_print(Terminal* terminal, const char* str);
 void draw_char_ctx(Window* win, char c, int x, int y, uint32_t fg, uint32_t bg);
 #endif

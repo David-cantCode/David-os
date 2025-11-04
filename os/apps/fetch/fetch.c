@@ -1,8 +1,7 @@
 #include "../../libary/include/stdconsole.h"
 
 #include "fetch.h"
-
-
+#include "../terminal/terminal.h"
 
 
 void fetch(){
@@ -21,3 +20,21 @@ print("\n");
 
 
 }
+
+void t_fetch(struct Terminal* t){
+
+terminal_print(t,
+
+" ____              _     _    ___  ____  \n"
+"|  _ \\  __ ___   _(_) __| |  / _ \\/ ___| \n"
+"| | | |/ _` \\ \\ / / |/ _` | | | | \\___ \\ \n"
+"| |_| | (_| |\\ V /| | (_| | | |_| |___) |\n"
+"|____/ \\__,_| \\_/ |_|\\__,_|  \\___/|____/ \n"
+
+);
+
+terminal_print(t,"\n");
+
+
+}
+

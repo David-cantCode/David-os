@@ -3,7 +3,21 @@
 
 #include <stdint.h>
 struct Window;
-struct Terminal;
+
+struct Terminal {
+    struct Window* win;                  
+    int cursor_row;
+    int cursor_col;
+    char lines[128][128];            
+    int num_lines;
+    int control_row;
+
+
+    uint16_t cur_dir_cluster;
+    char cur_dir_name[8];
+
+    char buffer[256];
+};
 
 
 #define KEY_DOWN_SCANCODE_LIMIT 57
