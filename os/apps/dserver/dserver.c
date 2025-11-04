@@ -53,13 +53,14 @@ void tile_windows() {
             w->width  = win_w;
             w->height = win_h;
 
-            // call on_resize if set
-            if (w->program && w->program->on_resize) {
+        
+        
+            //call each programs on_resize
                 w->program->on_resize(w, win_w, win_h);
             }
         }
     }
-}
+
 
 
 

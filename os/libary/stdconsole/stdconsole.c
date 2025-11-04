@@ -1,7 +1,7 @@
 #include "../include/stdconsole.h"
 
 #include <stdint.h>
-
+#include "../include/util.h"
 
 
 
@@ -79,12 +79,28 @@ void draw_char_ctx(Window* win, char c, int x, int y, uint32_t fg, uint32_t bg) 
         }
     }
 }
-void terminal_print(Terminal* terminal, const char* str) {
-    int x = terminal->cursor_col * CHAR_W;
-    int y = terminal->cursor_row * CHAR_H;
-    for (int i = 0; str[i]; i++) {
-        draw_char_ctx(&terminal->win, str[i], x, y, 0xFFFFFFFF, 0x00000000);
-        x += CHAR_W;
+void terminal_print(Terminal* t, const char* str) {
+    if (!t || !str) return;
+
+    // split by newline for multiple lines
+    const char* p = str;
+    while (*p) {
+        int row = t->num_lines;
+        if (row >= 128) { 
+            // scroll up
+            memorymove(t->lines, t->lines + 1, sizeof(t->lines) - sizeof(t->lines[0]));
+            row = 127;
+            t->num_lines = 128;
+        } else {
+            t->num_lines++;
+        }
+
+        int col = 0;
+        while (*p && *p != '\n' && col < 127) {
+            t->lines[row][col++] = *p++;
+        }
+        t->lines[row][col] = '\0';
+        if (*p == '\n') p++;
     }
 }
 

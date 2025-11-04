@@ -102,3 +102,20 @@ int absolute(int x) {
     return x < 0 ? -x : x;
 }
 
+void *memorymove(void *dest, const void *src, unsigned int n) {
+    unsigned char *d = (unsigned char*)dest;
+    const unsigned char *s = (const unsigned char*)src;
+
+    if (d < s) {
+        for (unsigned int i = 0; i < n; i++) {
+            d[i] = s[i];
+        }
+    } else if (d > s) {
+ 
+        for (unsigned int i = n; i-- > 0;) {
+            d[i] = s[i];
+        }
+    }
+  
+    return dest;
+}

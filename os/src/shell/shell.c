@@ -7,7 +7,7 @@
 #include "../../apps/pong/pong.h"
 #include "../../libary/include/stdconsole.h"
 #include "../../apps/dserver/dserver.h"
-#include "../../apps/raycast/raycasteng.h"
+
 
 
 #define KEY_DOWN_SCANCODE_LIMIT 57
@@ -152,11 +152,6 @@ void execute_command(char *input) {
         display_init();
     }
 
-
-    else if (compare_string(input, "ray")==0){
-
-     raycastengine_init();
-    }
 
     else{
         print("unknown command '");

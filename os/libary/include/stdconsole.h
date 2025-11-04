@@ -17,11 +17,12 @@ void draw_char(char c, int x, int y, uint32_t fg, uint32_t bg) ;
 struct Window;
 
 
-
 typedef struct {
-    Window* win;
+    Window* win;                     // pointer to the associated window
     int cursor_row;
     int cursor_col;
+    char lines[128][128];            // store up to 128 lines, 128 chars per line
+    int num_lines;
 } Terminal;
 
 
@@ -35,4 +36,5 @@ void print_backspace();
 
 extern const char scancode_to_char[];
 void terminal_print(Terminal* terminal, const char* str);
+void draw_char_ctx(Window* win, char c, int x, int y, uint32_t fg, uint32_t bg);
 #endif
