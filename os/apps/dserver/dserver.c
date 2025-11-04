@@ -17,6 +17,7 @@ volatile int mod_down;
 #define MAX_WINDOWS 12
 
 int window_count = 0;
+extern volatile int shift_down;
 
 
 static Window windows[MAX_WINDOWS];
@@ -24,6 +25,10 @@ static Window windows[MAX_WINDOWS];
 
 int focused_window = 0;
 static uint8_t prev_keys[256] = {0};
+
+
+#define KEY_COUNT 256
+extern const char scancode_to_char[256];
 
 
 
@@ -56,7 +61,7 @@ void tile_windows() {
         
         
             //call each programs on_resize
-                w->program->on_resize(w, win_w, win_h);
+                w->program.on_resize(w, win_w, win_h);
             }
         }
     }
@@ -77,11 +82,10 @@ Window* create_terminal() {
     
     win->color = colors[window_count % 4];
 
-    win->program->type = PROGRAM_TERMINAL;
-    win->program->on_update = terminal_update;
-    win->program->on_input = terminal_on_input;
-    win->program->on_resize = terminal_on_resize;
-
+    win->program.type = PROGRAM_TERMINAL;
+    win->program.on_update = terminal_update;
+    win->program.on_input = terminal_on_input;
+    win->program.on_resize = terminal_on_resize;
 
     window_count++;
     tile_windows();
@@ -144,7 +148,7 @@ void render_windows() {
         draw_window(w, (i == focused_window));
 
       
-            w->program->on_update(w);
+         w->program.on_update(w);
         
     }
 }
@@ -194,7 +198,21 @@ int event_check() {
     return 1;
 }
 
+void input_handler(){
 
+    uint8_t scancode;
+
+    //add way to get scancode from keyboard driver
+   
+    if (window_count > 0) {
+    Window* w = &windows[focused_window];{      
+
+        w->program.on_input(scancode);}
+    }
+                
+        
+    
+}
 
 
 
@@ -204,9 +222,10 @@ void display_server_loop() {
         if (should_update()) {
             screen_clear();
 
-            running = event_check();
+            running = event_check();    
+            input_handler();
             render_windows();
-
+        
             flip();
         }
     }

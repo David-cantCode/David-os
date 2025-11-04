@@ -50,59 +50,6 @@ void put_pixel(int x, int y, uint32_t color) {
 }
 
 
-//************************************ 
-//*********TERMINAL DRAW METHODS***** 
-//***********************************
-
-void put_pixel_ctx(Window* win, int x, int y, uint32_t color) {
-    // translate to screen coords
-    int fx = win->x + x;
-    int fy = win->y + y;
-
-    // draw_pixel writes into back_buffer
-    put_pixel(fx, fy, color);
-}
-
-void draw_char_ctx(Window* win, char c, int x, int y, uint32_t fg, uint32_t bg) {
-    for (int row = 0; row < FONT_H; row++) {
-        uint8_t bits = font8x8[(int)c][row];
-        for (int col = 0; col < FONT_W; col++) {
-            uint32_t color = (bits & (1 << col)) ? fg : bg;
-            for (int sy = 0; sy < PIXEL_SCALE_Y; sy++) {
-                for (int sx = 0; sx < PIXEL_SCALE_X; sx++) {
-                    put_pixel_ctx(win,
-                        x + col * PIXEL_SCALE_X + sx,
-                        y + row * PIXEL_SCALE_Y + sy,
-                        color);
-                }
-            }
-        }
-    }
-}
-void terminal_print(Terminal* t, const char* str) {
-    if (!t || !str) return;
-
-    // split by newline for multiple lines
-    const char* p = str;
-    while (*p) {
-        int row = t->num_lines;
-        if (row >= 128) { 
-            // scroll up
-            memorymove(t->lines, t->lines + 1, sizeof(t->lines) - sizeof(t->lines[0]));
-            row = 127;
-            t->num_lines = 128;
-        } else {
-            t->num_lines++;
-        }
-
-        int col = 0;
-        while (*p && *p != '\n' && col < 127) {
-            t->lines[row][col++] = *p++;
-        }
-        t->lines[row][col] = '\0';
-        if (*p == '\n') p++;
-    }
-}
 
 
 
