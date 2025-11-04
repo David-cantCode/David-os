@@ -11,6 +11,7 @@ enum Program_type{
 };
 
 struct Window; 
+
 struct Program {
     void (*on_update)(struct Window* self);
     void (*on_resize)(struct Window* self, int new_width, int new_height);

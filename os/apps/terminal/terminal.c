@@ -22,48 +22,48 @@ struct Terminal {
 
 
 struct Terminal self;
-#define CHAR_W 8
+#define CHAR_W 12
 #define CHAR_H 16
 
 
 extern int shift_down;
 extern const char scancode_to_char[];
 //ret num cols and rows to fit win
-int terminal_fb_cols() {
-    if (self.win && self.win->width > 0) return self.win->width / CHAR_W;
+int terminal_fb_cols(struct Terminal* t) {
+    if (self.win && t->win->width > 0) return t->win->width / CHAR_W;
     return 80;
 }
-int terminal_fb_rows() {
-    if (self.win && self.win->height > 0) return self.win->height / CHAR_H;
+int terminal_fb_rows(struct Terminal* t) {
+    if (t->win && t->win->height > 0) return t->win->height / CHAR_H;
     return 25;
 }
 
-void terminal_control_line(int row) {
-    self.control_row = row;
-    if (self.control_row < 0) self.control_row = 0;
-    if (self.control_row >= terminal_fb_rows()) self.control_row = terminal_fb_rows() - 1;
+void terminal_control_line(struct Terminal* t, int row) {
+    t->control_row = row;
+    if (t->control_row < 0) t->control_row = 0;
+    if (t->control_row >= terminal_fb_rows(t)) t->control_row = terminal_fb_rows(t) - 1;
 }
 
 
 
-void terminal_set_char_at_video_memory(char c, int col, int row) {
-    int cols = terminal_fb_cols();
-    int rows = terminal_fb_rows();
+void terminal_set_char_at_video_memory(struct Terminal* t, char c, int col, int row) {
+    int cols = terminal_fb_cols(t);
+    int rows = terminal_fb_rows(t);
 
     // bounds check
     if (row < 0 || row >= rows) return;
     if (col < 0 || col >= cols) return;
 
-    self.lines[row][col] = c;
+    t->lines[row][col] = c;
 
     // calculate draw position
-    int x = self.win->x + col * CHAR_W;
-    int y = self.win->y + row * CHAR_H;
+    int x = t->win->x + col * CHAR_W;
+    int y = t->win->y + row * CHAR_H;
 
     d_char(x, y, c, 0xFFFFFFFF, 1);
 
-    self.cursor_col = col;
-    self.cursor_row = row;
+    t->cursor_col = col;
+    t->cursor_row = row;
 }
 
 void terminal_draw(struct Window* win){
@@ -77,7 +77,7 @@ void terminal_draw(struct Window* win){
         char c = self.lines[row][col];
         if (c != '\0') {
             //set pos relative to win
-        int x = win->x + col * c_width;
+        int x = win->x + col * c_width +5;
         int y = win->y + row * c_height + 10;
 
         
@@ -88,26 +88,26 @@ void terminal_draw(struct Window* win){
         }}}
 }
 
-void terminal_scroll_screen() {
-    int rows = terminal_fb_rows();
-    int cols = terminal_fb_cols();
+void terminal_scroll_screen(struct Terminal* t) {
+    int rows = terminal_fb_rows(t);
+    int cols = terminal_fb_cols(t);
 
-    for (int r = self.control_row; r < self.num_lines - 1; ++r) {
-        memorycpy(self.lines[r], self.lines[r + 1], 128);
+    for (int r = t->control_row; r < t->num_lines - 1; ++r) {
+        memorycpy(t->lines[r], t->lines[r + 1], 128);
     }
-    memoryset(self.lines[self.num_lines - 1], 0, 128);
+    memoryset(t->lines[t->num_lines - 1], 0, 128);
 
 
-    terminal_draw(self.win);
+    terminal_draw(t->win);
 }
 
 
-void terminal_print(const char *string) {
-    int cols = terminal_fb_cols();
-    int rows = terminal_fb_rows();
+void terminal_print(struct Terminal* t, const char *string) {
+    int cols = terminal_fb_cols(t);
+    int rows = terminal_fb_rows(t);
 
-    int cur_row = self.cursor_row;
-    int cur_col = self.cursor_col;
+    int cur_row = t->cursor_row;
+    int cur_col = t->cursor_col;
 
     for (int i = 0; string[i] != '\0'; i++) {
         char c = string[i];
@@ -116,37 +116,37 @@ void terminal_print(const char *string) {
             cur_row++;
             cur_col = 0;
             if (cur_row >= rows) {
-                terminal_scroll_screen();
+                terminal_scroll_screen(t);
                 cur_row = rows - 1;
             }
         } else {
-            terminal_set_char_at_video_memory(c, cur_col, cur_row);
+            terminal_set_char_at_video_memory(t,c, cur_col, cur_row);
 
             cur_col++;
             if (cur_col >= cols) {
                 cur_col = 0;
                 cur_row++;
                 if (cur_row >= rows) {
-                    terminal_scroll_screen();
+                    terminal_scroll_screen(t);
                     cur_row = rows - 1;
                 }
             }
         }
     }
 
-    self.cursor_row = cur_row;
-    self.cursor_col = cur_col;
+    t->cursor_row = cur_row;
+    t->cursor_col = cur_col;
 }
 
-void terminal_print_backspace() {
+void terminal_print_backspace(struct Terminal* t ) {
     if (self.cursor_col > 0) {
         self.cursor_col--;
     } else if (self.cursor_row > 0) {
         self.cursor_row--;
-        self.cursor_col = terminal_fb_cols() - 1;
+        self.cursor_col = terminal_fb_cols(t) - 1;
     }
 
-    terminal_set_char_at_video_memory(' ', self.cursor_col, self.cursor_row);
+    terminal_set_char_at_video_memory(t, ' ', self.cursor_col, self.cursor_row);
 }
 
 
@@ -158,7 +158,7 @@ void run_cmd(){
 void terminal_on_resize(struct Window* self_win, int new_width, int new_height){
     self.win = self_win; 
 
-    self.num_lines = terminal_fb_rows();
+    self.num_lines = terminal_fb_rows(&self);
 }
 
 int terminal_backspace(char buffer[]) {
@@ -171,6 +171,19 @@ int terminal_backspace(char buffer[]) {
     }
 }
 
+void terminal_execute_command(char *input){
+
+
+    terminal_print(&self, "unknown command '");
+    terminal_print(&self, input);
+    terminal_print(&self, "' \ntype 'help' for info\n \n");
+    
+
+}
+
+
+
+
 
 
 void terminal_on_input(uint8_t scancode){
@@ -180,20 +193,20 @@ void terminal_on_input(uint8_t scancode){
 
     //deafult commands, backspace n enter
     if (scancode == BACKSPACE) {
-       if (terminal_backspace(self.buffer)) terminal_print_backspace();
+       if (terminal_backspace(self.buffer)) terminal_print_backspace(&self);
     }
 
     else if (scancode == ENTER) {
-        terminal_print("\n");
-        //execute_command(key_buffer);
+        terminal_print(&self, "\n");
+        terminal_execute_command(self.buffer);
         self.buffer[0] = '\0';
 
 
         if (self.cur_dir_cluster == 0){
         memoryset(self.cur_dir_name, '~', 1); //fix to delete spaces inbetween ~ and/ 
         }
-        terminal_print(self.cur_dir_name);
-        terminal_print("/ $ ");
+        terminal_print(&self,self.cur_dir_name);
+        terminal_print(&self, "/ $ ");
 
     }
 
@@ -210,7 +223,7 @@ void terminal_on_input(uint8_t scancode){
 
          append(self.buffer, letter);
         char str[2] = {letter, '\0'};
-        terminal_print(str);
+        terminal_print(&self, str);
     }
 
 
@@ -226,5 +239,5 @@ void terminal_on_input(uint8_t scancode){
 void terminal_update(struct Window* win) {
     self.win = win;
 
-    terminal_draw(win);
+    terminal_draw(win);//redraw each frame
 }

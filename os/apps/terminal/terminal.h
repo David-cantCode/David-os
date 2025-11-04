@@ -11,6 +11,7 @@ struct Terminal;
 #define ENTER 0x1C
 #define SHIFT_KEY_P 0x2A
 
+void terminal_print(struct Terminal* t,const char *string);
 
 void terminal_update(struct Window* self);
 void terminal_on_resize(struct Window* self_win, int new_width, int new_height);
