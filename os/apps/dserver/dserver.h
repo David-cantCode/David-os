@@ -2,18 +2,23 @@
 #define DSERVER_H
 
 
+#include "window.h"
 #include <stdint.h>
 
+
+
+
+
 enum Program_type{
-    PROGRAM_SHELL
+    PROGRAM_TERMINAL
 
 };
 
 
 
 struct Program {
-    void (*on_update)();
-    void (*on_resize)(int new_width, int new_height);
+    void (*on_update)(struct Window* self);
+    void (*on_resize)(struct Window* self, int new_width, int new_height);
     void (*on_input)(char key);
 
     enum Program_type type;
@@ -21,13 +26,6 @@ struct Program {
 
 
 
-typedef struct {
-    int x, y;
-    int width, height;
-    uint32_t color;
-
-    struct Program* program;
-} Window;
 
 void display_init();
 

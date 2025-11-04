@@ -1,4 +1,5 @@
 #include "../include/stdconsole.h"
+
 #include <stdint.h>
 
 
@@ -22,7 +23,9 @@ extern uint8_t font8x8[128][8];
 #define CHAR_W (FONT_W * PIXEL_SCALE_X) 
 #define CHAR_H (FONT_H * PIXEL_SCALE_Y) 
 
-
+//*************************
+//main shell draw methods***
+//**************************
 
 void draw_char(char c, int x, int y, uint32_t fg, uint32_t bg) {
     for (int row = 0; row < 8; row++) {
@@ -40,12 +43,49 @@ void draw_char(char c, int x, int y, uint32_t fg, uint32_t bg) {
         }
     }
 }
-
-
 void put_pixel(int x, int y, uint32_t color) {
     uint8_t* fb = (uint8_t*)fb_addr;
     uint32_t* pixel = (uint32_t*)(fb + y * pitch + x * 4);
     *pixel = color;
+}
+
+
+//************************************ 
+//*********TERMINAL DRAW METHODS***** 
+//***********************************
+
+void put_pixel_ctx(Window* win, int x, int y, uint32_t color) {
+    // translate to screen coords
+    int fx = win->x + x;
+    int fy = win->y + y;
+
+    // draw_pixel writes into back_buffer
+    put_pixel(fx, fy, color);
+}
+
+void draw_char_ctx(Window* win, char c, int x, int y, uint32_t fg, uint32_t bg) {
+    for (int row = 0; row < FONT_H; row++) {
+        uint8_t bits = font8x8[(int)c][row];
+        for (int col = 0; col < FONT_W; col++) {
+            uint32_t color = (bits & (1 << col)) ? fg : bg;
+            for (int sy = 0; sy < PIXEL_SCALE_Y; sy++) {
+                for (int sx = 0; sx < PIXEL_SCALE_X; sx++) {
+                    put_pixel_ctx(win,
+                        x + col * PIXEL_SCALE_X + sx,
+                        y + row * PIXEL_SCALE_Y + sy,
+                        color);
+                }
+            }
+        }
+    }
+}
+void terminal_print(Terminal* terminal, const char* str) {
+    int x = terminal->cursor_col * CHAR_W;
+    int y = terminal->cursor_row * CHAR_H;
+    for (int i = 0; str[i]; i++) {
+        draw_char_ctx(&terminal->win, str[i], x, y, 0xFFFFFFFF, 0x00000000);
+        x += CHAR_W;
+    }
 }
 
 
@@ -172,6 +212,9 @@ void print(char *string) {
 
     set_cursor(memory_offset);
 }
+
+
+
 void print_backspace() {
     int newCursor = get_cursor() - 2;
     if (newCursor < get_offset(0, control_row)) newCursor = get_offset(0, control_row);
