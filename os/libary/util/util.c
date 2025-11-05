@@ -16,10 +16,12 @@ int string_length(char s[]) {
     return i;
 }
 
-void append(char s[], char n) {
+void append(char s[], char n, int max_len) {
     int len = string_length(s);
-    s[len] = n;
-    s[len + 1] = '\0';
+    if (len < max_len - 1) { 
+        s[len] = n;
+        s[len + 1] = '\0';
+    }
 }
 
 int compare_string(char s1[], char s2[]) {

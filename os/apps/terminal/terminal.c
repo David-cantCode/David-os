@@ -195,20 +195,20 @@ void terminal_execute_command(char *input){
 
 
 
-void terminal_on_input(uint8_t scancode){
+void terminal_on_input(struct Window* win, uint8_t scancode){
     //runs when key is pressed
     if (scancode > KEY_DOWN_SCANCODE_LIMIT) return;
 
 
     //deafult commands, backspace n enter
     if (scancode == BACKSPACE) {
-       if (terminal_backspace(self.buffer)) terminal_print_backspace(&self);
+       if (terminal_backspace(win->buffer)) terminal_print_backspace(&self);
     }
 
     else if (scancode == ENTER) {
         terminal_print(&self, "\n");
-        terminal_execute_command(self.buffer);
-        self.buffer[0] = '\0';
+        terminal_execute_command(win->buffer);
+        win->buffer[0] = '\0';
 
 
         if (self.cur_dir_cluster == 0){
@@ -230,7 +230,7 @@ void terminal_on_input(uint8_t scancode){
         else if (!shift_down && letter >= 'A' && letter <= 'Z') letter += 32;
 
 
-         append(self.buffer, letter);
+        append(win->buffer, letter, 1);
         char str[2] = {letter, '\0'};
         terminal_print(&self, str);
     }

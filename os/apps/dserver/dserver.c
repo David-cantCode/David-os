@@ -5,7 +5,7 @@
 #include "dserver.h"
 #include "../terminal/terminal.h"
 #include "../../libary/include/memory.h"
-
+#include "../../libary/include/util.h"
 
 extern uint32_t fb_addr;
 extern uint32_t pitch;
@@ -33,8 +33,6 @@ extern uint8_t scancode;
 extern uint8_t key_state[256];
 extern int key_down;
 
-
-char buf[256];
 
 void tile_windows() {
     if (window_count == 0) return;
@@ -90,7 +88,15 @@ Window* create_terminal() {
     win->program.on_update = terminal_update;
     win->program.on_input = terminal_on_input;
     win->program.on_resize = terminal_on_resize;
-   // win->buffer = buf;
+
+
+    win->buffer = (char*)memoryalloc(256);
+
+    memoryset(win->buffer, '0', 256);
+    win->buffer[0] = '0';
+
+    win->lines_buf = (char*)memoryalloc(128*128);
+    memoryset(win->lines_buf, 0, 128 * 128);
 
     window_count++;
     tile_windows();
@@ -211,7 +217,7 @@ void input_handler() {
         if (window_count > 0) {
             Window* w = &windows[focused_window];
             if (w->program.on_input) {
-                w->program.on_input(scancode);
+                w->program.on_input(w,scancode);
             }
         }
     }

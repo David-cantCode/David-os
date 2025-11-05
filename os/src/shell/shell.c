@@ -209,7 +209,7 @@ void shell_main(uint8_t scancode){
         if (shift_down && letter >= 'a' && letter <= 'z') letter -= 32;
         else if (!shift_down && letter >= 'A' && letter <= 'Z') letter += 32;
 
-        append(key_buffer, letter);
+        append(key_buffer, letter,256);
         char str[2] = {letter, '\0'};
         print(str);
     }

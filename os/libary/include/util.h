@@ -4,7 +4,7 @@
 #include <stdint.h>
 void memory_copy(unsigned char *source, unsigned char *dest, unsigned long no_of_bytes);
 int string_length(char s[]);
-void append(char s[], char n);
+void append(char s[], char n, int max_len);
 int compare_string(char s1[], char s2[]);
 void *memoryset(void *ptr, int value, unsigned int num);
 void *memorycpy(void *dst, const void *src, unsigned int num) ;
