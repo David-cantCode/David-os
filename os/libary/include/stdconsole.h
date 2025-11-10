@@ -14,17 +14,6 @@ extern uint32_t screen_height;
 void put_pixel(int x, int y, uint32_t color) ;
 void draw_char(char c, int x, int y, uint32_t fg, uint32_t bg) ;
 
-struct Window;
-
-
-typedef struct {
-    Window* win;                     // pointer to the associated window
-    int cursor_row;
-    int cursor_col;
-    char lines[128][128];            // store up to 128 lines, 128 chars per line
-    int num_lines;
-} Terminal;
-
 
 
 void control_line(int row);

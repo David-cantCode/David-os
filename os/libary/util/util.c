@@ -16,7 +16,7 @@ int string_length(char s[]) {
     return i;
 }
 
-void append(char s[], char n, int max_len) {
+void append(char * s, char n, int max_len) {
     int len = string_length(s);
     if (len < max_len - 1) { 
         s[len] = n;

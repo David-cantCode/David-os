@@ -7,6 +7,8 @@
 #include "../../libary/include/memory.h"
 #include "../../libary/include/util.h"
 
+
+
 extern uint32_t fb_addr;
 extern uint32_t pitch;
 extern uint32_t screen_width;
@@ -80,8 +82,9 @@ static const uint32_t colors[MAX_WINDOWS] = {
 
 Window* create_terminal() {
     if (window_count >= MAX_WINDOWS) return 0;
+   
+
     Window* win = &windows[window_count];
-    
     win->color = colors[window_count % 4];
 
     win->program.type = PROGRAM_TERMINAL;
@@ -90,13 +93,23 @@ Window* create_terminal() {
     win->program.on_resize = terminal_on_resize;
 
 
+  //  win->term->win = win;
     win->buffer = (char*)memoryalloc(256);
 
-    memoryset(win->buffer, '0', 256);
-    win->buffer[0] = '0';
+    memoryset(win->buffer, 0, 256);
+    win->buffer[0] = '\0';
 
-    win->lines_buf = (char*)memoryalloc(128*128);
-    memoryset(win->lines_buf, 0, 128 * 128);
+    win->p_cursor_col = (int*)memoryalloc(sizeof(int)); *win->p_cursor_col= 0;
+    win->p_cursor_row = (int*)memoryalloc(sizeof(int)); *win->p_cursor_row = 0;
+    win->p_num_lines = (int*)memoryalloc(sizeof(int));  *win->p_num_lines= 0;
+    win->p_control_row = (int*)memoryalloc(sizeof(int)); *win->p_control_row = 0;
+
+   win->p_lines = (char**)memoryalloc(128 * sizeof(char*)); // allocate rows
+    for (int i = 0; i < 128; i++) { //allocate cols
+        win->p_lines[i] = (char *)memoryalloc(128 * sizeof(char));
+        memoryset(win->p_lines[i], 0, 128); // clear each row
+    }
+
 
     window_count++;
     tile_windows();
@@ -159,7 +172,9 @@ void render_windows() {
         draw_window(w, (i == focused_window));
 
       
-         w->program.on_update(w);
+       // w->lines[1][1] = 'h'; w->lines[1][2] = 'i'; 
+        w->program.on_update(w);
+
         
     }
 }

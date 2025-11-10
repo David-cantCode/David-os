@@ -21,9 +21,9 @@ print("\n");
 
 }
 
-void t_fetch(struct Terminal* t){
+void t_fetch(struct Window* win){
 
-terminal_print(t,
+terminal_print(win,
 
 " ____              _     _    ___  ____  \n"
 "|  _ \\  __ ___   _(_) __| |  / _ \\/ ___| \n"
@@ -33,7 +33,7 @@ terminal_print(t,
 
 );
 
-terminal_print(t,"\n");
+terminal_print(win,"\n");
 
 
 }
