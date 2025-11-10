@@ -99,15 +99,15 @@ Window* create_terminal() {
     memoryset(win->buffer, 0, 256);
     win->buffer[0] = '\0';
 
-    win->p_cursor_col = (int*)memoryalloc(sizeof(int)); *win->p_cursor_col= 0;
-    win->p_cursor_row = (int*)memoryalloc(sizeof(int)); *win->p_cursor_row = 0;
-    win->p_num_lines = (int*)memoryalloc(sizeof(int));  *win->p_num_lines= 0;
-    win->p_control_row = (int*)memoryalloc(sizeof(int)); *win->p_control_row = 0;
+    win->cursor_col = (int*)memoryalloc(sizeof(int)); *win->cursor_col= 0;
+    win->cursor_row = (int*)memoryalloc(sizeof(int)); *win->cursor_row = 0;
+    win->num_lines = (int*)memoryalloc(sizeof(int));  *win->num_lines= 0;
+    win->control_row = (int*)memoryalloc(sizeof(int)); *win->control_row = 0;
 
-   win->p_lines = (char**)memoryalloc(128 * sizeof(char*)); // allocate rows
+   win->lines = (char**)memoryalloc(128 * sizeof(char*)); // allocate rows
     for (int i = 0; i < 128; i++) { //allocate cols
-        win->p_lines[i] = (char *)memoryalloc(128 * sizeof(char));
-        memoryset(win->p_lines[i], 0, 128); // clear each row
+        win->lines[i] = (char *)memoryalloc(128 * sizeof(char));
+        memoryset(win->lines[i], 0, 128); // clear each row
     }
 
 

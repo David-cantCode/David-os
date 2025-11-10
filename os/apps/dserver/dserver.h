@@ -30,20 +30,17 @@ typedef struct Window {
 
 
 
-    int cursor_row;
-    int cursor_col;
-    int num_lines;
-    int control_row;
+
     uint16_t cur_dir_cluster;
     char cur_dir_name[8];
 
 
     char* buffer;
-    char** p_lines;
-    int* p_cursor_row;
-    int* p_cursor_col;
-    int* p_num_lines;
-    int* p_control_row;
+    char** lines;
+    int* cursor_row;
+    int* cursor_col;
+    int* num_lines;
+    int* control_row;
 
 } Window;
 

@@ -12,7 +12,6 @@
 #define CHAR_H 16
 
 //char d_lines[128][128];
- char lines[128][128];
 
 
 extern int shift_down;
@@ -43,7 +42,7 @@ void terminal_set_char_at_video_memory(struct Window* win, char c, int col, int 
     if (row < 0 || row >= rows) return;
     if (col < 0 || col >= cols) return;
 
-    lines[row][col] = c;
+    win->lines[row][col] = c;
 
     // calculate draw position
     int x = win->x + col * CHAR_W;
@@ -66,7 +65,7 @@ void terminal_draw(struct Window* win){
 
     for (int row = 0; row < max_rows; row++) {
     for (int col = 0; col < max_cols; col++) {
-        char c = lines[row][col];
+        char c = win->lines[row][col];
         if (c != '\0') {
             //set pos relative to win
         int x = win->x + col * c_width +5;
@@ -86,9 +85,9 @@ void terminal_scroll_screen(struct Window* win) {
     int cols = terminal_fb_cols(win);
 
     for (int r = win->control_row; r < win->num_lines - 1; ++r) {
-       memorycpy(lines[r], lines[r + 1], 128);
+       memorycpy(win->lines[r], win->lines[r + 1], 128);
     }
-    memoryset(lines[win->num_lines - 1], 0, 128);
+    memoryset(win->lines[*win->num_lines - 1], 0, 128);
 
 
    
