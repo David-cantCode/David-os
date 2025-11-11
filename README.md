@@ -8,6 +8,5 @@ DATE STARTED AUGUST 12 2025
 things to do:
 
 
-
-display server,
 text editer 
+networking 
