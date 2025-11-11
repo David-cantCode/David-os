@@ -90,14 +90,6 @@ Window* create_terminal() {
     win->program.on_resize = terminal_on_resize;
 
 
-    win->buffer = (char*)memoryalloc(256);
-
-    memoryset(win->buffer, '0', 256);
-    win->buffer[0] = '0';
-
-    win->lines_buf = (char*)memoryalloc(128*128);
-    memoryset(win->lines_buf, 0, 128 * 128);
-
     window_count++;
     tile_windows();
     return win;
@@ -108,7 +100,7 @@ void kill_window() {
     if (window_count == 0) return;
 
     for (int i = focused_window; i < window_count - 1; i++) {
-        windows[i] = windows[i + 1];
+        memorycpy(&windows[i], &windows[i + 1], sizeof(Window));
     }
 
     window_count--;

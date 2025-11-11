@@ -4,5 +4,7 @@
 
 
 void fetch();
-void t_fetch(struct Terminal* t);
+void t_fetch(struct Window* win);
+
+
 #endif
