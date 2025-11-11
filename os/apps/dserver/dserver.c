@@ -208,7 +208,7 @@ void input_handler() {
 
         if (window_count > 0) {
             Window* w = &windows[focused_window];
-            if (w->program.on_input) {
+            if ((w->program.on_input) && (!mod_down)) {
                 w->program.on_input(w, scancode);
             }
         }
