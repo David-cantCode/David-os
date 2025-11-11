@@ -1,7 +1,7 @@
 
 BUILD_DIR = ./build
 BIN_DIR   = ./bin
-SRC_DIR   = ./src
+SYS_DIR   = ./sys
 
 
 
@@ -26,7 +26,7 @@ APP_OBJS := $(patsubst $(APP_DIR)/%.c,$(BUILD_DIR)/apps/%.o,$(APP_SRCS))
 
 SRC_C := $(filter-out $(APP_DIR)/%,$(wildcard $(SRC_DIR)/**/*.c))
 
-OBJS_C := $(patsubst $(SRC_DIR)/%.c,$(BUILD_DIR)/%.o,$(SRC_C))
+OBJS_C := $(patsubst $(SYS_DIR)/%.c,$(BUILD_DIR)/%.o,$(SYS_C))
 
 
 
@@ -35,7 +35,7 @@ OBJS = $(BUILD_DIR)/kernel.asm.o \
        $(BUILD_DIR)/isr.o \
        $(LIB_OBJS) \
        $(DRI_OBJS) \
-		$(APP_OBJS)
+	   $(APP_OBJS)
 	
 
 .PHONY: all clean run gdb-instructions
@@ -63,25 +63,25 @@ $(BIN_DIR):
 	mkdir -p $(BIN_DIR)
 
 # Bootloader (raw binary)
-$(BIN_DIR)/boot.bin: $(SRC_DIR)/boot.asm | $(BIN_DIR)
+$(BIN_DIR)/boot.bin: $(SYS_DIR)/boot.asm | $(BIN_DIR)
 	$(AS) -f bin $< -o $@
 
 # Assemble kernel asm and ISR as elf32 objects
-$(BUILD_DIR)/kernel.asm.o: $(SRC_DIR)/kernel.asm | $(BUILD_DIR)
+$(BUILD_DIR)/kernel.asm.o: $(SYS_DIR)/kernel.asm | $(BUILD_DIR)
 	$(AS) -f elf32 -g $< -o $@
 
-$(BUILD_DIR)/isr.o: $(SRC_DIR)/isr.asm | $(BUILD_DIR)
+$(BUILD_DIR)/isr.o: $(SYS_DIR)/isr.asm | $(BUILD_DIR)
 	$(AS) -f elf32 -g $< -o $@
 
 # Compile C kernel
-$(BUILD_DIR)/kernel.o: $(SRC_DIR)/kernel.c | $(BUILD_DIR)
+$(BUILD_DIR)/kernel.o: $(SYS_DIR)/kernel.c | $(BUILD_DIR)
 	$(CC) $(FLAGS) -std=gnu99 -c $< -o $@
 
 
 # Link flat binary kernel using your linker.ld (script expects to produce binary)
 # Output: bin/kernel.bin (flat binary)
-$(BIN_DIR)/kernel.bin: $(OBJS) $(SRC_DIR)/linker.ld | $(BIN_DIR)
-	$(LD) -T $(SRC_DIR)/linker.ld -o $@ $(OBJS)
+$(BIN_DIR)/kernel.bin: $(OBJS) $(SYS_DIR)/linker.ld | $(BIN_DIR)
+	$(LD) -T $(SYS_DIR)/linker.ld -o $@ $(OBJS)
 
 # Produce relocatable object containing all kernel symbols for GDB
 # Output: build/completeKernel.o
