@@ -3,6 +3,8 @@
 
 
 #include <stdint.h>
+#include "../../apps/dserver/dserver.h"
+
 #define SECTOR_SIZE 512
 #define RESERVED_SECTORS 52 //increase by 2 when kernel sectors get increased in boot.asm
 #define FAT_COUNT 2
@@ -27,4 +29,5 @@ void create_directory(const char* name, uint16_t parent_cluster, int is_root_par
 void list_directory(uint16_t dir_cluster);
 uint16_t find_directory_cluster(const char* name, uint16_t parent_cluster) ;
 char* conv_fat_name(const char* input);
+void list_terminal_directory(Window* win, uint16_t dir_cluster);
 #endif

@@ -47,13 +47,6 @@ void fill_test_pattern(uint8_t* buf, uint8_t pattern) {
     }
 }
 
-int starts_with(const char* a, const char* b) {
-    while (*b) {
-        if (*a++ != *b++) return 0;
-    }
-    return 1;
-}
-
 
 
 void execute_command(char *input) {

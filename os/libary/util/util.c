@@ -121,3 +121,11 @@ void *memorymove(void *dest, const void *src, unsigned int n) {
   
     return dest;
 }
+
+
+int starts_with(const char* a, const char* b) {
+    while (*b) {
+        if (*a++ != *b++) return 0;
+    }
+    return 1;
+}

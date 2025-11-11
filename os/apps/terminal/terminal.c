@@ -161,9 +161,7 @@ void terminal_on_input(struct Window* win, uint8_t scancode) {
     }
 
     else if (scancode == ENTER) {
-
-
-        
+        terminal_print(win, "\n");
         terminal_execute_command(win,win->buffer);
         win->buffer[0] = '\0';
 
@@ -171,7 +169,7 @@ void terminal_on_input(struct Window* win, uint8_t scancode) {
         if (win->cur_dir_cluster == 0){
         memoryset(win->cur_dir_name, '~', 1); //fix to delete spaces inbetween ~ and/ 
         }
-        terminal_print(win,win->cur_dir_name);
+        terminal_print(win,win->cur_dir_name); //fix some weird ah bug that keeps printing the dir name idc rn ill do it later
         terminal_print(win, "/ $ ");
         
     }
@@ -189,8 +187,6 @@ void terminal_on_input(struct Window* win, uint8_t scancode) {
         
     
         append(win->buffer, letter, 256);
-  
-
         char str[2] = {letter, '\0'};
         terminal_print(win, str);
     }

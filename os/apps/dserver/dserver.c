@@ -209,7 +209,7 @@ void input_handler() {
         if (window_count > 0) {
             Window* w = &windows[focused_window];
             if (w->program.on_input) {
-                w->program.on_input(w,scancode);
+                w->program.on_input(w, scancode);
             }
         }
     }

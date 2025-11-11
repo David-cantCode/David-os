@@ -15,5 +15,5 @@ void int_to_str(int num, char* buffer);
 
 int absolute(int x);
 void *memorymove(void *dest, const void *src, unsigned int n);
-
+int starts_with(const char* a, const char* b) ;
 #endif

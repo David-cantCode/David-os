@@ -3,6 +3,7 @@
 #include "../include/util.h"
 #include "../../drivers/include/ata.h"
 #include "../include/stdconsole.h"
+#include "../../apps/terminal/terminal.h"
 uint8_t sector_buf[SECTOR_SIZE];
 
 
@@ -231,6 +232,43 @@ void list_directory(uint16_t dir_cluster) {
         print("\n");
     }
 }
+
+
+void list_terminal_directory(Window* win, uint16_t dir_cluster) {
+
+    uint32_t lba;
+
+    if (dir_cluster == 0)
+        lba = FIRST_ROOT_DIR_SECTOR;
+    else
+        lba = FIRST_DATA_SECTOR + (dir_cluster - 2) * SECTORS_PER_CLUSTER;
+
+    read_sector(lba, sector_buf);
+
+    for (int i = 0; i < SECTOR_SIZE; i += 32) {
+        if (sector_buf[i] == 0x00) break; // no more entries
+        if (sector_buf[i] == 0xE5) continue; // deleted
+
+        char name[12];
+        memorycpy(name, &sector_buf[i], 11);
+        name[11] = '\0';
+
+        terminal_print(win,name);
+        terminal_print(win,"\n");
+    }
+}
+
+
+
+
+
+
+
+
+
+
+
+
 
 uint16_t get_fat_entry(uint16_t cluster) {
     fat_read_full();
