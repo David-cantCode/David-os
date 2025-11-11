@@ -28,9 +28,9 @@ int terminal_fb_rows(struct Window* win) {
 }
 
 void terminal_control_line(struct Window* win, int *row) {
-    win->control_row = *row;
-    if (win->control_row < 0) win->control_row = 0;
-    if (win->control_row >= terminal_fb_rows(win)) win->control_row = terminal_fb_rows(win) - 1;
+    *win->control_row = *row;
+    if (*win->control_row < 0) *win->control_row = 0;
+    if (*win->control_row >= terminal_fb_rows(win)) *win->control_row = terminal_fb_rows(win) - 1;
 }
 
 
@@ -50,8 +50,8 @@ void terminal_set_char_at_video_memory(struct Window* win, char c, int col, int 
 
     d_char(x, y, c, 0xFFFFFFFF, 1);
 
-    win->cursor_col = col;
-    win->cursor_row = row;
+    *win->cursor_col = col;
+    *win->cursor_row = row;
 }
 
 void terminal_draw(struct Window* win){
@@ -84,10 +84,10 @@ void terminal_scroll_screen(struct Window* win) {
     int rows = terminal_fb_rows(win);
     int cols = terminal_fb_cols(win);
 
-    for (int r = win->control_row; r < win->num_lines - 1; ++r) {
-       memorycpy(win->lines[r], win->lines[r + 1], 128);
-    }
-    memoryset(win->lines[*win->num_lines - 1], 0, 128);
+     for (int r = *win->control_row; r < *win->num_lines - 1; ++r) {
+         memorycpy(win->lines[r], win->lines[r + 1], 128);
+     }
+     memoryset(win->lines[*win->num_lines - 1], 0, 128);
 
 
    
@@ -102,22 +102,22 @@ void terminal_print(struct Window* win, const char *string) {
         char c = string[i];
 
         if (c == '\n') {
-            win->cursor_row++;  
-            win->cursor_col = 0;
-            if (win->cursor_row >= rows) {
+            (*win->cursor_row)++;  
+            *win->cursor_col = 0;
+            if (*win->cursor_row >= rows) {
                 terminal_scroll_screen(win);
-                win->cursor_row = rows - 1;
+                *win->cursor_row = rows - 1;
             }
         } else {
-            terminal_set_char_at_video_memory(win, c, win->cursor_col, win->cursor_row);
+            terminal_set_char_at_video_memory(win, c, *win->cursor_col, *win->cursor_row);
 
-            (win->cursor_col)++;
-            if (win->cursor_col >= cols) {
-                win->cursor_col = 0;
-                win->cursor_row++;
-                if (win->cursor_row >= rows) {
+            (*win->cursor_col)++;
+            if (*win->cursor_col >= cols) {
+                *win->cursor_col = 0;
+                (*win->cursor_row)++;
+                if (*win->cursor_row >= rows) {
                     terminal_scroll_screen(win);
-                    win->cursor_row = rows - 1;
+                    *win->cursor_row = rows - 1;
                 }
             }
         }
@@ -126,26 +126,25 @@ void terminal_print(struct Window* win, const char *string) {
 }
 
 void terminal_print_backspace(struct Window* win ) {
-    if (win->cursor_col > 0) {
-        win->cursor_col--;
-    } else if (win->cursor_row > 0) {
-        win->cursor_row--;
-        win->cursor_col = terminal_fb_cols(win) - 1;
+    if (*win->cursor_col > 0) {
+        (*win->cursor_col)--;
+    } else if (*win->cursor_row > 0) {
+        (*win->cursor_row)--;
+        *win->cursor_col = terminal_fb_cols(win) - 1;
     }
 
-    terminal_set_char_at_video_memory(win, ' ', win->cursor_col, win->cursor_row);
+    terminal_set_char_at_video_memory(win, ' ', *win->cursor_col, *win->cursor_row);
 }
 
 void terminal_clear(struct Window* win){
     int cols = terminal_fb_cols(win);
     int rows = terminal_fb_rows(win);
-    for (int r = win->control_row; r < rows; ++r) {
+    for (int r = *win->control_row; r < rows; ++r) {
         for (int c = 0; c < cols; ++c) {
-      
-        terminal_set_char_at_video_memory(win, ' ', c, r);
+            terminal_set_char_at_video_memory(win, ' ', c, r);
         }
     }
-    win->cursor_row =0; win->cursor_col =0;
+    *win->cursor_row = 0; *win->cursor_col = 0;
 }
 
 void run_cmd(){
@@ -156,7 +155,7 @@ void run_cmd(){
 void terminal_on_resize(struct Window* win, int new_width, int new_height){
   
 
-    win->num_lines = terminal_fb_rows(win);
+    *win->num_lines = terminal_fb_rows(win);
 }
 
 int terminal_backspace(char buffer[]) {

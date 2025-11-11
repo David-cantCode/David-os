@@ -99,9 +99,9 @@ Window* create_terminal() {
     memoryset(win->buffer, 0, 256);
     win->buffer[0] = '\0';
 
-    win->cursor_col = (int*)memoryalloc(sizeof(int)); *win->cursor_col= 0;
+    win->cursor_col = (int*)memoryalloc(sizeof(int)); *win->cursor_col = 0;
     win->cursor_row = (int*)memoryalloc(sizeof(int)); *win->cursor_row = 0;
-    win->num_lines = (int*)memoryalloc(sizeof(int));  *win->num_lines= 0;
+    win->num_lines = (int*)memoryalloc(sizeof(int)); *win->num_lines = 0;
     win->control_row = (int*)memoryalloc(sizeof(int)); *win->control_row = 0;
 
    win->lines = (char**)memoryalloc(128 * sizeof(char*)); // allocate rows
