@@ -14,7 +14,7 @@ extern volatile int program_count;
 void terminal_pviewer(struct Window* win){
     terminal_print(win, "\n");
 
-    terminal_print(win, "Process Viewer\nID       NAME\n========================\n \n");
+    terminal_print(win, "Process Viewer\nID       NAME     SIZE\n========================\n \n");
     for(int i = 0; i < program_count; i++) {
     
     
@@ -33,7 +33,15 @@ void terminal_pviewer(struct Window* win){
 
     //name
     terminal_print(win, get_program_name(p->type));
-    terminal_print(win, "\n");
+    terminal_print(win, "      ");
+   
+    //size
+
+
+    int_to_str(sizeof(p), buffer);
+    terminal_print(win, buffer);
+
+     terminal_print(win, "\n");
 
     }
 

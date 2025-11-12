@@ -1,6 +1,6 @@
 
 #include <stdint.h>
-#include "../../libary/include/program.h"
+
 #include "../../libary/include/davidgl.h"
 #include "dserver.h"
 #include "../terminal/terminal.h"
@@ -240,7 +240,7 @@ void display_server_loop() {
 }
 
 
-void display_init() {
+void display_init(Program* self, Window* self_win) {
 
     display_server_loop();
 }

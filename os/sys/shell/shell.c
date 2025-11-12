@@ -6,6 +6,7 @@
 #include "../../libary/include/util.h"
 #include "../../apps/pong/pong.h"
 #include "../../libary/include/stdconsole.h"
+#include "../../libary/include/program.h"
 #include "../../apps/dserver/dserver.h"
 
 
@@ -142,7 +143,8 @@ void execute_command(char *input) {
     {pong_on_start();}
 
     else if (compare_string(input, "startd")==0){
-        display_init();
+
+        create_program(PROGRAM_DSERVER,display_init,0,0,0,0);
     }
 
 
