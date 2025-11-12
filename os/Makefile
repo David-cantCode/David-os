@@ -11,7 +11,7 @@ AS = nasm
 LD = i686-elf-ld
 OBJCOPY = i686-elf-objcopy
 
-# Compiler flags (kept from your original)
+
 FLAGS = -g -ffreestanding -nostdlib -nostartfiles -nodefaultlibs -Wall -O0 -Iinc -Ilibary
 
 LIB_SRCS := $(shell find libary -type f -name "*.c") #update; includes all c files ine every folder under libary

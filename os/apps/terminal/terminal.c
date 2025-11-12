@@ -2,7 +2,7 @@
 
 #include "../../libary/include/davidgl.h"
 #include "../../libary/include/util.h"
-#include "../dserver/dserver.h"
+
 #include "t_cmds.h"
 
 
@@ -11,6 +11,10 @@
 
 extern int shift_down;
 extern const char scancode_to_char[];
+
+
+
+struct Window;
 
 //ret num cols and rows to fit win
 int terminal_fb_cols(struct Window* win) {
@@ -137,7 +141,7 @@ void terminal_clear(struct Window* win) {
     win->cursor_col = 0;
 }
 
-void terminal_on_resize(struct Window* win, int new_width, int new_height) {
+void terminal_on_resize(struct Program* self_prog, struct Window* win, int new_width, int new_height) {
     win = win;
     win->num_lines = terminal_fb_rows(win);
 }
@@ -154,7 +158,7 @@ int terminal_backspace(char buffer[]) {
 
 
 
-void terminal_on_input(struct Window* win, uint8_t scancode) {
+void terminal_on_input(struct Program* self_prog, struct Window* win, uint8_t scancode) {
 
     if (scancode == BACKSPACE) {
        if (terminal_backspace(win->buffer)) terminal_print_backspace(win);
@@ -192,7 +196,7 @@ void terminal_on_input(struct Window* win, uint8_t scancode) {
     }
 }
 
-void terminal_update(struct Window* win) {
+void terminal_update(struct Program* self_prog, struct Window* win) {
 
     terminal_draw(win);
 }

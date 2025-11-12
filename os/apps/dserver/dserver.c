@@ -1,6 +1,6 @@
 
 #include <stdint.h>
-
+#include "../../libary/include/program.h"
 #include "../../libary/include/davidgl.h"
 #include "dserver.h"
 #include "../terminal/terminal.h"
@@ -63,7 +63,7 @@ void tile_windows() {
         
         
             //call each programs on_resize
-                w->program.on_resize(w, win_w, win_h);
+                w->program.on_resize(0, w, win_w, win_h);
             }
         }
     }
@@ -81,13 +81,18 @@ static const uint32_t colors[MAX_WINDOWS] = {
 Window* create_terminal() {
     if (window_count >= MAX_WINDOWS) return 0;
     Window* win = &windows[window_count];
-    
+
+    memoryset(win, 0, sizeof(Window));
+
     win->color = colors[window_count % 4];
 
-    win->program.type = PROGRAM_TERMINAL;
-    win->program.on_update = terminal_update;
-    win->program.on_input = terminal_on_input;
-    win->program.on_resize = terminal_on_resize;
+    // Create the program for this window
+    Program* program = create_program(PROGRAM_TERMINAL,0,terminal_update,terminal_on_resize,terminal_on_input,
+        win                 
+    );
+
+    if (!program) return 0; //if theres too many programs already 
+
 
 
     window_count++;
@@ -151,7 +156,7 @@ void render_windows() {
         draw_window(w, (i == focused_window));
 
       
-         w->program.on_update(w);
+         w->program.on_update(0, w);
         
     }
 }
@@ -209,7 +214,7 @@ void input_handler() {
         if (window_count > 0) {
             Window* w = &windows[focused_window];
             if ((w->program.on_input) && (!mod_down)) {
-                w->program.on_input(w, scancode);
+                w->program.on_input(0, w, scancode);
             }
         }
     }
