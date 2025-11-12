@@ -4,12 +4,14 @@
 #include "../../libary/include/memory.h"
 #include <stdint.h>
 
+#define MAX_PROGRAMS 32
+extern volatile struct Program* programs[MAX_PROGRAMS];
+extern volatile int program_count;
 
 
 enum Program_type{
-    PROGRAM_DSERVER,
-    PROGRAM_TERMINAL
-
+    PROGRAM_TERMINAL,
+    PROGRAM_DSERVER
 };
 
 struct Window; 
@@ -61,5 +63,8 @@ struct Program* create_program(enum Program_type type,
     void (*on_input)(Program*, Window*, uint8_t),
     Window* window 
     );
+
+char* get_program_name(enum Program_type type) ;
+int get_max_programs();
 
 #endif

@@ -12,7 +12,7 @@ LD = i686-elf-ld
 OBJCOPY = i686-elf-objcopy
 
 
-FLAGS = -g -ffreestanding -nostdlib -nostartfiles -nodefaultlibs -Wall -O0 -Iinc -Ilibary
+FLAGS = -g -ffreestanding -nostdlib -nostartfiles -nodefaultlibs -Wall -O0 -Iinc -Ilibary/include
 
 LIB_SRCS := $(shell find libary -type f -name "*.c") #update; includes all c files ine every folder under libary
 LIB_OBJS := $(patsubst libary/%.c, $(BUILD_DIR)/libary/%.o, $(LIB_SRCS))

@@ -4,21 +4,18 @@
 #include "../../libary/include/util.h"
 #include "../../apps/help/help.h"
 #include "../../libary/include/fat16.h"
-#include "../../libary/include/util.h"
 #include "../../libary/include/stdconsole.h"
 #include "../../apps/dserver/dserver.h"
-
+#include "../pviewr/pviewer.h"
 
 
 
 void terminal_execute_command(struct Window* win, char *input) {
-    if (compare_string(input, "fetch") == 0) {
-        
-        t_fetch(win);
 
-
-
-    } else if (compare_string(input, "clear") == 0) {
+    //**********************
+    //*******GENERAL********
+    //**********************
+    if (compare_string(input, "clear") == 0) {
 
         terminal_clear(win);
 
@@ -64,7 +61,19 @@ void terminal_execute_command(struct Window* win, char *input) {
                 
     }
 
-    
+
+    //**********************
+    //**********CLIS********
+    //**********************
+    else if (compare_string(input, "fetch") == 0) {
+        t_fetch(win);
+    } 
+
+    else if (compare_string(input, "pviewer") == 0) {
+        terminal_pviewer(win);
+    } 
+
+
     
     
     

@@ -3,9 +3,9 @@
 
 
 
-#define MAX_PROGRAMS 32
-struct Program* programs[MAX_PROGRAMS];
-int program_count;
+
+volatile struct Program* programs[MAX_PROGRAMS];
+volatile int program_count;
 
 struct Program* create_program(enum Program_type type,
     void (*on_init)(Program*, Window*),
@@ -47,4 +47,18 @@ struct Program* create_program(enum Program_type type,
     }
 
     return program;
+}
+
+
+char* get_program_name(enum Program_type type) {
+    switch(type) {
+        case PROGRAM_TERMINAL: return "Terminal";
+        case PROGRAM_DSERVER: return "Dserver";
+        default: return "Unknown";
+    }
+}
+
+
+int get_max_programs(){
+    return MAX_PROGRAMS;
 }

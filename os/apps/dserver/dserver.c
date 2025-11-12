@@ -4,7 +4,7 @@
 #include "../../libary/include/davidgl.h"
 #include "dserver.h"
 #include "../terminal/terminal.h"
-#include "../../libary/include/memory.h"
+#include "memory.h"
 #include "../../libary/include/util.h"
 
 extern uint32_t fb_addr;
