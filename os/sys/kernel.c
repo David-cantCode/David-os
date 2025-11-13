@@ -6,7 +6,7 @@
 #include "cpu/isr.h"
 #include "shell/shell.c"
 #include "../drivers/include/timer.h"
-
+#include "../drivers/include/nic.h"
 
 volatile int key_down;
 

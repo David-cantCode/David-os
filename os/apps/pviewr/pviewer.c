@@ -5,29 +5,34 @@
 
 #define MAX_PROGRAMS 32
 
-extern volatile struct Program* programs[MAX_PROGRAMS];
-extern volatile int program_count;
+extern struct Program* programs[MAX_PROGRAMS];
+extern int program_count;
 
 
 
+ struct Program* p;
+
+ //huge ass bug tjats driving me crazy;
+ //keeps printing termminal im gonna go insane lol prolly a problem with program.c/programs not being added correctly 
+ //also i think some memalloc problems (here not in mem.c) cuz the font keeps getting messed 
 
 void terminal_pviewer(struct Window* win){
     terminal_print(win, "\n");
 
     terminal_print(win, "Process Viewer\nID       NAME     SIZE\n========================\n \n");
     for(int i = 0; i < program_count; i++) {
+    p = programs[i];
     
-    
-    struct Program* p = programs[i];
-    if(!p) continue;
+   
+    if(p){
 
     //id
-    char* buffer;
+    char buffer[16];
     int_to_str(i, buffer);
     
     terminal_print(win, buffer);
     terminal_print(win, "    ");
-    
+
 
 
 
@@ -38,14 +43,17 @@ void terminal_pviewer(struct Window* win){
     //size
 
 
-    int_to_str(sizeof(p), buffer);
+    int_to_str(sizeof(*p), buffer);
     terminal_print(win, buffer);
 
      terminal_print(win, "\n");
 
     }
 
+    }
+
     terminal_print(win, "\n");
+
 }
 
 

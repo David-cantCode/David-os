@@ -40,3 +40,8 @@ void outsw(uint16_t port, const void* buffer, uint32_t count) {
     const uint16_t* buf = (const uint16_t*)buffer;
     __asm__ volatile ("cld\n\t" "rep outsw": "+S"(buf), "+c"(count) : "d"(port): "memory");
 }
+
+
+uint16_t htons(uint16_t x) {
+    return (x << 8) | (x >> 8);
+}

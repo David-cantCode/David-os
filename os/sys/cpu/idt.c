@@ -38,5 +38,11 @@ void IDT_Initialize()
 
     // OCW1
      outb(0x21, 0xFC); // 1111 1100 -> unmask IRQ0 (timer) and unmask IRQ1 (keyboard)
+
+
+     outb(0xA1, 0xF7); // 1111 0111 -> IRQ3  (NIC / IRQ11)
+
      outb(0xA1, 0xFF);
+
+    
 }

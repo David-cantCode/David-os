@@ -5,13 +5,12 @@
 #include <stdint.h>
 
 #define MAX_PROGRAMS 32
-extern volatile struct Program* programs[MAX_PROGRAMS];
-extern volatile int program_count;
 
 
 enum Program_type{
     PROGRAM_TERMINAL,
-    PROGRAM_DSERVER
+    PROGRAM_DSERVER,
+    PROGRAM_PONG
 };
 
 struct Window; 
@@ -56,7 +55,7 @@ typedef struct Window {
 
 
 
-struct Program* create_program(enum Program_type type,
+Program* create_program(enum Program_type type,
     void (*on_init)(Program*, Window*),
     void (*on_update)(Program*, Window*),
     void (*on_resize)(Program*, Window*, int, int),
@@ -66,5 +65,6 @@ struct Program* create_program(enum Program_type type,
 
 char* get_program_name(enum Program_type type) ;
 int get_max_programs();
-
+Program* get_programs();
+int get_program_count();
 #endif

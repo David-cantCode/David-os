@@ -145,6 +145,7 @@ void execute_command(char *input) {
     else if (compare_string(input, "startd")==0){
 
         create_program(PROGRAM_DSERVER,display_init,0,0,0,0);
+        
     }
 
 

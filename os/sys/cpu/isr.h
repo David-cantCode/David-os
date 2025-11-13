@@ -50,11 +50,12 @@ void ISR_Initialize()
     IDT_SetGate(45, (unsigned long)IRQ13);
     IDT_SetGate(46, (unsigned long)IRQ14);
     IDT_SetGate(47, (unsigned long)IRQ15);
+    
 }
 
 extern void keyboard_callback();
 extern void timer_callback();
-
+extern void nic_callback();
 
 void __attribute__((cdecl)) ISR_Handler(Registers *ptr)
 {
@@ -70,6 +71,12 @@ void __attribute__((cdecl)) ISR_Handler(Registers *ptr)
     
     if (ptr->interrupt >= 40) 
     {outb(0xA0, 0x20);}
+
+
+    if (ptr->interrupt==43) {
+    nic_callback(); 
+    }
+
     
     outb(0x20, 0x20);
         
