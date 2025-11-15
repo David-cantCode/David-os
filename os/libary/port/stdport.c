@@ -45,3 +45,13 @@ void outsw(uint16_t port, const void* buffer, uint32_t count) {
 uint16_t htons(uint16_t x) {
     return (x << 8) | (x >> 8);
 }
+
+ void outl(uint16_t port, uint32_t val) {
+    __asm__ volatile ("outl %0, %1" : : "a"(val), "Nd"(port));
+}
+
+ uint32_t inl(uint16_t port) {
+    uint32_t ret;
+    __asm__ volatile ("inl %1, %0" : "=a"(ret) : "Nd"(port));
+    return ret;
+}

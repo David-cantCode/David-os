@@ -12,4 +12,9 @@ void insw(uint16_t port, void* addr, uint32_t count);
 uint16_t inw(uint16_t port);
 void outsw(uint16_t port, const void* buffer, uint32_t count);
 uint16_t htons(uint16_t x);
+
+
+
+ void outl(uint16_t port, uint32_t val);
+  uint32_t inl(uint16_t port);
 #endif
