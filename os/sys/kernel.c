@@ -8,6 +8,7 @@
 #include "../drivers/include/timer.h"
 #include "../drivers/include/nic.h"
 #include "../libary/include/program.h"
+#include "../drivers/include/pci.h"
 volatile int key_down;
 
 
@@ -74,6 +75,10 @@ void kernel_ini() {
 
 
     timer_set_frequency(INTERUPT_FREQ);
+
+    print("Detecting Devices");
+    pci_enumerate();
+    print("\n");
 
 
     print("Shell was Loaded \n");
