@@ -45,6 +45,20 @@ void kernel_main(){
 }
 
 
+void get_e1000(){
+    e1000 = pci_find_device(0x8086, 0x100E);
+    if (e1000) {
+    print("Located e1000 NIC \n");
+    
+    } 
+    
+    
+    else {
+        print("e1000 NIC not found\n");
+    }
+
+}
+
 
 void kernel_ini() {
     //**************************
@@ -79,6 +93,8 @@ void kernel_ini() {
     print("Detecting Devices\n");
     pci_enumerate();
     print("\n");
+
+    get_e1000();
 
 
     print("Shell was Loaded \n");

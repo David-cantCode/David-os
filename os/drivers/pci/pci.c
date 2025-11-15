@@ -73,3 +73,13 @@ void pci_enumerate() {
  
 
 }}}}
+
+struct pci_device* pci_find_device(uint16_t vendor_id, uint16_t device_id) {
+    for (int i = 0; i < device_count; i++) {
+        if (pci_devices[i].vendor_id == vendor_id &&
+            pci_devices[i].device_id == device_id) {
+            return &pci_devices[i];
+        }
+    }
+    return 0;
+}

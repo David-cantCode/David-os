@@ -17,5 +17,5 @@ struct pci_device {
 uint32_t pci_read_config(uint8_t bus, uint8_t device, uint8_t function, uint8_t offset);
 void pci_write_config(uint8_t bus, uint8_t device, uint8_t function, uint8_t offset, uint32_t value) ;
 void pci_enumerate();
-
+struct pci_device* pci_find_device(uint16_t vendor_id, uint16_t device_id);
 #endif
