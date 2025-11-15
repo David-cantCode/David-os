@@ -21,7 +21,7 @@ extern uint32_t screen_height;
 
 
 
-
+struct pci_device *e1000;
 Program *Shell;
 
 void kernel_main(){
@@ -76,7 +76,7 @@ void kernel_ini() {
 
     timer_set_frequency(INTERUPT_FREQ);
 
-    print("Detecting Devices");
+    print("Detecting Devices\n");
     pci_enumerate();
     print("\n");
 
