@@ -10,7 +10,8 @@
 enum Program_type{
     PROGRAM_TERMINAL,
     PROGRAM_DSERVER,
-    PROGRAM_PONG
+    PROGRAM_PONG,
+    PROGRAM_SHELL
 };
 
 struct Window; 
@@ -67,4 +68,10 @@ char* get_program_name(enum Program_type type) ;
 int get_max_programs();
 Program* get_programs();
 int get_program_count();
+
+
+void terminal_pviewer(struct Window* win);
+void shell_pviewer();
+
+
 #endif

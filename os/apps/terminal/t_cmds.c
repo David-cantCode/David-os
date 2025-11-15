@@ -2,11 +2,8 @@
 #include "../fetch/fetch.h"
 #include "terminal.h"
 #include "../../libary/include/util.h"
-#include "../../apps/help/help.h"
+
 #include "../../libary/include/fat16.h"
-#include "../../libary/include/stdconsole.h"
-#include "../../apps/dserver/dserver.h"
-#include "../pviewr/pviewer.h"
 
 
 

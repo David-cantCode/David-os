@@ -7,7 +7,7 @@
 #include "shell/shell.c"
 #include "../drivers/include/timer.h"
 #include "../drivers/include/nic.h"
-
+#include "../libary/include/program.h"
 volatile int key_down;
 
 
@@ -17,6 +17,11 @@ extern uint32_t screen_width;
 extern uint32_t screen_height;
 #define VBE_ADDR 0x400
 #define INTERUPT_FREQ 100
+
+
+
+
+Program *Shell;
 
 void kernel_main(){
 
@@ -73,7 +78,9 @@ void kernel_ini() {
 
     print("Shell was Loaded \n");
     print("\n");
-    shell_ini();
+
+    Shell = create_program(PROGRAM_SHELL, shell_ini, 0,0,0,0);
+
 
 
 

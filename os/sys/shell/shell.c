@@ -10,7 +10,6 @@
 #include "../../apps/dserver/dserver.h"
 
 
-
 #define KEY_DOWN_SCANCODE_LIMIT 57
 #define BACKSPACE 0x0e
 #define ENTER 0x1C
@@ -144,8 +143,13 @@ void execute_command(char *input) {
 
     else if (compare_string(input, "startd")==0){
 
-        create_program(PROGRAM_DSERVER,display_init,0,0,0,0);
+        Program* p = create_program(PROGRAM_DSERVER,display_init,0,0,0,0);
+    
         
+    }
+
+    else if(compare_string(input, "pviewer")==0){
+        shell_pviewer();
     }
 
 
