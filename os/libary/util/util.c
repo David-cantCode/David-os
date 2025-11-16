@@ -129,3 +129,75 @@ int starts_with(const char* a, const char* b) {
     }
     return 1;
 }
+
+
+static void reverse(char *str, int len) {
+    int i = 0, j = len - 1;
+    while (i < j) {
+        char tmp = str[i];
+        str[i] = str[j];
+        str[j] = tmp;
+        i++; j--;
+    }
+}
+
+static int itoa(int value, char *str, int base) {
+    int i = 0;
+    int neg = 0;
+    if (value == 0) { str[i++] = '0'; str[i] = 0; return i; }
+    if (value < 0 && base == 10) { neg = 1; value = -value; }
+    while (value) {
+        int rem = value % base;
+        str[i++] = (rem > 9) ? rem - 10 + 'a' : rem + '0';
+        value /= base;
+    }
+    if (neg) str[i++] = '-';
+    str[i] = 0;
+    reverse(str, i);
+    return i;
+}
+
+// sprintf-like, takes array of arguments
+int s_printf(char *buf, const char *fmt, uint32_t val) {
+    char *p = buf;
+    char tmp[32];
+
+    while (*fmt) {
+        if (*fmt == '%') {
+            fmt++;
+            switch (*fmt) {
+                case 'd': {
+                    itoa((int)val, tmp, 10);  // decimal
+                    char *t = tmp;
+                    while (*t) *p++ = *t++;
+                    break;
+                }
+                case 'x': {
+                    itoa((int)val, tmp, 16);  // hex
+                    char *t = tmp;
+                    while (*t) *p++ = *t++;
+                    break;
+                }
+                case 'p': {  // pointer
+                    itoa((unsigned long)val, tmp, 16);
+                    char *t = tmp;
+                    while (*t) *p++ = *t++;
+                    break;
+                }
+                case 's': {  // string
+                    char *s = (char*)(uintptr_t)val;
+                    while (*s) *p++ = *s++;
+                    break;
+                }
+                default:
+                    *p++ = *fmt;  // unknown specifier: just print it
+            }
+        } else {
+            *p++ = *fmt;
+        }
+        fmt++;
+    }
+
+    *p = 0;
+    return p - buf;
+}

@@ -3,7 +3,7 @@
 #include "../include/pci.h"
 #include "../../libary/include/stdconsole.h"
 #include "../../libary/include/util.h"
-
+#include "../../network/include/ethernet.h"
 
 static struct rx_desc rx_ring[RX_DESC_COUNT];
 static uint8_t rx_buffers[RX_DESC_COUNT][RX_BUFFER_SIZE];
@@ -97,3 +97,21 @@ int send_packet(void* data, uint16_t len) {
     return 0;
 }
 
+void e1000_poll() {
+    static uint32_t rx_index = 0;
+    
+
+    while (rx_ring[rx_index].status & E1000_RXD_STAT_DD) {
+        uint8_t* pkt = rx_buffers[rx_index];
+        uint16_t len = rx_ring[rx_index].length;
+
+        ethernet_receive(pkt, len);
+
+        rx_ring[rx_index].status = 0;
+
+
+        rx_index = (rx_index + 1) % RX_DESC_COUNT;
+
+        e1000_mmio[E1000_RDT/4] = rx_index;
+    }
+}

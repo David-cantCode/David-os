@@ -20,6 +20,8 @@
 #define E1000_RCTL  0x0100
 #define E1000_RCTL_EN 0x2
 
+#define E1000_RXD_STAT_DD  (1 << 0)
+
 struct rx_desc {
     uint64_t addr;
     uint16_t length;
@@ -65,4 +67,5 @@ struct tx_desc {
 
 int e1000_init();
 int send_packet(void* data, uint16_t len);
+void e1000_poll();
 #endif

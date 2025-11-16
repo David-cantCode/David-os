@@ -9,6 +9,13 @@
 #include "../drivers/include/e1000.h"
 #include "../libary/include/program.h"
 #include "../drivers/include/pci.h"
+
+
+
+
+#include "../network/include/arp.h"
+#include "../network/include/icmp.h"
+#include "../network/include/ethernet.h"
 volatile int key_down;
 
 
@@ -20,8 +27,6 @@ extern uint32_t screen_height;
 #define INTERUPT_FREQ 100
 
 
-
-struct pci_device *e1000;
 Program *Shell;
 
 void kernel_main(){
@@ -48,15 +53,22 @@ void kernel_main(){
 void get_e1000(){
     e1000_init();   
 
-
-    uint8_t test_frame[60];
-    memoryset(test_frame, 0xFF, 6);  
-    memoryset(test_frame + 6, 0x11, 6);
-    test_frame[12] = 0x08;     
-    test_frame[13] = 0x00;
-    send_packet(test_frame, 60);
-
     
+    uint8_t mac[6] = {0x52,0x54,0x00,0x12,0x34,0x56};
+    ethernet_init(mac);
+    uint32_t host_ip = 0xC0A86401; 
+
+
+    uint16_t seq = 1;
+
+
+    while(1) {
+        e1000_poll();
+
+        for (volatile int i=0;i<100000000;i++);
+    
+    }
+
 }
 
 
