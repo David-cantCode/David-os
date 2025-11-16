@@ -6,7 +6,7 @@
 #include "cpu/isr.h"
 #include "shell/shell.c"
 #include "../drivers/include/timer.h"
-#include "../drivers/include/nic.h"
+#include "../drivers/include/e1000.h"
 #include "../libary/include/program.h"
 #include "../drivers/include/pci.h"
 volatile int key_down;
@@ -46,17 +46,7 @@ void kernel_main(){
 
 
 void get_e1000(){
-    e1000 = pci_find_device(0x8086, 0x100E);
-    if (e1000) {
-    print("Located e1000 NIC \n");
-    
-    } 
-    
-    
-    else {
-        print("e1000 NIC not found\n");
-    }
-
+    e1000_init();         // Initialize NIC
 }
 
 
