@@ -24,8 +24,11 @@ APP_DIR := ./apps
 APP_SRCS := $(shell find $(APP_DIR) -type f -name "*.c")
 APP_OBJS := $(patsubst $(APP_DIR)/%.c,$(BUILD_DIR)/apps/%.o,$(APP_SRCS))
 
-SRC_C := $(filter-out $(APP_DIR)/%,$(wildcard $(SRC_DIR)/**/*.c))
+NET_DIR := ./network
+NET_SRCS := $(shell find $(NET_DIR) -type f -name "*.c")
+NET_OBJS := $(patsubst $(NET_DIR)/%.c,$(BUILD_DIR)/apps/%.o,$(NET_SRCS))
 
+SRC_C := $(filter-out $(APP_DIR)/%,$(wildcard $(SRC_DIR)/**/*.c))
 OBJS_C := $(patsubst $(SYS_DIR)/%.c,$(BUILD_DIR)/%.o,$(SYS_C))
 
 
@@ -35,7 +38,8 @@ OBJS = $(BUILD_DIR)/kernel.asm.o \
        $(BUILD_DIR)/isr.o \
        $(LIB_OBJS) \
        $(DRI_OBJS) \
-	   $(APP_OBJS)
+	   $(APP_OBJS) \
+	   $(NET_OBJS)
 	
 
 .PHONY: all clean run gdb-instructions
