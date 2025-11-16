@@ -29,6 +29,13 @@ extern uint32_t screen_height;
 
 Program *Shell;
 
+
+
+#define MAX_PROGRAMS 32
+volatile Program* programs[MAX_PROGRAMS];
+volatile int program_count;
+
+
 void kernel_main(){
 
     //*******************
@@ -62,12 +69,10 @@ void get_e1000(){
     uint16_t seq = 1;
 
 
-    while(1) {
         e1000_poll();
 
         for (volatile int i=0;i<100000000;i++);
-    
-    }
+
 
 }
 

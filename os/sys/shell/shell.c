@@ -139,7 +139,10 @@ void execute_command(char *input) {
 
     
     else if (compare_string(input, "pong") == 0)
-    {pong_on_start();}
+    {
+        Program* pong = create_program(PROGRAM_PONG,pong_on_start,0,0,0,0);
+    
+    }
 
     else if (compare_string(input, "startd")==0){
 

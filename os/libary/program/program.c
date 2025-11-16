@@ -4,8 +4,8 @@
 #include "../include/stdconsole.h"
 #include "../../apps/terminal/terminal.h"
 
-struct Program* programs[MAX_PROGRAMS];
-int program_count;
+extern Program* programs[MAX_PROGRAMS];
+extern int program_count;
 
 
 struct Program* create_program(enum Program_type type,
