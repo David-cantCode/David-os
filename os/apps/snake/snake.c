@@ -23,8 +23,8 @@ uint32_t green = 0xFF000000;
 uint32_t red = 0xF8000000;  
 
 //not using global screen_height/width cuz it gave sone issues gotta check that out later
-int screen_w = 600;
-int screen_h = 600;
+static int screen_w = 600;
+static int screen_h = 600;
 
 
 static uint32_t rng_seed = 12345; 

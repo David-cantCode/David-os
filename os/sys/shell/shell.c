@@ -10,7 +10,7 @@
 #include "../../libary/include/stdconsole.h"
 #include "../../libary/include/program.h"
 #include "../../apps/dserver/dserver.h"
-
+#include "../../apps/cube/cube.h"
 
 #define KEY_DOWN_SCANCODE_LIMIT 57
 #define BACKSPACE 0x0e
@@ -169,6 +169,10 @@ void execute_command(char *input) {
     else if (compare_string(input, "snake")==0){
         snake_innit();
 
+    }
+
+    else if (compare_string(input, "cube")==0){
+        cube_main();
     }
 
 
