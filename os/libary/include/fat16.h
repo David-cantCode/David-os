@@ -6,7 +6,7 @@
 #include "program.h"
 
 #define SECTOR_SIZE 512
-#define RESERVED_SECTORS 60 //increase by 2 when kernel sectors get increased in boot.asm
+#define RESERVED_SECTORS 61 //increase by 2 when kernel sectors get increased in boot.asm
 #define FAT_COUNT 2
 #define SECTORS_PER_FAT 64
 #define ROOT_DIR_ENTRIES 512
@@ -30,4 +30,5 @@ void list_directory(uint16_t dir_cluster);
 uint16_t find_directory_cluster(const char* name, uint16_t parent_cluster) ;
 char* conv_fat_name(const char* input);
 void list_terminal_directory(Window* win, uint16_t dir_cluster);
+int fat_create_file_root(const char* name, const uint8_t* data, uint32_t size) ;
 #endif

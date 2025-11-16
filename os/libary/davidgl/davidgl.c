@@ -25,22 +25,52 @@ extern uint8_t font8x8[128][8];
 
 uint8_t char_to_scancode(char c) {
     switch (c) {
-        case 'w': return 0x11;
-        case 's': return 0x1F;
-        case 'a': return 0x1E;
-        case 'd': return 0x20;
-        case 'o': return 0x18;
-        case 'l': return 0x26;
-        case 'k': return 0x25;
-        case ' ': return 0x39; 
+        case '1': return 0x02;
+        case '2': return 0x03;
+        case '3': return 0x04;
+        case '4': return 0x05;
+        case '5': return 0x06;
+        case '6': return 0x07;
+        case '7': return 0x08;
+        case '8': return 0x09;
+        case '9': return 0x0A;
+        case '0': return 0x0B;
+
         case 'q': return 0x10;
+        case 'w': return 0x11;
         case 'e': return 0x12;
+        case 'r': return 0x13;
+        case 't': return 0x14;
+        case 'y': return 0x15;
+        case 'u': return 0x16;
+        case 'i': return 0x17;
+        case 'o': return 0x18;
         case 'p': return 0x19;
-        case '\n':return 0x1C;
-        default: return 0; 
+
+        case 'a': return 0x1E;
+        case 's': return 0x1F;
+        case 'd': return 0x20;
+        case 'f': return 0x21;
+        case 'g': return 0x22;
+        case 'h': return 0x23;
+        case 'j': return 0x24;
+        case 'k': return 0x25;
+        case 'l': return 0x26;
+
+        case 'z': return 0x2C;
+        case 'x': return 0x2D;
+        case 'c': return 0x2E;
+        case 'v': return 0x2F;
+        case 'b': return 0x30;
+        case 'n': return 0x31;
+        case 'm': return 0x32;
+
+        case ' ': return 0x39;
+        case '\n': return 0x1C;
+
+        default: return 0;
     }
 }
-
 
 void set_fps(unsigned int fps) {
     if (fps == 0) fps = 1; // so no n / 0
@@ -147,13 +177,22 @@ void d_char(int x, int y, char c, uint32_t color, int size) {
 }
 void draw_text(int x, int y, const char* str, uint32_t color, int size) {
     int cursor_x = x;
+    int line_height = 8 * size;
+
     while (*str) {
+
+        if (*str == '\n') {
+            y += line_height;   
+            cursor_x = x;       
+            str++;
+            continue;
+        }
+
         d_char(cursor_x, y, *str, color, size);
         cursor_x += 8 * size; 
         str++;
     }
 }
-
 
 void draw_line(int x0, int y0, int x1, int y1, uint32_t color) {
     int dx = absolute(x1 - x0), sx = x0 < x1 ? 1 : -1;

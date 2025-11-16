@@ -5,6 +5,7 @@
 #include "../../drivers/include/ata.h"
 #include "../../libary/include/util.h"
 #include "../../apps/pong/pong.h"
+#include "../../apps/d_edit/d_edit.h"
 #include "../../libary/include/stdconsole.h"
 #include "../../libary/include/program.h"
 #include "../../apps/dserver/dserver.h"
@@ -153,6 +154,13 @@ void execute_command(char *input) {
 
     else if(compare_string(input, "pviewer")==0){
         shell_pviewer();
+    }
+
+
+    else if(compare_string(input, "dedit")==0){
+         text_editor_main();
+
+
     }
 
 

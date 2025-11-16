@@ -1,0 +1,4 @@
+
+
+To delete files:
+     mark directory entry first byte 0xE5 and free cluster chain by writing 0x0000 to each FAT entry in the chain.

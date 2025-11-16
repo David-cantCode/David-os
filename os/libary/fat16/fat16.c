@@ -103,17 +103,35 @@ void write_test_file() {
 }
 
 
-
 uint32_t find_safe_cluster() {
-    uint32_t cluster = 2;
-    uint32_t lba = FIRST_DATA_SECTOR + (cluster - 2)*SECTORS_PER_CLUSTER;
-
-    while (lba < FIRST_DATA_SECTOR + RESERVED_SECTORS) {
-        cluster++;
-        lba = FIRST_DATA_SECTOR + (cluster - 2)*SECTORS_PER_CLUSTER;
+    fat_read_full();
+    uint32_t total_entries = (SECTORS_PER_FAT * SECTOR_SIZE) / 2;
+    for (uint32_t c = 2; c < total_entries; c++) {
+        uint32_t idx = c * 2;
+        uint16_t entry = fatbuf[idx] | (fatbuf[idx + 1] << 8);
+        if (entry == 0x0000) return c;
     }
-    return cluster;
+    return 0xFFFFFFFF;
 }
+
+static uint32_t allocate_free_cluster() {
+    fat_read_full();
+    uint32_t total_entries = (SECTORS_PER_FAT * SECTOR_SIZE) / 2; 
+    for (uint32_t c = 2; c < total_entries; c++) {
+        uint32_t idx = c * 2;
+        uint16_t entry = fatbuf[idx] | (fatbuf[idx + 1] << 8);
+        if (entry == 0x0000) {
+            //mark temporarily as EOF write actual chain later
+            fatbuf[idx] = 0xFF;
+            fatbuf[idx + 1] = 0xFF;
+            fat_write_full_to_both();
+            return c;
+        }
+    }
+    return 0xFFFFFFFF;
+}
+
+
 
 static void fat_set_entry_full(uint32_t cluster, uint16_t value) {
     if (cluster < 2) return;
@@ -323,4 +341,135 @@ uint16_t find_directory_cluster(const char* name, uint16_t parent_cluster) {
     }
 
     return 0xFFFF;  
+}
+
+
+
+//file creation 
+
+
+// Convert "name.ext" or "NAME.EXT" to 11-byte FAT format (pads with spaces; does not uppercase)
+void make_fat11_name(const char* input, uint8_t out[11]) {
+    int i;
+    for (i = 0; i < 11; i++) out[i] = ' ';
+    int j = 0;
+    // copy name part up to '.'
+    int k = 0;
+    while (input[k] && input[k] != '.' && j < 8) {
+        out[j++] = input[k++];
+    }
+    if (input[k] == '.') {
+        k++;
+        int extpos = 8;
+        int e = 0;
+        while (input[k] && e < 3) {
+            out[extpos + e] = input[k++];
+            e++;
+        }
+    }
+}
+
+int fat_create_file_root(const char* name, const uint8_t* data, uint32_t size) {
+    uint32_t dir_sect;
+    int dir_off;
+    if (find_free_root_slot(&dir_sect, &dir_off) != 0) return -1;
+
+    // allocate clusters needed
+    uint32_t bytes_per_cluster = SECTORS_PER_CLUSTER * SECTOR_SIZE;
+    uint32_t clusters_needed = (size + bytes_per_cluster - 1) / bytes_per_cluster;
+    if (clusters_needed == 0) clusters_needed = 1;
+
+    // read full FAT, allocate and build chain in memory
+    fat_read_full();
+    uint32_t total_entries = (SECTORS_PER_FAT * SECTOR_SIZE) / 2;
+
+    uint32_t prev_cluster = 0;
+    uint32_t first_cluster = 0;
+
+    for (uint32_t i = 0; i < clusters_needed; i++) {
+        // find free entry in fatbuf
+        uint32_t found = 0xFFFFFFFF;
+        for (uint32_t c = 2; c < total_entries; c++) {
+            uint32_t idx = c * 2;
+            uint16_t entry = fatbuf[idx] | (fatbuf[idx+1] << 8);
+            if (entry == 0x0000) { found = c; break; }
+        }
+        if (found == 0xFFFFFFFF) {
+            // out of space: rollback is possible but keep it simple and fail
+            return -1;
+        }
+
+        // mark as used (for now mark as 0xFFFF EOF; we'll chain below if necessary)
+        uint32_t fidx = found*2;
+        fatbuf[fidx] = 0xFF;
+        fatbuf[fidx+1] = 0xFF;
+
+        if (prev_cluster != 0) {
+            // set previous -> found
+            uint32_t pidx = prev_cluster * 2;
+            fatbuf[pidx] = (uint8_t)(found & 0xFF);
+            fatbuf[pidx+1] = (uint8_t)((found >> 8) & 0xFF);
+        } else {
+            first_cluster = found;
+        }
+        prev_cluster = found;
+    }
+
+    // prev_cluster currently last cluster: ensure EOF marker 0xFFFF already set
+
+    // write FATs once
+    fat_write_full_to_both();
+
+    // write data into allocated clusters
+    uint32_t remaining = size;
+    const uint8_t* src = data;
+    uint32_t current_cluster = first_cluster;
+    while (remaining > 0) {
+        uint32_t lba = FIRST_DATA_SECTOR + (current_cluster - 2) * SECTORS_PER_CLUSTER;
+        for (int s = 0; s < SECTORS_PER_CLUSTER; s++) {
+            uint8_t dbuf[SECTOR_SIZE];
+            uint32_t tocopy = remaining > SECTOR_SIZE ? SECTOR_SIZE : remaining;
+            if (tocopy > 0) {
+                memoryset(dbuf, 0, SECTOR_SIZE);
+                memorycpy(dbuf, src, tocopy);
+                src += tocopy;
+                remaining -= tocopy;
+            } else {
+                // pad with zeros
+                memoryset(dbuf, 0, SECTOR_SIZE);
+            }
+            write_sector(lba + s, dbuf);
+        }
+        // move to next cluster from FAT
+        uint16_t next = get_fat_entry(current_cluster);
+        if (next >= 0xFFF8 || remaining == 0) break;
+        current_cluster = next;
+    }
+
+    // create directory entry in root
+    read_sector(dir_sect, sector_buf);
+    // clear entry first 32 bytes
+    for (int i = 0; i < 32; i++) sector_buf[dir_off + i] = 0x00;
+
+    // name
+    uint8_t fatname[11];
+    make_fat11_name(name, fatname);
+    for (int i = 0; i < 11; i++) sector_buf[dir_off + i] = fatname[i];
+
+    sector_buf[dir_off + 11] = 0x20; // archive attribute (regular file)
+
+    // starting cluster (little endian)
+    sector_buf[dir_off + 26] = (uint8_t)(first_cluster & 0xFF);
+    sector_buf[dir_off + 27] = (uint8_t)((first_cluster >> 8) & 0xFF);
+
+    // file size 32-bit little-endian
+    sector_buf[dir_off + 28] = (uint8_t)(size & 0xFF);
+    sector_buf[dir_off + 29] = (uint8_t)((size >> 8) & 0xFF);
+    sector_buf[dir_off + 30] = (uint8_t)((size >> 16) & 0xFF);
+    sector_buf[dir_off + 31] = (uint8_t)((size >> 24) & 0xFF);
+
+    // write back directory sector
+    write_sector(dir_sect, sector_buf);
+
+    return 0;
 }
