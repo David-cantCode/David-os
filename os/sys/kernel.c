@@ -46,7 +46,17 @@ void kernel_main(){
 
 
 void get_e1000(){
-    e1000_init();         // Initialize NIC
+    e1000_init();   
+
+
+    uint8_t test_frame[60];
+    memoryset(test_frame, 0xFF, 6);  
+    memoryset(test_frame + 6, 0x11, 6);
+    test_frame[12] = 0x08;     
+    test_frame[13] = 0x00;
+    send_packet(test_frame, 60);
+
+    
 }
 
 
