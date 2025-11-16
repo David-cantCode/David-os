@@ -2,6 +2,7 @@
 #include "../../libary/include/davidgl.h"
 #include "../../libary/include/fat16.h"
 #include "../../libary/include/util.h"
+#include "../../drivers/include/ata.h"
 #include "d_edit.h"
 
 extern uint8_t key_state[256];
@@ -90,7 +91,82 @@ static void d_edit_save() {
     flip();
 }
 
+static int d_edit_open(const char* fname) {
+    uint8_t fatname[11];
+    make_fat11_name(fname, fatname);
 
+    uint8_t dirbuf[SECTOR_SIZE];
+    uint16_t starting_cluster = 0;
+    uint32_t file_size = 0;
+    int found = 0;
+
+    // scan root dir sectors
+    uint32_t sector = FIRST_ROOT_DIR_SECTOR;
+    for (int s = 0; s < ROOT_DIR_SECTORS; s++, sector++) {
+        read_sector(sector, dirbuf);
+        for (int off = 0; off < SECTOR_SIZE; off += 32) {
+            uint8_t first = dirbuf[off];
+            if (first == 0x00) { // no more entries
+                text_len = 0;
+                textbuf[0] = '\0';
+                return -1;
+            }
+            if (first == 0xE5) continue; // deleted
+            if (memorycompare((const char*)fatname, (const char*)&dirbuf[off], 11) == 0) {
+                starting_cluster = dirbuf[off + 26] | (dirbuf[off + 27] << 8);
+                file_size =  dirbuf[off + 28] |(dirbuf[off + 29] << 8) |(dirbuf[off + 30] << 16) |(dirbuf[off + 31] << 24);
+                found = 1;
+                break;
+            }
+
+        }
+        if (found) break;
+    }
+
+
+    // read file data
+    text_len = 0;
+    uint32_t remaining = file_size;
+    uint16_t cluster = starting_cluster;
+    uint8_t sec[SECTOR_SIZE];
+
+    while (cluster >= 2 && cluster < 0xFFF8 && remaining > 0) {
+        uint32_t lba = FIRST_DATA_SECTOR + (cluster - 2) * SECTORS_PER_CLUSTER;
+        for (int si = 0; si < SECTORS_PER_CLUSTER && remaining > 0; si++) {
+            read_sector(lba + si, sec);
+            uint32_t tocopy = remaining > SECTOR_SIZE ? SECTOR_SIZE : remaining;
+            for (uint32_t i = 0; i < tocopy; i++) {
+                if (text_len >= MAX_TEXT - 1) { remaining = 0; break; }
+                textbuf[text_len++] = (char)sec[i];
+            }
+            remaining -= tocopy;
+        }
+        if (remaining == 0) break;
+        cluster = get_fat_entry(cluster);
+    }
+
+    textbuf[text_len] = '\0';
+    return 0;
+}
+
+static void set_cur_pos() {
+    cursor_x = 0;
+    cursor_y = 0;
+
+    for (int i = 0; i < text_len; i++) {
+        char c = textbuf[i];
+        if (c == '\n') {
+            cursor_x = 0;
+            cursor_y += line_height;
+        } else {
+            cursor_x += 8 * 2; // 8px font * size
+            if (cursor_x > screen_width - 20) {
+                cursor_x = 0;
+                cursor_y += line_height;
+            }
+        }
+    }
+}
 
 
 static int input_poll(){
@@ -166,6 +242,9 @@ void d_edit_innit(char *fname){
     file_name = fname;
 
     set_fps(120);
+
+    d_edit_open(fname);
+    set_cur_pos(); 
 
     d_edit_main();
 

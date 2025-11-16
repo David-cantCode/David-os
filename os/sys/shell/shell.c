@@ -157,8 +157,8 @@ void execute_command(char *input) {
     }
 
 
-    else if (starts_with(input,"dedit" )){
-        char* name = input + 6;
+    else if (starts_with(input,"edit")){
+        char* name = input + 5;
 
         d_edit_innit(name);
 
