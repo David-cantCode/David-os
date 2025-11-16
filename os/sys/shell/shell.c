@@ -157,8 +157,10 @@ void execute_command(char *input) {
     }
 
 
-    else if(compare_string(input, "dedit")==0){
-         text_editor_main();
+    else if (starts_with(input,"dedit" )){
+        char* name = input + 6;
+
+        d_edit_innit(name);
 
 
     }

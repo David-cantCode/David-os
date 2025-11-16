@@ -11,7 +11,8 @@ enum Program_type{
     PROGRAM_TERMINAL,
     PROGRAM_DSERVER,
     PROGRAM_PONG,
-    PROGRAM_SHELL
+    PROGRAM_SHELL,
+    PROGRAM_DEDIT
 };
 
 struct Window; 
