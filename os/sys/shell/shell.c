@@ -5,6 +5,7 @@
 #include "../../drivers/include/ata.h"
 #include "../../libary/include/util.h"
 #include "../../apps/pong/pong.h"
+#include "../../apps/snake/snake.h"
 #include "../../apps/d_edit/d_edit.h"
 #include "../../libary/include/stdconsole.h"
 #include "../../libary/include/program.h"
@@ -162,6 +163,11 @@ void execute_command(char *input) {
 
         d_edit_innit(name);
 
+
+    }
+
+    else if (compare_string(input, "snake")==0){
+        snake_innit();
 
     }
 
