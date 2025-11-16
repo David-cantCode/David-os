@@ -9,5 +9,11 @@ Dserver:
 things to do:
 
 
-text editer 
-networking 
+- [x] Bootloader
+- [X] Kernel
+- [x] Shell
+- [x] File System
+- [x] Graphics Libary
+- [x] Display Server
+- [x] text editer 
+- [ ] networking 
