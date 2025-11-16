@@ -67,7 +67,8 @@ uint8_t char_to_scancode(char c) {
 
         case ' ': return 0x39;
         case '\n': return 0x1C;
-
+        case '\b': return 0x0E;
+        
         default: return 0;
     }
 }

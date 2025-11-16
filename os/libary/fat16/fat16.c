@@ -348,7 +348,7 @@ uint16_t find_directory_cluster(const char* name, uint16_t parent_cluster) {
 //file creation 
 
 
-// Convert "name.ext" or "NAME.EXT" to 11-byte FAT format (pads with spaces; does not uppercase)
+// Convert 11-byte FAT format 
 void make_fat11_name(const char* input, uint8_t out[11]) {
     int i;
     for (i = 0; i < 11; i++) out[i] = ' ';
