@@ -134,7 +134,7 @@ int scroll_screen(int memory_offset) {
     // Clear last row
     int last_row = rows - 1;
     for (int c = 0; c < cols; ++c) {
-        draw_char(' ', c * CHAR_W, last_row * CHAR_H, 0x00000000, 0xFFFFFFFF);
+        draw_char(' ', c * CHAR_W, last_row * CHAR_H, 0x00000000, 0x00000000);
     }
 
     return memory_offset - 2 * cols;

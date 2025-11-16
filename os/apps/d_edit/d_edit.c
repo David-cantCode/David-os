@@ -1,9 +1,12 @@
 #include <stdint.h>
-#include "../../libary/include/davidgl.h"
+#include "../../libary/include/davidgl.h" 
 #include "../../libary/include/fat16.h"
 #include "../../libary/include/util.h"
 #include "../../drivers/include/ata.h"
 #include "d_edit.h"
+
+//powered by david gl lol
+
 
 extern uint8_t key_state[256];
 extern volatile unsigned int tick;
@@ -23,6 +26,14 @@ static char* file_name = "TEMP.TXT";
 //commands:
 //ctrl + s - save
 //ctrl + q - quit
+
+
+
+//todo 
+// when saving files it just creates a new one
+// add different dir save support 
+
+
 
 
 
@@ -100,18 +111,18 @@ static int d_edit_open(const char* fname) {
     uint32_t file_size = 0;
     int found = 0;
 
-    // scan root dir sectors
+    //scan root dir sectors
     uint32_t sector = FIRST_ROOT_DIR_SECTOR;
     for (int s = 0; s < ROOT_DIR_SECTORS; s++, sector++) {
         read_sector(sector, dirbuf);
         for (int off = 0; off < SECTOR_SIZE; off += 32) {
             uint8_t first = dirbuf[off];
-            if (first == 0x00) { // no more entries
+            if (first == 0x00) { //no more entries
                 text_len = 0;
                 textbuf[0] = '\0';
                 return -1;
             }
-            if (first == 0xE5) continue; // deleted
+            if (first == 0xE5) continue; //deleted
             if (memorycompare((const char*)fatname, (const char*)&dirbuf[off], 11) == 0) {
                 starting_cluster = dirbuf[off + 26] | (dirbuf[off + 27] << 8);
                 file_size =  dirbuf[off + 28] |(dirbuf[off + 29] << 8) |(dirbuf[off + 30] << 16) |(dirbuf[off + 31] << 24);
@@ -124,7 +135,7 @@ static int d_edit_open(const char* fname) {
     }
 
 
-    // read file data
+    //read file data
     text_len = 0;
     uint32_t remaining = file_size;
     uint16_t cluster = starting_cluster;
