@@ -4,12 +4,12 @@
 
 #include <stdint.h>
 
-extern uint32_t __heap_start;
-extern uint32_t __heap_end;
+extern uint8_t __heap_start[];
+extern uint8_t __heap_end[];
 
-#define HEAP_START ((uint32_t)&__heap_start)
-#define HEAP_END   ((uint32_t)&__heap_end)
-#define HEAP_SIZE  (HEAP_END - HEAP_START)
+#define HEAP_START ((uint8_t*)&__heap_start)
+#define HEAP_END   ((uint8_t*)&__heap_end)
+#define HEAP_SIZE (HEAP_END - HEAP_START)
 
 //im so silly turns out my old heap was mapped to nothing lol
 

@@ -27,10 +27,12 @@ SECTIONS
     /* Uninitialized data */
     .bss ALIGN(4096) :
     {
+        __bss_start = .;
         *(COMMON)
         *(.bss)
+        __bss_end = .;
     }
-
+    
     /* ================================
        HEAP SECTION
        ================================ */
@@ -38,11 +40,7 @@ SECTIONS
     . = ALIGN(4096);
     __heap_start = .;
 
-    .heap ALIGN(4096) :
-    {
-        . += 0x01500000;       /* 21 MB heap */
-    }
-
+    . = __heap_start + 0x01500000;   /* reserve 21MB in RAM */
     __heap_end = .;
 
 

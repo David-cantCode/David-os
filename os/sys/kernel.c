@@ -94,8 +94,9 @@ void kernel_ini() {
     print("kernel was loaded \n");
 
 
-    void memory_init();
-    
+    memory_init();
+
+    for (volatile int i=0;i<1000000;i++);
 
         
     IDT_Initialize();

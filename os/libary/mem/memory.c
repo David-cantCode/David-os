@@ -9,17 +9,12 @@
 uint8_t* heap_ptr;
 uint8_t* heap_end;
 
-//note fix memory use mem to check info and check linker too 
+
 
 typedef struct {
     uint32_t size;
 } BlockHeader;
 
-
-void memory_init() {
-    heap_ptr = (uint8_t*)&__heap_start;
-    heap_end = (uint8_t*)&__heap_end;
-}
 
 
 void* mem_alloc(uint32_t size) {
@@ -54,21 +49,21 @@ void* mem_realloc(void* ptr, uint32_t new_size) {
 }
 
 
-
-
 void shell_mem() {
-    //prints mem status for shell
 
-    //idk im bored lol
-
-    uint32_t total = (uint32_t)(heap_end - (uint8_t*)HEAP_START);
-    uint32_t used  = (uint32_t)(heap_ptr - (uint8_t*)HEAP_START);
-    uint32_t free  = total - used;
+    uintptr_t total = (uintptr_t)heap_end - (uintptr_t)HEAP_START;
+    uintptr_t used  = (uintptr_t)heap_ptr - (uintptr_t)HEAP_START;
+    uintptr_t freeb = total - used;
 
     char buf[128];
 
     print("Memory Status:\n");
 
+    s_printf(buf, "  raw __heap_start: 0x%x\n", (uint32_t)__heap_start); print(buf);
+    s_printf(buf, "  raw __heap_end:   0x%x\n", (uint32_t)__heap_end);
+    print(buf);
+
+    
     s_printf(buf, "  Heap Start: 0x%x\n", (uint32_t)HEAP_START);
     print(buf);
 
@@ -78,12 +73,21 @@ void shell_mem() {
     s_printf(buf, "  Heap Ptr:   0x%x\n", (uint32_t)heap_ptr);
     print(buf);
 
-    s_printf(buf, "  Total:      %d bytes\n", total);
+    s_printf(buf, "  Total:      %d bytes\n", (uint32_t)total);
     print(buf);
 
-    s_printf(buf, "  Used:       %d bytes\n", used);
+    s_printf(buf, "  Used:       %d bytes\n", (uint32_t)used);
     print(buf);
 
-    s_printf(buf, "  Free:       %d bytes\n", free);
+    s_printf(buf, "  Free:       %d bytes\n", (uint32_t)freeb);
     print(buf);
+}
+
+
+
+void memory_init() {
+    heap_ptr = (uint8_t*)0x00453000;
+    heap_end = HEAP_END;
+
+    shell_mem();
 }
