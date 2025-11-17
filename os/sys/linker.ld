@@ -1,37 +1,62 @@
 ENTRY(_start)
 OUTPUT_FORMAT(binary)
+
 SECTIONS
 {
-    . = 0x0100000;
-    .text : ALIGN(4096)
+    /* Kernel load address */
+    . = 0x00100000;            /* 1MB */
+
+    /* Code */
+    .text ALIGN(4096) :
     {
         *(.text)
     }
 
-    .rodata : ALIGN(4096)
+    /* Read-only data */
+    .rodata ALIGN(4096) :
     {
         *(.rodata)
     }
 
-    .data : ALIGN(4096){
+    /* Initialized data */
+    .data ALIGN(4096) :
+    {
         *(.data)
     }
 
-    .bss : ALIGN(4096)
+    /* Uninitialized data */
+    .bss ALIGN(4096) :
     {
         *(COMMON)
         *(.bss)
     }
 
-    
-    /* Reserve x bytes for stack */
+    /* ================================
+       HEAP SECTION
+       ================================ */
+
+    . = ALIGN(4096);
+    __heap_start = .;
+
+    .heap ALIGN(4096) :
+    {
+        . += 0x01500000;       /* 21 MB heap */
+    }
+
+    __heap_end = .;
+
+
+    /* ================================
+       STACK SECTION
+       ================================ */
+
     . = ALIGN(16);
     __stack_start = .;
-    .stack : ALIGN(16)
+
+    .stack ALIGN(16) :
     {
-        
-        . += 32K; 
-        /*bytes to allign*/
+        . += 32K;
     }
+
     __stack_end = .;
 }

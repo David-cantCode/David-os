@@ -22,7 +22,7 @@ struct Program* create_program(enum Program_type type,
 
     if (program_count >= MAX_PROGRAMS) {return 0;}
     
-    Program* program = memoryalloc(sizeof(Program));
+    Program* program = mem_alloc(sizeof(Program));
 
     memoryset(program, 0, sizeof(Program));
 

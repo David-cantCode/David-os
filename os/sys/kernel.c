@@ -32,8 +32,8 @@ Program *Shell;
 
 
 #define MAX_PROGRAMS 32
-volatile Program* programs[MAX_PROGRAMS];
-volatile int program_count;
+Program* programs[MAX_PROGRAMS];
+int program_count;
 
 
 void kernel_main(){
@@ -93,7 +93,11 @@ void kernel_ini() {
 
     print("kernel was loaded \n");
 
+
+    void memory_init();
     
+
+        
     IDT_Initialize();
     print("Interupt Descriptor Table was loaded\n");
 

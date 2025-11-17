@@ -11,7 +11,7 @@
 #include "../../libary/include/program.h"
 #include "../../apps/dserver/dserver.h"
 #include "../../apps/cube/cube.h"
-
+#include "../../apps/cowsay/cowsay.h"
 #define KEY_DOWN_SCANCODE_LIMIT 57
 #define BACKSPACE 0x0e
 #define ENTER 0x1C
@@ -173,6 +173,15 @@ void execute_command(char *input) {
 
     else if (compare_string(input, "cube")==0){
         cube_main();
+    }
+
+    else if (starts_with(input, "cowsay")){
+        char* x = input + 7;
+        shell_cowsay(x);
+
+    }
+    else if (compare_string(input, "mem")==0){
+        shell_mem();
     }
 
 
