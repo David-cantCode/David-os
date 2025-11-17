@@ -24,8 +24,14 @@ int e1000_init() {
         return -1;
     }
 
+
+    char buf[128];
+
     //map BAR0
     e1000_mmio = (uint32_t *)(dev->bar[0] & 0xFFFFFFF0);
+    s_printf(buf, "e1000: mapped mmio=%p\n", (uint32_t)e1000_mmio); print(buf);
+
+
 
     //reset device
     e1000_mmio[E1000_CTRL/4] |= E1000_CTRL_RST;
@@ -35,14 +41,24 @@ int e1000_init() {
     for (int i = 0; i < RX_DESC_COUNT; i++) {
         rx_ring[i].addr = (uint64_t)&rx_buffers[i];
         rx_ring[i].status = 0;
+
+        s_printf(buf, "e1000: rx_ring[%d]", i);print(buf);
+        s_printf(buf, ".addr=%p\n",  (uint32_t)&rx_buffers[i]);print(buf);
+    
+
     }
 
+    print("\n");
 
     //setup tx ring
     for (int i = 0; i < TX_DESC_COUNT; i++) {
         tx_ring[i].addr = (uint64_t)&tx_buffers[i];
         tx_ring[i].cmd = 0;
         tx_ring[i].status = E1000_TXD_STAT_DD; 
+
+        s_printf(buf, "e1000: tx_ring[%d]", i);print(buf);
+        s_printf(buf, ".addr=%p\n",  (uint32_t)&tx_buffers[i]);print(buf);
+    
     }
 
     //write rx regs
@@ -99,11 +115,16 @@ int send_packet(void* data, uint16_t len) {
 
 void e1000_poll() {
     static uint32_t rx_index = 0;
-    
+    char buf[128];
 
     while (rx_ring[rx_index].status & E1000_RXD_STAT_DD) {
         uint8_t* pkt = rx_buffers[rx_index];
         uint16_t len = rx_ring[rx_index].length;
+
+
+        s_printf(buf, "e1000: rx packet len=%d ", len);print(buf);
+
+        s_printf(buf, "at index %d\n", rx_index);print(buf);
 
         ethernet_receive(pkt, len);
 

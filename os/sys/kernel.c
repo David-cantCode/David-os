@@ -9,7 +9,7 @@
 #include "../drivers/include/e1000.h"
 #include "../libary/include/program.h"
 #include "../drivers/include/pci.h"
-
+#include "../drivers/include/mouse.h"
 
 
 
@@ -59,7 +59,6 @@ void kernel_main(){
 
 void get_e1000(){
     e1000_init();   
-
     
     uint8_t mac[6] = {0x52,0x54,0x00,0x12,0x34,0x56};
     ethernet_init(mac);
@@ -68,11 +67,8 @@ void get_e1000(){
 
     uint16_t seq = 1;
 
-
         e1000_poll();
-
         for (volatile int i=0;i<100000000;i++);
-
 
 }
 
@@ -96,10 +92,13 @@ void kernel_ini() {
     //char msgKernel[] = "Kernel was loaded";
 
     print("kernel was loaded \n");
+
     
     IDT_Initialize();
     print("Interupt Descriptor Table was loaded\n");
 
+
+    for (volatile int i=0;i<1000000000;i++);
 
     ISR_Initialize();
     print("PIC was Remaped \n");
@@ -108,18 +107,33 @@ void kernel_ini() {
     timer_set_frequency(INTERUPT_FREQ);
 
     print("Detecting Devices\n");
+    for (volatile int i=0;i<10000000;i++);
     pci_enumerate();
     print("\n");
 
+    
+
     get_e1000();
+
+
+    print("setting up mouse\n");
+    mouse_init();
 
 
     print("Shell was Loaded \n");
     print("\n");
 
+    for (volatile int i=0;i<100000000;i++);
+
+
+
+
+    print("\n");
+    print("=============USER SPACE============\n\n");
+
+
+
     Shell = create_program(PROGRAM_SHELL, shell_ini, 0,0,0,0);
-
-
 
 
     kernel_main();

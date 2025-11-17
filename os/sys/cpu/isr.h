@@ -56,6 +56,7 @@ void ISR_Initialize()
 extern void keyboard_callback();
 extern void timer_callback();
 extern void nic_callback();
+extern void  mouse_callback();
 
 void __attribute__((cdecl)) ISR_Handler(Registers *ptr)
 {
@@ -76,6 +77,11 @@ void __attribute__((cdecl)) ISR_Handler(Registers *ptr)
     if (ptr->interrupt==43) {
     nic_callback(); 
     }
+
+    if (ptr->interrupt == 44) {
+    mouse_callback();
+    }
+
 
     
     outb(0x20, 0x20);
