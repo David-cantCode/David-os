@@ -42,13 +42,19 @@ char alias[8];
 //in futer add buffer for last command so when user press arrow up; that command gets thrown into the keybuffer
 
 extern void play_game(char* game);
-
+extern void  list_games();
 
 void fill_test_pattern(uint8_t* buf, uint8_t pattern) {
     for (int i = 0; i < SECTOR_SIZE; i++) {
         buf[i] = pattern;
     }
 }
+
+
+
+
+
+
 
 
 
@@ -80,25 +86,6 @@ void execute_command(char *input) {
 
     else if(compare_string(input, "READ BOOT") == 0){
         read_sector(0, sector_buff);
-        dump_sector(sector_buff);
-    }
-
-    else if (compare_string(input, "WRITE SECTOR") == 0){
-    fill_test_pattern(write_buf, 0xAB);  
-    write_sector(TEST_SECTOR, write_buf);
-
-    print("Sector 1 was overwritten\n");
-    }
-    else if (compare_string(input, "READ SECTOR") ==0){
-
-        read_sector(TEST_SECTOR, sector_buff);
-        dump_sector(sector_buff);
-    }
-
-
-    else if (compare_string(input, "READ TEST TEXT")==0){
-        uint32_t test_file_lba = FIRST_DATA_SECTOR + (2 - 2) * SECTORS_PER_CLUSTER;
-        read_sector(test_file_lba, sector_buff);
         dump_sector(sector_buff);
     }
 
@@ -184,6 +171,13 @@ void execute_command(char *input) {
     else if (compare_string(input, "mem")==0){
         shell_mem();
     }
+    else if (compare_string(input, "tetris")==0){
+        play_game(input);
+    }
+
+    else if(compare_string(input, "games")==0){
+        list_games();
+    }
 
 
     else{
@@ -194,6 +188,11 @@ void execute_command(char *input) {
     
 }
     
+
+
+
+
+
 
 
 
