@@ -65,11 +65,16 @@ struct Program* create_program(enum Program_type type,
 
 
 char* get_program_name(enum Program_type type) {
-    switch(type) {
-        case PROGRAM_TERMINAL: return "Terminal";
-        case PROGRAM_DSERVER: return "Dserver";
-        case PROGRAM_SHELL: return "Shell";
-        default: return "Unknown";
+    switch(type) {                  
+        case PROGRAM_TERMINAL:  return "Terminal ";
+        case PROGRAM_DSERVER:   return "Dserver  ";
+        case PROGRAM_SHELL:     return "Shell    ";
+        case PROGRAM_PONG:      return "Pong     ";
+
+
+
+
+        default:                return "Unknown  ";
     }
 }
 
@@ -107,17 +112,17 @@ void terminal_pviewer(struct Window* win){
 
     //id
     char buffer[16];
-    int_to_str(i, buffer);
+    int_to_str(i + 1, buffer);
     
     terminal_print(win, buffer);
-    terminal_print(win, "    ");
+    terminal_print(win, "       ");
 
 
 
 
     //name
     terminal_print(win, get_program_name(p->type));
-    terminal_print(win, "      ");
+    terminal_print(win, "  ");
    
     //size
 
@@ -152,17 +157,17 @@ void shell_pviewer(){
 
     //id
     char buffer[16];
-    int_to_str(i, buffer);
+    int_to_str(i + 1, buffer);
     
     print(buffer);
-    print( "    ");
+    print( "       ");
 
 
 
 
     //name
     print(get_program_name(p->type));
-    print("      ");
+    print("  ");
    
     //size
 

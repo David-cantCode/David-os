@@ -10,7 +10,7 @@ uint32_t pitch = 0;
 uint32_t screen_width = 0;
 uint32_t screen_height = 0;
 
-extern uint8_t font8x8[128][8];
+extern uint8_t font_8bit[128][8];
 #define FONT_W 8
 #define FONT_H 8
 
@@ -29,7 +29,7 @@ extern uint8_t font8x8[128][8];
 
 void draw_char(char c, int x, int y, uint32_t fg, uint32_t bg) {
     for (int row = 0; row < 8; row++) {
-        uint8_t bits = font8x8[(int)c][row];
+        uint8_t bits = font_8bit[(int)c][row];
         for (int col = 0; col < 8; col++) {
             uint32_t color = (bits & (1 << col)) ? fg : bg;
 

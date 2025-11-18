@@ -28,6 +28,12 @@ NET_DIR := ./network
 NET_SRCS := $(shell find $(NET_DIR) -type f -name "*.c")
 NET_OBJS := $(patsubst $(NET_DIR)/%.c,$(BUILD_DIR)/network/%.o,$(NET_SRCS))
 
+USR_DIR := ./usr
+USR_SRCS := $(shell find $(USR_DIR) -type f -name "*.c")
+USR_OBJS := $(patsubst $(USR_DIR)/%.c,$(BUILD_DIR)/network/%.o,$(USR_SRCS))
+
+
+
 SRC_C := $(filter-out $(APP_DIR)/%,$(wildcard $(SRC_DIR)/**/*.c))
 OBJS_C := $(patsubst $(SYS_DIR)/%.c,$(BUILD_DIR)/%.o,$(SYS_C))
 
@@ -39,7 +45,8 @@ OBJS = $(BUILD_DIR)/kernel.asm.o \
        $(LIB_OBJS) \
        $(DRI_OBJS) \
 	   $(APP_OBJS) \
-	   $(NET_OBJS)
+	   $(NET_OBJS) \
+	   $(USR_OBJS)
 	
 
 .PHONY: all clean run gdb-instructions
@@ -62,6 +69,12 @@ $(BUILD_DIR)/apps/%.o: $(APP_DIR)/%.c | $(BUILD_DIR)
 $(BUILD_DIR)/network/%.o: $(NET_DIR)/%.c | $(BUILD_DIR)
 	@mkdir -p $(dir $@)
 	$(CC) $(FLAGS) -std=gnu99 -c $< -o $@
+
+
+$(BUILD_DIR)/network/%.o: $(USR_DIR)/%.c | $(BUILD_DIR)
+	@mkdir -p $(dir $@)
+	$(CC) $(FLAGS) -std=gnu99 -c $< -o $@
+
 
 
 # ensure directories exist

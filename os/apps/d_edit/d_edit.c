@@ -19,7 +19,7 @@ static int text_len = 0;
 static int cursor_x = 0;
 static int cursor_y = 0;
 static int line_height = 16; // 8px font * size (2)
-
+static int size = 2;
 
 static char* file_name = "TEMP.TXT";
 
@@ -46,7 +46,7 @@ static void editor_insert_char(char c) {
         cursor_x = 0;
         cursor_y += line_height;
     } else {
-        cursor_x += 8 * 2; // * size
+        cursor_x += 8 * size; // * size
         if (cursor_x > screen_width - 20) {
             cursor_x = 0;
             cursor_y += line_height;
@@ -71,7 +71,7 @@ static void editor_backspace() {
                 cursor_y += line_height;
                 cursor_x = 0;
             } else {
-                cursor_x += 8 * 2;
+                cursor_x += 8 * size;
                 if (cursor_x > screen_width - 20) {
                     cursor_x = 0;
                     cursor_y += line_height;
@@ -214,7 +214,7 @@ static int input_poll(){
 
 static void d_edit_draw(){
     draw_text(10, 10, textbuf, 0xFFFFFF, 2);
-    draw_text(cursor_x , cursor_y + 5, "|", 0x00FF00, 3);
+    draw_text(cursor_x , cursor_y + 5, "|", 0xFFFFFFFF, 3);
 
 }
 

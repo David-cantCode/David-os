@@ -10,7 +10,7 @@ uint8_t sector_buf[SECTOR_SIZE];
 
 
 static int find_free_root_slot(uint32_t *out_sector_lba, int *out_offset_in_sector) {
-    //-1 not found - if found
+    //ret 0 found | ret -1 not found
     for (int s = 0; s < ROOT_DIR_SECTORS; s++) {
         uint32_t lba = FIRST_ROOT_DIR_SECTOR + s;
         read_sector(lba, sector_buf);
@@ -19,11 +19,11 @@ static int find_free_root_slot(uint32_t *out_sector_lba, int *out_offset_in_sect
             if (first_byte == 0x00 || first_byte == 0xE5) {
                 *out_sector_lba = lba;
                 *out_offset_in_sector = off;
-                return 0; 
+                return 0;
             }
         }
     }
-    return 0; 
+    return -1;
 }
 
 
@@ -369,17 +369,73 @@ void make_fat11_name(const char* input, uint8_t out[11]) {
     }
 }
 
-int fat_create_file_root(const char* name, const uint8_t* data, uint32_t size) {
-    uint32_t dir_sect;
-    int dir_off;
-    if (find_free_root_slot(&dir_sect, &dir_off) != 0) return -1;
 
-    // allocate clusters needed
+static void free_cluster_chain(uint16_t start_cluster) {
+    if (start_cluster < 2 || start_cluster >= 0xFFF8) return;
+    fat_read_full();
+    uint16_t cluster = start_cluster;
+    while (cluster >= 2 && cluster < 0xFFF8) {
+        uint32_t idx = cluster * 2;
+        uint16_t next = fatbuf[idx] | (fatbuf[idx + 1] << 8);
+        //clear this entry
+        fatbuf[idx] = 0x00;
+        fatbuf[idx + 1] = 0x00;
+        if (next >= 0xFFF8 || next == 0x0000) break;
+        cluster = next;
+    }
+    fat_write_full_to_both();
+}
+
+
+
+
+int fat_create_file_root(const char* name, const uint8_t* data, uint32_t size) {
+    uint32_t dir_sect = 0;
+    int dir_off = -1;
+    uint16_t old_start_cluster = 0;
+    uint8_t fatname[11];
+    make_fat11_name(name, fatname);
+
+    //Search root for existing file with same 11-byte name
+    uint32_t sector = FIRST_ROOT_DIR_SECTOR;
+    int found_existing = 0;
+    for (int s = 0; s < ROOT_DIR_SECTORS; s++, sector++) {
+        read_sector(sector, sector_buf);
+        for (int off = 0; off < SECTOR_SIZE; off += 32) {
+            uint8_t first = sector_buf[off];
+            if (first == 0x00) {
+                // no more entries
+                s = ROOT_DIR_SECTORS; // break outer
+                break;
+            }
+            if (first == 0xE5) continue;
+            if (memorycompare((const char*)fatname, (const char*)&sector_buf[off], 11) == 0) {
+                // existing file found
+                dir_sect = FIRST_ROOT_DIR_SECTOR + s;
+                dir_off = off;
+                old_start_cluster = sector_buf[off + 26] | (sector_buf[off + 27] << 8);
+                found_existing = 1;
+                break;
+            }
+        }
+        if (found_existing) break;
+    }
+
+    //If not found find a free root slot
+    if (!found_existing) {
+        if (find_free_root_slot(&dir_sect, &dir_off) != 0) return -1; // no free slot
+    } else {
+        // free previous cluster chain to avoid leaks (if it had clusters)
+        if (old_start_cluster >= 2 && old_start_cluster < 0xFFF8) {
+            free_cluster_chain(old_start_cluster);
+        }
+    }
+
+    //allocate clusters needed
     uint32_t bytes_per_cluster = SECTORS_PER_CLUSTER * SECTOR_SIZE;
     uint32_t clusters_needed = (size + bytes_per_cluster - 1) / bytes_per_cluster;
     if (clusters_needed == 0) clusters_needed = 1;
 
-    // read full FAT, allocate and build chain in memory
     fat_read_full();
     uint32_t total_entries = (SECTORS_PER_FAT * SECTOR_SIZE) / 2;
 
@@ -387,40 +443,35 @@ int fat_create_file_root(const char* name, const uint8_t* data, uint32_t size) {
     uint32_t first_cluster = 0;
 
     for (uint32_t i = 0; i < clusters_needed; i++) {
-        // find free entry in fatbuf
         uint32_t found = 0xFFFFFFFF;
         for (uint32_t c = 2; c < total_entries; c++) {
             uint32_t idx = c * 2;
-            uint16_t entry = fatbuf[idx] | (fatbuf[idx+1] << 8);
+            uint16_t entry = fatbuf[idx] | (fatbuf[idx + 1] << 8);
             if (entry == 0x0000) { found = c; break; }
         }
         if (found == 0xFFFFFFFF) {
-            // out of space: rollback is possible but keep it simple and fail
+            //out of space
             return -1;
         }
-
-        // mark as used (for now mark as 0xFFFF EOF; we'll chain below if necessary)
-        uint32_t fidx = found*2;
+        uint32_t fidx = found * 2;
+        //mark temporarily as EOF
         fatbuf[fidx] = 0xFF;
-        fatbuf[fidx+1] = 0xFF;
+        fatbuf[fidx + 1] = 0xFF;
 
         if (prev_cluster != 0) {
-            // set previous -> found
             uint32_t pidx = prev_cluster * 2;
             fatbuf[pidx] = (uint8_t)(found & 0xFF);
-            fatbuf[pidx+1] = (uint8_t)((found >> 8) & 0xFF);
+            fatbuf[pidx + 1] = (uint8_t)((found >> 8) & 0xFF);
         } else {
             first_cluster = found;
         }
         prev_cluster = found;
     }
 
-    // prev_cluster currently last cluster: ensure EOF marker 0xFFFF already set
-
-    // write FATs once
+    //ensure EOF for last cluster already 0xFFFF
     fat_write_full_to_both();
 
-    // write data into allocated clusters
+    //write data into allocated clusters
     uint32_t remaining = size;
     const uint8_t* src = data;
     uint32_t current_cluster = first_cluster;
@@ -429,46 +480,35 @@ int fat_create_file_root(const char* name, const uint8_t* data, uint32_t size) {
         for (int s = 0; s < SECTORS_PER_CLUSTER; s++) {
             uint8_t dbuf[SECTOR_SIZE];
             uint32_t tocopy = remaining > SECTOR_SIZE ? SECTOR_SIZE : remaining;
+            memoryset(dbuf, 0, SECTOR_SIZE);
             if (tocopy > 0) {
-                memoryset(dbuf, 0, SECTOR_SIZE);
                 memorycpy(dbuf, src, tocopy);
                 src += tocopy;
                 remaining -= tocopy;
-            } else {
-                // pad with zeros
-                memoryset(dbuf, 0, SECTOR_SIZE);
             }
             write_sector(lba + s, dbuf);
         }
-        // move to next cluster from FAT
         uint16_t next = get_fat_entry(current_cluster);
         if (next >= 0xFFF8 || remaining == 0) break;
         current_cluster = next;
     }
 
-    // create directory entry in root
+    //fill directory entry (dir_sect/dir_off is set either to existing entry or free slot)
     read_sector(dir_sect, sector_buf);
-    // clear entry first 32 bytes
+    //clear entry first 32 bytes
     for (int i = 0; i < 32; i++) sector_buf[dir_off + i] = 0x00;
 
-    // name
-    uint8_t fatname[11];
-    make_fat11_name(name, fatname);
     for (int i = 0; i < 11; i++) sector_buf[dir_off + i] = fatname[i];
+    sector_buf[dir_off + 11] = 0x20; //archive attribute
 
-    sector_buf[dir_off + 11] = 0x20; // archive attribute (regular file)
-
-    // starting cluster (little endian)
     sector_buf[dir_off + 26] = (uint8_t)(first_cluster & 0xFF);
     sector_buf[dir_off + 27] = (uint8_t)((first_cluster >> 8) & 0xFF);
 
-    // file size 32-bit little-endian
     sector_buf[dir_off + 28] = (uint8_t)(size & 0xFF);
     sector_buf[dir_off + 29] = (uint8_t)((size >> 8) & 0xFF);
     sector_buf[dir_off + 30] = (uint8_t)((size >> 16) & 0xFF);
     sector_buf[dir_off + 31] = (uint8_t)((size >> 24) & 0xFF);
 
-    // write back directory sector
     write_sector(dir_sect, sector_buf);
 
     return 0;

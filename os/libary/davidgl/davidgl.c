@@ -21,7 +21,7 @@ extern uint32_t pitch;
 static int ticks_per_frame = 1;
 static int last_tick = 0;
 static unsigned int target_fps = 60;
-extern uint8_t font8x8[128][8];
+extern uint8_t font_8bit[128][8];
 
 uint8_t char_to_scancode(char c) {
     switch (c) {
@@ -160,7 +160,7 @@ void d_char(int x, int y, char c, uint32_t color, int size) {
     if (c < 0 || c > 127) return;
     if (size < 1) size = 1;
 
-    uint8_t* glyph = font8x8[(uint8_t)c];
+    uint8_t* glyph = font_8bit[(uint8_t)c];
 
     for (int row = 0; row < 8; row++) {
         uint8_t row_bits = glyph[row];
