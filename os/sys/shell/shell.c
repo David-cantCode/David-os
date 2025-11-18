@@ -4,8 +4,7 @@
 #include "../../libary/include/fat16.h"
 #include "../../drivers/include/ata.h"
 #include "../../libary/include/util.h"
-#include "../../apps/pong/pong.h"
-#include "../../apps/snake/snake.h"
+
 #include "../../apps/d_edit/d_edit.h"
 #include "../../libary/include/stdconsole.h"
 #include "../../libary/include/program.h"
@@ -41,6 +40,8 @@ char alias[8];
 
 
 //in futer add buffer for last command so when user press arrow up; that command gets thrown into the keybuffer
+
+extern void play_game(char* game);
 
 
 void fill_test_pattern(uint8_t* buf, uint8_t pattern) {
@@ -142,7 +143,7 @@ void execute_command(char *input) {
     
     else if (compare_string(input, "pong") == 0)
     {
-        Program* pong = create_program(PROGRAM_PONG,pong_on_start,0,0,0,0);
+        play_game(input);
     
     }
 
@@ -167,7 +168,7 @@ void execute_command(char *input) {
     }
 
     else if (compare_string(input, "snake")==0){
-        snake_innit();
+        play_game(input);
 
     }
 

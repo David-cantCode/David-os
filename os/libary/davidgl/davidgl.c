@@ -98,32 +98,30 @@ void screen_clear() {
 }
 
 void draw_pixel(int x, int y, uint32_t color) {
-    if (x < 0 || x >= SCREEN_W || y < 0 || y >= SCREEN_H) return;
+    if ((unsigned)x >= SCREEN_W || (unsigned)y >= SCREEN_H) return;
     back_buffer[y * SCREEN_W + x] = color;
-
-    
 }
+
 
 //copy backbuffer 2 front
 void flip() {
     uint8_t* fb = (uint8_t*)fb_addr;
+    int row_bytes = SCREEN_W * 4;
+
     for (int y = 0; y < SCREEN_H; y++) {
-        for (int x = 0; x < SCREEN_W; x++) {
-            uint32_t* pixel_addr = (uint32_t*)(fb + y * pitch + x * 4);
-            *pixel_addr = back_buffer[y * SCREEN_W + x];
-        }
+        memorycpy(fb + y * pitch, &back_buffer[y * SCREEN_W], row_bytes);
     }
 }
 
 
 void draw_rect(int x, int y, int w, int h, uint32_t color) {
     for (int row = 0; row < h; row++) {
+        uint32_t* dst = &back_buffer[(y + row) * SCREEN_W + x];
         for (int col = 0; col < w; col++) {
-            draw_pixel(x + col, y + row, color);
+            dst[col] = color;
         }
     }
 }
-
 void draw_circle(int cx, int cy, int radius, uint32_t color) {
     int x = radius;
     int y = 0;
