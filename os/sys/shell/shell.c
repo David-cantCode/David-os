@@ -173,6 +173,13 @@ void execute_command(char *input) {
     }
     else if (compare_string(input, "tetris")==0){
         play_game(input);
+
+
+        //later remove other games 
+        // use starts with play
+        //then game_name = input + 4 or whaterver
+        //then call play_game with (game_name)
+
     }
 
     else if(compare_string(input, "games")==0){
