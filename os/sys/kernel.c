@@ -134,7 +134,7 @@ void kernel_ini() {
 
 
     print("\n");
-    print("=============USER SPACE============\n\n");
+    print("=============USER SPACE============\n\n\n\n\n\n");
 
 
 

@@ -127,12 +127,7 @@ void execute_command(char *input) {
     print("\n");
     }
 
-    
-    else if (compare_string(input, "pong") == 0)
-    {
-        play_game(input);
-    
-    }
+
 
     else if (compare_string(input, "startd")==0){
 
@@ -154,10 +149,6 @@ void execute_command(char *input) {
 
     }
 
-    else if (compare_string(input, "snake")==0){
-        play_game(input);
-
-    }
 
     else if (compare_string(input, "cube")==0){
         cube_main();
@@ -171,16 +162,13 @@ void execute_command(char *input) {
     else if (compare_string(input, "mem")==0){
         shell_mem();
     }
-    else if (compare_string(input, "tetris")==0){
-        play_game(input);
-
-
-        //later remove other games 
-        // use starts with play
-        //then game_name = input + 4 or whaterver
-        //then call play_game with (game_name)
+    else if (starts_with(input, "play ")){
+        char* game_name = input + 5;
+        play_game(game_name);
 
     }
+
+
 
     else if(compare_string(input, "games")==0){
         list_games();

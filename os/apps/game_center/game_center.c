@@ -20,6 +20,13 @@ void play_game(char* game){
     }
 
 
+
+
+    else{
+        print("unknown game");
+    }
+
+
 }
 
 
@@ -27,8 +34,9 @@ void play_game(char* game){
 void list_games(){
 
 
-
-    print("(1) Pong\n"); 
-    print("(2) Snake\n"); 
-    print("(3) Tetris\n");
+    print("Info: Play game using 'play ...'\n"); 
+    
+    print("(1) pong\n"); 
+    print("(2) pnake\n"); 
+    print("(3) tetris\n");
 }
