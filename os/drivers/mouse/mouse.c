@@ -1,6 +1,7 @@
 #include "stdint.h"
 #include "../../libary/include/stdport.h"
 #include "../../libary/include/stdconsole.h"
+#include "util.h"
 uint8_t mouse_cycle = 0;
 uint8_t mouse_packet[3];
 
@@ -12,9 +13,19 @@ int mouse_right = 0;
 extern uint32_t screen_width;
 extern uint32_t screen_height;
 
+//doesnt work 
+// i tried doing qemu-system-i386 -hda bin/davidos.iso -m 4G -machine pc -device i8042
+//still nothing ill check this out later
 void mouse_init() {
     outb(0x64, 0xA8); //enable auxiliary device
     outb(0x60, 0xF4); //enable data reporting
+    outb(0x64, 0xD4);  
+
+    uint8_t status = inb(0x64);
+    char buf[64];
+    s_printf(buf, "PS2 status after A8 = %x\n", status);
+    print(buf);
+
 
     print("mouse was initialized\n");
     
@@ -22,10 +33,13 @@ void mouse_init() {
 
 void mouse_callback() {
     uint8_t data = inb(0x60);
+    print("mouse be going brrrr");
 
     if (mouse_cycle == 0) mouse_packet[0] = data;
     else if (mouse_cycle == 1) mouse_packet[1] = data;
     else if (mouse_cycle == 2) {
+
+
         mouse_packet[2] = data;
         mouse_cycle = 0;
 
