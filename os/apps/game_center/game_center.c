@@ -6,6 +6,7 @@
 extern void snake_innit();
 extern void pong_on_start();
 extern void tetris_main();
+extern void mtest_start();
 void play_game(char* game){
 
 
@@ -18,12 +19,14 @@ void play_game(char* game){
     else if (compare_string(game, "tetris")==0){
         tetris_main();
     }
-
+    else if (compare_string(game, "mtest")==0){
+        mtest_start();
+    }
 
 
 
     else{
-        print("unknown game");
+        print("unknown game\n");
     }
 
 
@@ -35,7 +38,7 @@ void list_games(){
 
 
     print("Info: Play game using 'play ...'\n"); 
-    
+
     print("(1) pong\n"); 
     print("(2) pnake\n"); 
     print("(3) tetris\n");
