@@ -93,9 +93,13 @@ int should_update() {
 
 
 void screen_clear() {
-    for (int i = 0; i < SCREEN_W * SCREEN_H; i++)
-        back_buffer[i] = 0x00000000; 
+    //does 2 pixles at a time instead
+    uint64_t* ptr = (uint64_t*)back_buffer;
+    int count = (SCREEN_W * SCREEN_H) / 2;
+
+    while(count--) *ptr++ = 0;
 }
+
 
 void draw_pixel(int x, int y, uint32_t color) {
     if ((unsigned)x >= SCREEN_W || (unsigned)y >= SCREEN_H) return;
@@ -108,8 +112,14 @@ void flip() {
     uint8_t* fb = (uint8_t*)fb_addr;
     int row_bytes = SCREEN_W * 4;
 
-    for (int y = 0; y < SCREEN_H; y++) {
-        memorycpy(fb + y * pitch, &back_buffer[y * SCREEN_W], row_bytes);
+
+    if (pitch == row_bytes) {
+        memorycpy(fb, back_buffer, SCREEN_W * SCREEN_H * 4);
+    } else {
+
+        for (int y = 0; y < SCREEN_H; y++) {
+            memorycpy(fb + y * pitch, &back_buffer[y * SCREEN_W], row_bytes);
+        }
     }
 }
 
@@ -209,26 +219,55 @@ void draw_line(int x0, int y0, int x1, int y1, uint32_t color) {
 
 
 
-void draw_sprite(int pos_x, int pos_y, Sprite sprite, float scale){
-    int width = sprite.width * scale;
-    int height = sprite.height * scale;
+void draw_sprite(int pos_x, int pos_y, Sprite sprite, float scale) {
+    int dst_w = (int)(sprite.width * scale);
+    int dst_h = (int)(sprite.height * scale);
+    
+
+    if (dst_w <= 0 || dst_h <= 0) return;
+
+    //clip check
+    int x0 = pos_x;
+    int y0 = pos_y;
+    int x1 = x0 + dst_w;
+    int y1 = y0 + dst_h;
+
+    if (x0 < 0) x0 = 0;
+    if (y0 < 0) y0 = 0;
+    if (x1 > SCREEN_W) x1 = SCREEN_W;
+    if (y1 > SCREEN_H) y1 = SCREEN_H;
+
+    //if completely offscreen ret
+    if (x0 >= x1 || y0 >= y1) return;
+
+    uint32_t step_x = (sprite.width << 16) / dst_w;
+    uint32_t step_y = (sprite.height << 16) / dst_h;
+
+    uint32_t u_start = (x0 - pos_x) * step_x;
+    uint32_t v = (y0 - pos_y) * step_y;
 
 
-    for (int y = 0; y < height; y++ ){
+    for (int y = y0; y < y1; y++) {
 
-        int srcY = (int)(y / scale);
+        int src_y = v >> 16;
+        
+        v += step_y;
 
-        for (int x = 0; x < width; x++){
+      
+        uint32_t* sprite_row = &sprite.pixles[src_y * sprite.width];
 
-            int srcX = (int)(x / scale);
+        uint32_t* screen_row = &back_buffer[y * SCREEN_W];
 
-            uint32_t color = sprite.pixles[srcY * sprite.width + srcX];
+        uint32_t u = u_start;
 
-            if (color == 0x000000FF)continue; 
+        for (int x = x0; x < x1; x++) {
+            int src_x = u >> 16;
+            u += step_x;
+            uint32_t color = sprite_row[src_x];
 
-            draw_pixel(pos_x + x, pos_y + y, color);
-
+            if (color != 0x000000FF) {
+                screen_row[x] = color;
+            }
         }
     }
-    
 }

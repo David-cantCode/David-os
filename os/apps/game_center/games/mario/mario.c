@@ -29,8 +29,8 @@ struct Player{
 //globals
 struct Player player;
 static int is_in_menu;
-int menu_options = 2;
-int pointer = 1; 
+static int menu_options = 2;
+static int pointer = 1; 
 static int end_game;
 static int current_level;
 
@@ -42,22 +42,22 @@ static int fps = 30;
 static int screen_w = 600;
 static int screen_h = 600;
 static int gravity = 2;
-static int mario_offset = 50; //height offset so hes no clipping into tiles
+static int mario_offset = 35; //height offset so hes no clipping into tiles
 
 //colors
 static uint32_t red = 0x00000FFFF;
 static uint32_t dark_brown = 0x8000FF8F;
 static uint32_t light_brown = 0x3FFFFF3F;
-
+static uint32_t black = 0x00000000;
 
 
 
 //sprites:
-Sprite mario_sprite;
-
+static Sprite mario_sprite;
+static Sprite ground_sprite;
 
 //levels
-#define TILE_SIZE 40
+#define TILE_SIZE 34
     
 //rules:
     //0 air, 1 brick, 2 question block
@@ -163,7 +163,8 @@ void render_level(int* level, int level_cols, int level_rows) {
                 
                 uint32_t color = (tile_id == 1) ? dark_brown : light_brown;
                
-                draw_rect(x_pos, y_pos, TILE_SIZE, TILE_SIZE, color); 
+
+                draw_sprite(x_pos, y_pos, ground_sprite, 4);
             }
         }
     }
@@ -234,7 +235,7 @@ static void main_loop() {
             input_poll();
             update_physics(l1_map, l1_cols, l1_rows); 
             render_level(l1_map, l1_cols, l1_rows);  
-            draw_sprite(player.position.x, player.position.y, mario_sprite, 3);
+            draw_sprite(player.position.x, player.position.y, mario_sprite, 2);
             
         
             }
@@ -283,10 +284,24 @@ void mario_on_start(){
     mario_sprite. width = 16; mario_sprite.height = 16;
 
 
+    uint32_t ground_pixles[64]= {
+        dark_brown, dark_brown, dark_brown,  dark_brown,  dark_brown,  black, dark_brown,  dark_brown,
+        dark_brown, dark_brown, dark_brown,  dark_brown,  dark_brown,  black, dark_brown,  dark_brown,
+        dark_brown, dark_brown, dark_brown,  dark_brown,  dark_brown,  black, black, black,
+        dark_brown, dark_brown, dark_brown,  dark_brown,  dark_brown,  black, dark_brown,  dark_brown,
+        dark_brown, dark_brown, dark_brown,  dark_brown,  dark_brown,  black, dark_brown,  dark_brown,
+        black, dark_brown, dark_brown,  dark_brown,  black,  dark_brown, dark_brown,  dark_brown,
+        dark_brown, black, black,  black,  black,  dark_brown, dark_brown,  dark_brown,
+        dark_brown, dark_brown, black,  dark_brown,  dark_brown,  dark_brown, dark_brown,  dark_brown,
+    };
+    ground_sprite.pixles = ground_pixles;
+    ground_sprite.width = 8;
+    ground_sprite.height = 8;
+
+
+
+
     main_loop();
-
-
-
 
 }
 
