@@ -1,0 +1,28 @@
+
+general asm 32bit
+
+args
+1	edi
+2	esi
+3	edx
+4	ecx
+
+
+arr dd 1,2,3,4   ;array operator cant belive i js found this out now
+
+
+
+
+div ebx  ; eax /ebx
+mul ebx ; eax * ebx
+
+seeing a pattern? unspecifing another reg does it with eax
+
+mul eax ; eax* eax
+
+
+
+
+
+
+
