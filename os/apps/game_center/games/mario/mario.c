@@ -1,6 +1,7 @@
 
 #include "../../../../libary/include/davidgl.h"
 #include "../../../../libary/include/util.h"
+#include "mario.h"
 int fps = 30;
 int is_in_menu;
 
@@ -64,12 +65,6 @@ static int menu(){
 
 
     }
-
-
-
-
-
-
 
 
     return -1;
