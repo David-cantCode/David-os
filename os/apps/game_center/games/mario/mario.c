@@ -1,6 +1,7 @@
 
 #include "../../../../libary/include/davidgl.h"
 #include "../../../../libary/include/util.h"
+
 #include <stdint.h>
 #include "mario.h"
 
@@ -23,17 +24,25 @@ struct Player{
 };
 
 
-
+struct Enemy{
+    struct Vector2 position;
+    struct Vector2 velocity;
+    int is_alive;
+    int direction; //1= right, -1 left
+    int is_on_ground;
+};
 
 
 //globals
+struct Camera camera;
 struct Player player;
+
 static int is_in_menu;
 static int menu_options = 2;
 static int pointer = 1; 
 static int end_game;
 static int current_level;
-
+static char* buf;
 
 
 
@@ -43,45 +52,65 @@ static int screen_w = 600;
 static int screen_h = 600;
 static int gravity = 2;
 static int mario_offset = 35; //height offset so hes no clipping into tiles
+static int jump_str = 25;
+
+
+static int lives = 3; 
+static int score; 
+static int coins;
+
+
+
 
 //colors
 static uint32_t red = 0x00000FFFF;
 static uint32_t dark_brown = 0x8000FF8F;
-static uint32_t light_brown = 0x3FFFFF3F;
+static uint32_t light_brown = 0xFF000FF0;
 static uint32_t black = 0x00000000;
-
+static uint32_t white = 0xFFFFFFFF;
 
 
 //sprites:
 static Sprite mario_sprite;
 static Sprite ground_sprite;
+static Sprite p_block_sprite;
+static Sprite goomba_sprite;
+
+//screen pos = world pos - camera pos
 
 //levels
 #define TILE_SIZE 34
+
+
+
+
     
 //rules:
     //0 air, 1 brick, 2 question block
 
     //level 1
-    #define l1_rows 15
-    #define l1_cols 20
+    #define l1_rows 18
+    #define l1_cols 61
 
     int l1_map[l1_rows][l1_cols] = {
-        {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
-        {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
-        {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
-        {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
-        {0,0,0,0,0,0,0,0,0,0,0,1,1,1,0,0,0,0,0,0}, 
-        {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
-        {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
-        {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
-        {0,0,0,0,2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
-        {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
-        {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
-        {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
-        {0,0,0,0,0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0},
-        {1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1},
-        {1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1}
+        {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
+        {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
+        {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
+        {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
+        {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
+        {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
+        {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
+        {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
+        {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
+        {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
+        {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
+        {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
+        {0,0,0,0,0,0,0,2,0,0,0,0,0,0,0,2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
+        {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
+        {0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
+        {0,0,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
+        {1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1},
+        {1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1}
     };
 
 
@@ -146,56 +175,146 @@ static int menu(){
 }
 
 
-void render_level(int* level, int level_cols, int level_rows) {
+static void draw_ui(){
+
+    s_printf(buf, "Score: %d", score);
+    draw_text(20, 10, buf, 0xFFFFFFFF, 2);
+    
+    //drawsprite(coins)
+    //s_printf(buf, "x%d", coins);
+
+}
+
+
+static void render_level(int* level, int level_cols, int level_rows) {
     for (int row = 0; row < level_rows; row++) {
         for (int col = 0; col < level_cols; col++) {
             
-          
             int current_index = (row * level_cols) + col;
-
-        
             int tile_id = level[current_index];
 
-            
             if (tile_id > 0) {
-                int x_pos = col * TILE_SIZE;
-                int y_pos = row * TILE_SIZE;
-                
-                uint32_t color = (tile_id == 1) ? dark_brown : light_brown;
-               
+                //get wlrd pos
+                int world_x = col * TILE_SIZE;
+                int world_y = row * TILE_SIZE;
 
-                draw_sprite(x_pos, y_pos, ground_sprite, 4);
+                //convert to screen pos
+                int screen_x = world_x - camera.position.x;
+                int screen_y = world_y - camera.position.y;
+                
+                if (screen_x + TILE_SIZE > 0 && screen_x < screen_w) {
+                   
+                if (tile_id ==1) draw_sprite(screen_x, screen_y, ground_sprite, 4);
+                if (tile_id ==2) draw_sprite(screen_x, screen_y, p_block_sprite, 4);
+                }
             }
         }
     }
 }
 
+
+void update_camera(int level_cols) {
+    //add camera y pos update in future 
+
+
+    camera.position.x = player.position.x - (screen_w / 2);    
+
+    if (camera.position.x < 0) camera.position.x = 0;
+
+
+    int level_width_pixels = level_cols * TILE_SIZE;
+    if (camera.position.x > level_width_pixels - screen_w) {
+        camera.position.x = level_width_pixels - screen_w;
+    }
+}
+
+
+
+int get_tile(int x, int y, int* level, int cols, int rows) {
+    //rets tile if x, y == tile.pos
+
+
+    int col = x / TILE_SIZE;
+    int row = y / TILE_SIZE;
+
+    if (col < 0 || col >= cols || row < 0 || row >= rows) {
+        return 0; 
+    }
+
+    return level[row * cols + col];
+}
+
 void update_physics(int* level, int level_cols, int level_rows) {
-   
+
+    //why dont i just use one variable since there the same? idk haha
+    int player_w = 32; 
+    int player_h = 32; 
+
+    //x axis movement and collison
+    player.position.x += player.velocity.x;
+
+    //check right side
+    if (player.velocity.x > 0) {
+    
+        int tile_top = get_tile(player.position.x + player_w, player.position.y, level, level_cols, level_rows);
+        int tile_bot = get_tile(player.position.x + player_w, player.position.y + player_h - 1, level, level_cols, level_rows);
+
+        //on collide
+        if (tile_top != 0 || tile_bot != 0) {
+            int tile_x = ((player.position.x + player_w) / TILE_SIZE) * TILE_SIZE;
+            player.position.x = tile_x - player_w - 1; 
+            player.velocity.x = 0;
+        }
+    }
+
+
+    //check left
+    else if (player.velocity.x < 0) {
+      
+        int tile_top = get_tile(player.position.x, player.position.y, level, level_cols, level_rows);
+        int tile_bot = get_tile(player.position.x, player.position.y + player_h - 1, level, level_cols, level_rows);
+
+        //on hit
+        if (tile_top != 0 || tile_bot != 0) {
+            int tile_x = (player.position.x / TILE_SIZE) * TILE_SIZE;
+            player.position.x = tile_x + TILE_SIZE + 1;
+            player.velocity.x = 0;
+        }
+    }
+
+    //y axis collision n movement
     player.velocity.y += gravity; 
-
-    //apply velocity to pos
     player.position.y += player.velocity.y;
-    player.position.x += player.velocity.x; 
+    player.is_on_ground = 0; 
 
-    //floor check
-    int map_col = (player.position.x + 15) / TILE_SIZE; //mario center
-    int map_row = (player.position.y + mario_offset) / TILE_SIZE;
 
-    //check bounds
-    if (map_row >= 0 && map_row < level_rows && map_col >= 0 && map_col < level_cols) {
+    //floor_check
+    if (player.velocity.y > 0) {
+        int tile_left = get_tile(player.position.x + 4, player.position.y + player_h, level, level_cols, level_rows);
+        int tile_right = get_tile(player.position.x + player_w - 4, player.position.y + player_h, level, level_cols, level_rows);
+        //+- 4; lil offset
 
-        int tile_index = (map_row * level_cols) + map_col;
-        
-        //if air
-        if (level[tile_index] != 0) {
-            
-            //snap mario
-            player.position.y = (map_row * TILE_SIZE) - mario_offset; 
+        if (tile_left != 0 || tile_right != 0) {
+            //on ground
+            int tile_y = ((player.position.y + player_h) / TILE_SIZE) * TILE_SIZE;
+            player.position.y = tile_y - player_h;
             player.velocity.y = 0;
             player.is_on_ground = 1;
-        } else {
-            player.is_on_ground = 0;
+        }
+    }
+
+
+    //ceiling check
+    else if (player.velocity.y < 0) {
+       
+        int tile_left = get_tile(player.position.x + 4, player.position.y, level, level_cols, level_rows);
+        int tile_right = get_tile(player.position.x + player_w - 4, player.position.y, level, level_cols, level_rows);
+
+        if (tile_left != 0 || tile_right != 0) {
+            //hit head
+            int tile_y = (player.position.y / TILE_SIZE) * TILE_SIZE;
+            player.position.y = tile_y + TILE_SIZE + 1;
+            player.velocity.y = 0;
         }
     }
 }
@@ -218,10 +337,13 @@ static void input_poll(){
 
 
     if (is_pressed(' ') && player.is_on_ground){
-        player.velocity.y = -20; 
+        player.velocity.y = -jump_str; 
         player.is_on_ground = 0;
     }
 }
+
+
+
 
 static void main_loop() { 
     while (end_game == 0) {
@@ -234,8 +356,13 @@ static void main_loop() {
 
             input_poll();
             update_physics(l1_map, l1_cols, l1_rows); 
+            update_camera(l1_cols);
             render_level(l1_map, l1_cols, l1_rows);  
-            draw_sprite(player.position.x, player.position.y, mario_sprite, 2);
+            
+            
+            draw_ui();
+
+            draw_sprite(player.position.x- camera.position.x, player.position.y - camera.position.y, mario_sprite, 2);
             
         
             }
@@ -249,6 +376,7 @@ static void main_loop() {
 void mario_on_start(){
     set_fps(fps);
     is_in_menu = 1;
+    end_game= 0;
     
     //i wrote this all by hand coping a mario sprite
     uint32_t mario_pixles[256] = {
@@ -299,6 +427,38 @@ void mario_on_start(){
     ground_sprite.height = 8;
 
 
+    uint32_t p_block_pixles[64]= {
+
+         dark_brown, light_brown, white, white, white, white, light_brown, dark_brown, 
+       light_brown, white, white, white, white, white, white, light_brown, 
+         light_brown, white, white, light_brown, light_brown, white, white, light_brown, 
+         light_brown, light_brown, light_brown, light_brown, light_brown, white, white, light_brown, 
+         light_brown, light_brown, light_brown, light_brown, white, white, white, light_brown,
+       light_brown, light_brown, light_brown, white, white, light_brown, light_brown, light_brown, 
+         light_brown, light_brown, light_brown, light_brown, light_brown, light_brown, light_brown, light_brown, 
+      dark_brown, light_brown, light_brown, white, white, light_brown, light_brown, dark_brown
+    };
+
+    p_block_sprite.pixles = p_block_pixles;
+    p_block_sprite.width = 8;
+    p_block_sprite.height = 8;
+
+
+    uint32_t goomba_pixles[100]={
+        0x000000FF, 0x000000FF, 0x000000FF, 0x000000FF, dark_brown, dark_brown, 0x000000FF, 0x000000FF,0x000000FF,0x000000FF,
+        0x000000FF, 0x000000FF, dark_brown, dark_brown, dark_brown, dark_brown, dark_brown, dark_brown, 0x000000FF,0x000000FF,
+        0x000000FF,black, black, black, dark_brown, dark_brown, black, black, black, 0x000000FF,
+        dark_brown, dark_brown, light_brown, black, black, black, black, light_brown, dark_brown, dark_brown,
+        dark_brown, dark_brown, light_brown, light_brown, black, black, light_brown, light_brown, dark_brown,dark_brown,
+        dark_brown, dark_brown,dark_brown,dark_brown,dark_brown,dark_brown,dark_brown,dark_brown,dark_brown,dark_brown,
+        0x000000FF, dark_brown, dark_brown, light_brown, light_brown, light_brown, light_brown, dark_brown, dark_brown, 0x000000FF,
+        black, black, light_brown, light_brown, light_brown, light_brown, light_brown, light_brown, black,black,
+        black, black, black, black, light_brown, light_brown, black, black, black, black,
+        0x000000FF, black, black, black, 0x000000FF, 0x000000FF, black, black, black, 0x000000FF
+    };
+    goomba_sprite.pixles = goomba_pixles;
+    goomba_sprite.height = 10;
+    goomba_sprite.width = 10;
 
 
     main_loop();
