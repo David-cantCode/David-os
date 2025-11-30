@@ -27,5 +27,5 @@ void draw_pixel(int x, int y, uint32_t color);
 void draw_line(int x0, int y0, int x1, int y1, uint32_t color);
 void flip();
 uint8_t char_to_scancode(char c);
-void draw_sprite(int pos_x, int pos_y, Sprite sprite);
+void draw_sprite(int pos_x, int pos_y, Sprite sprite, float scale);
 #endif

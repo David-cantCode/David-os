@@ -1,6 +1,7 @@
 
 #include "../../../../libary/include/davidgl.h"
 #include "../../../../libary/include/util.h"
+#include <stdint.h>
 #include "mario.h"
 
 struct Vector2{
@@ -19,12 +20,8 @@ struct Player{
 };
 
 
-
-
-
-
-int fps = 30;
-int is_in_menu;
+static int fps = 30;
+static int is_in_menu;
 
 static int screen_w = 600;
 static int screen_h = 600;
@@ -33,7 +30,26 @@ int menu_options = 2;
 int pointer = 1; 
 static int end_game;
 
-int current_world;
+static int current_world;
+
+//colors
+
+static uint32_t red = 0x00000FFFF;
+static uint32_t dark_brown = 0x8000FF8F;
+static uint32_t light_brown = 0x3FFFFF3F;
+
+
+
+
+//sprites:
+Sprite mario_sprite;
+
+
+
+
+
+
+
 
 static int menu(){
     //ret -1 if not chosen yet| ret 0 -> menu_options on select
@@ -100,6 +116,7 @@ static void main_loop() {
         
             if (is_in_menu==1) menu();
 
+            draw_sprite(25, 25, mario_sprite, 10);
 
 
             
@@ -112,6 +129,40 @@ void mario_on_start(){
     set_fps(fps);
     is_in_menu = 1;
     
+    //i wrote this all by hand coping a mario sprite
+    uint32_t mario_pixles[256] = {
+    0x000000FF, 0x000000FF, 0x000000FF, 0x000000FF, 0x000000FF, 0x000000FF, 0x000000FF, red, red, red, red, red, 0x000000FF, 0x000000FF, 0x000000FF, 0x000000FF, 0x000000FF,
+    0x000000FF, 0x000000FF, 0x000000FF, 0x000000FF, 0x000000FF,  red, red, red, red, red, red, red, red, 0x000000FF, 0x000000FF, 0x000000FF,
+    0x000000FF, 0x000000FF,  0x000000FF, 0x000000FF, dark_brown, dark_brown, dark_brown, light_brown, light_brown, dark_brown, light_brown, 0x000000FF, 0x000000FF, 0x000000FF,0x000000FF, 0x000000FF,
+    0x000000FF, 0x000000FF, 0x000000FF, dark_brown, light_brown, dark_brown, light_brown, light_brown, light_brown, dark_brown, light_brown, light_brown, light_brown,0x000000FF, 0x000000FF,0x000000FF, 
+    0x000000FF, 0x000000FF, 0x000000FF,dark_brown, light_brown, dark_brown, dark_brown, light_brown, light_brown, light_brown, dark_brown, light_brown, light_brown, light_brown,  0x000000FF,0x000000FF,
+    0x000000FF, 0x000000FF, 0x000000FF, dark_brown, dark_brown, light_brown, light_brown, light_brown, light_brown, dark_brown, dark_brown,  dark_brown, dark_brown, 0x000000FF,0x000000FF, 0x000000FF,
+    0x000000FF, 0x000000FF, 0x000000FF, 0x000000FF, 0x000000FF, light_brown, light_brown, light_brown, light_brown, light_brown, light_brown, light_brown, 0x000000FF, 0x000000FF, 0x000000FF, 0x000000FF, 
+ 
+    //body start
+
+    0x000000FF, 0x000000FF, 0x000000FF, 0x000000FF, dark_brown, dark_brown, red, dark_brown, dark_brown, dark_brown,0x000000FF, 0x000000FF, 0x000000FF,0x000000FF, 0x000000FF,0x000000FF,
+    0x000000FF, 0x000000FF, 0x000000FF, dark_brown, dark_brown, dark_brown, red, dark_brown, dark_brown, red, dark_brown,dark_brown,dark_brown, 0x000000FF, 0x000000FF, 0x000000FF,
+    0x000000FF, 0x000000FF, dark_brown, dark_brown, dark_brown, dark_brown, red, red, red, red, dark_brown, dark_brown ,dark_brown, dark_brown, 0x000000FF, 0x000000FF,
+    
+    //hands
+    0x000000FF, 0x000000FF, light_brown, light_brown, dark_brown, red, light_brown, red, red, light_brown, red, dark_brown, light_brown, light_brown, 0x000000FF,  0x000000FF, 
+    0x000000FF, 0x000000FF, light_brown, light_brown, light_brown, red, red, red, red, red, red, light_brown, light_brown, light_brown, 0x000000FF, 0x000000FF,
+    0x000000FF, 0x000000FF, light_brown, light_brown, red, red, red, red, red, red, red, red,light_brown, light_brown, 0x000000FF, 0x000000FF,
+   
+   
+   
+    0x000000FF, 0x000000FF, 0x000000FF, 0x000000FF, red, red, red, 0x000000FF, 0x000000FF, red, red, red, 0x000000FF, 0x000000FF, 0x000000FF, 0x000000FF,
+    
+    //feet
+    0x000000FF, 0x000000FF, 0x000000FF, dark_brown, dark_brown, dark_brown, 0x000000FF, 0x000000FF, 0x000000FF, 0x000000FF,dark_brown,dark_brown, dark_brown, 0x000000FF, 0x000000FF,0x000000FF, 
+    0x000000FF, 0x000000FF, dark_brown, dark_brown, dark_brown, dark_brown, 0x000000FF, 0x000000FF,0x000000FF, 0x000000FF,dark_brown, dark_brown, dark_brown, dark_brown,  0x000000FF, 0x000000FF
+    };
+
+    mario_sprite.pixles = mario_pixles;
+    mario_sprite. width = 16; mario_sprite.height = 16;
+
+
     main_loop();
 
 
