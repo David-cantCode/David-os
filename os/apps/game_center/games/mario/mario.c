@@ -2,6 +2,27 @@
 #include "../../../../libary/include/davidgl.h"
 #include "../../../../libary/include/util.h"
 #include "mario.h"
+
+struct Vector2{
+    int x, y;
+};
+
+
+struct Camera{
+    struct Vector2 position;
+};
+
+struct Player{
+    struct Vector2 position;
+    int is_on_ground;
+
+};
+
+
+
+
+
+
 int fps = 30;
 int is_in_menu;
 

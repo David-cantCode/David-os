@@ -1,5 +1,5 @@
 #include <stdint.h>
-
+#include "../include/davidgl.h"
 #include "../include/util.h"
 
 extern volatile unsigned int tick;  
@@ -205,4 +205,20 @@ void draw_line(int x0, int y0, int x1, int y1, uint32_t color) {
         if (e2 >= dy) { err += dy; x0 += sx; }
         if (e2 <= dx) { err += dx; y0 += sy; }
     }
+}
+
+
+
+void draw_sprite(int pos_x, int pos_y, Sprite sprite){
+    for (int y = 0; y < sprite.height; y++ ){
+        for (int x = 0; x < sprite.width; x++){
+            uint32_t color = sprite.pixles[y * sprite.width + x];
+
+            if (color == 0x000000FF)continue; 
+
+            draw_pixel(pos_x + x, pos_y + y, color);
+
+        }
+    }
+    
 }
