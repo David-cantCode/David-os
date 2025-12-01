@@ -1,0 +1,54 @@
+Port 	Description
+0x224 	DSP Mixer port
+0x225 	DSP Mixer data port
+0x226 	DSP Reset
+0x22A 	DSP Read
+0x22C 	DSP Write
+0x22E 	DSP Read Status (Read this port to acknowledge 8-bit interrupt)
+0x22F 	DSP 16-bit Interrupt Acknowledge (Read this port to acknowledge 16-bit interrupt) (DSP Version 4.0+ Only) 
+
+
+
+
+
+
+Command for DSP Write 	Description 	Output/input for command
+0x40 	Set time constant 	8 bit value
+0x41 	Set Output Sample Rate 	high bit/low bit
+0xD1 	Turn speaker on 	
+0xD3 	Turn speaker off 	
+0xD0 	Stop playing 8 bit channel 	
+0xD4 	Resume playback of 8 bit channel 	
+0xD5 	Stop playing 16 bit channel 	
+0xD6 	Resume playback of 16 bit channel 	
+0xE1 	Get DSP version 	major version/minor version
+
+
+
+
+
+
+
+Command for Mixer port 	Description 	Mixer data port
+0x22 	Master volume 	0xLR L=left volume R=right volume min=0x0 max=0xF (default value is 0xCC or 0x11)
+0x80 	Set IRQ 
+
+
+
+
+
+
+
+Playing sound
+
+    Reset DSP
+    Load sound data to memory
+    Set master volume
+    Turn speaker on
+    Program ISA DMA to transfer
+    Set time constant. Notice that the Sound Blaster 16 is able to use sample rates instead of time constants using command 0x41 instead of 0x40.
+    You can calculate the time constant like this: Time constant = 65536 - (256000000 / (channels * sampling rate))
+    Set output sample rate
+    Write transfer mode to DSP
+    Write type of sound data
+    Write data length to DSP(Low byte/High byte) (You must calculate LENGTH-1 e.g. if is your real length 0x0FFF, you must send 0xFE and 0x0F)

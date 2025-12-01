@@ -113,7 +113,7 @@ static Sprite goomba_sprite;
         {0,0,0,0,0,0,0,2,0,0,0,0,0,0,0,2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
         {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
         {0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
-        {0,0,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
+        {0,0,0,1,1,0,0,0,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
         {1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1},
         {1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1}
     };
@@ -191,6 +191,21 @@ static void draw_ui(){
 
 }
 
+int get_tile(int x, int y, int* level, int cols, int rows) {
+    //rets tile if x, y == tile.pos
+
+
+    int col = x / TILE_SIZE;
+    int row = y / TILE_SIZE;
+
+    if (col < 0 || col >= cols || row < 0 || row >= rows) {
+        return 0; 
+    }
+
+    return level[row * cols + col];
+}
+
+
 
 //***************************
 //**********ENEMIES************
@@ -222,10 +237,59 @@ static void render_enemies() {
 }
 
 
-static void enemy_physics(){
+static void enemy_physics(int* level, int level_cols, int level_rows){
+for (int i = 0; i < num_enemies; i++) {
+        if (!enemies[i].is_alive) continue;
+
+        struct Enemy* e = &enemies[i];
+        int enemy_w = 32; 
+        int enemy_h = 32; 
+
+        e->velocity.y += gravity; 
 
 
-    
+        e->position.x += e->velocity.x;
+
+        //wall collision check
+        int tile_top_check_x = (e->velocity.x > 0) ? (e->position.x + enemy_w) : e->position.x;
+        int tile_bot_check_x = (e->velocity.x > 0) ? (e->position.x + enemy_w) : e->position.x;
+
+        int tile_top = get_tile(tile_top_check_x, e->position.y, level, level_cols, level_rows);
+        int tile_bot = get_tile(tile_bot_check_x, e->position.y + enemy_h - 1, level, level_cols, level_rows);
+
+        if (tile_top != 0 || tile_bot != 0) {
+        
+            e->velocity.x *= -1;
+       
+
+            if (e->velocity.x > 0) {
+                int tile_x = ((e->position.x) / TILE_SIZE) * TILE_SIZE;
+                e->position.x = tile_x + TILE_SIZE + 1;
+            } else {
+                int tile_x = ((e->position.x + enemy_w) / TILE_SIZE) * TILE_SIZE;
+                e->position.x = tile_x - enemy_w - 1; 
+            }
+        }
+        
+       //ground check
+        e->position.y += e->velocity.y;
+        e->is_on_ground = 0; 
+
+        if (e->velocity.y > 0) { 
+            int tile_left = get_tile(e->position.x + 4, e->position.y + enemy_h, level, level_cols, level_rows);
+            int tile_right = get_tile(e->position.x + enemy_w , e->position.y + enemy_h, level, level_cols, level_rows);
+
+            if (tile_left != 0 || tile_right != 0) {
+                int tile_y = ((e->position.y + enemy_h) / TILE_SIZE) * TILE_SIZE;
+                e->position.y = tile_y - enemy_h;
+                e->velocity.y = 0;
+                e->is_on_ground = 1;
+            }
+        }
+    }
+}
+
+static void check_collisions() {
 }
 
 
@@ -236,7 +300,7 @@ static void enemy_physics(){
 static void innit_level(){
     num_enemies = 0;
 
-    add_enemy(100, 200);
+    add_enemy(300, 400);
 
 }
 
@@ -284,19 +348,6 @@ void update_camera(int level_cols) {
 
 
 
-int get_tile(int x, int y, int* level, int cols, int rows) {
-    //rets tile if x, y == tile.pos
-
-
-    int col = x / TILE_SIZE;
-    int row = y / TILE_SIZE;
-
-    if (col < 0 || col >= cols || row < 0 || row >= rows) {
-        return 0; 
-    }
-
-    return level[row * cols + col];
-}
 
 void update_physics(int* level, int level_cols, int level_rows) {
 
@@ -413,7 +464,10 @@ static void main_loop() {
             update_physics(l1_map, l1_cols, l1_rows); 
             update_camera(l1_cols);
             render_level(l1_map, l1_cols, l1_rows);  
+            enemy_physics(l1_map, l1_cols, l1_rows);
             render_enemies();
+
+            check_collisions();
             
             
             draw_ui();
