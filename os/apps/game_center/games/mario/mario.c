@@ -28,9 +28,14 @@ struct Enemy{
     struct Vector2 position;
     struct Vector2 velocity;
     int is_alive;
-    int direction; //1= right, -1 left
     int is_on_ground;
 };
+
+#define MAX_ENEMIES 100
+struct Enemy enemies[MAX_ENEMIES];
+static int num_enemies = 0;
+
+
 
 
 //globals
@@ -63,7 +68,7 @@ static int coins;
 
 
 //colors
-static uint32_t red = 0x00000FFFF;
+static uint32_t red = 0xF8000000;  
 static uint32_t dark_brown = 0x8000FF8F;
 static uint32_t light_brown = 0xFF000FF0;
 static uint32_t black = 0x00000000;
@@ -145,6 +150,7 @@ static int menu(){
 
     if (is_pressed(' ')&& pointer == 1){
         is_in_menu =0;
+        return 0;
     }
 
 
@@ -185,6 +191,54 @@ static void draw_ui(){
 
 }
 
+
+//***************************
+//**********ENEMIES************
+//***************************
+static void add_enemy(int x, int y) {
+    if (num_enemies < MAX_ENEMIES) {
+        enemies[num_enemies].position.x = x;
+        enemies[num_enemies].position.y = y;
+        enemies[num_enemies].velocity.x = -2; 
+        enemies[num_enemies].velocity.y = 0;
+        enemies[num_enemies].is_alive = 1;
+        enemies[num_enemies].is_on_ground = 0;
+        num_enemies++;
+    }
+}
+
+
+static void render_enemies() {
+    for (int i = 0; i < num_enemies; i++) {
+        if (enemies[i].is_alive ==0) continue;
+
+        int screen_x = enemies[i].position.x - camera.position.x;
+        int screen_y = enemies[i].position.y - camera.position.y;
+
+
+        draw_sprite(screen_x, screen_y, goomba_sprite, 2); 
+      
+    }
+}
+
+
+static void enemy_physics(){
+
+
+    
+}
+
+
+
+//***************************
+//**********LEVEL************
+//***************************
+static void innit_level(){
+    num_enemies = 0;
+
+    add_enemy(100, 200);
+
+}
 
 static void render_level(int* level, int level_cols, int level_rows) {
     for (int row = 0; row < level_rows; row++) {
@@ -350,7 +404,8 @@ static void main_loop() {
         if (should_update()) {
             screen_clear();
             input_poll();
-            if (is_in_menu==1) menu();
+            if (is_in_menu==1) {
+                if (menu() == 0) innit_level();}
 
             else{
 
@@ -358,6 +413,7 @@ static void main_loop() {
             update_physics(l1_map, l1_cols, l1_rows); 
             update_camera(l1_cols);
             render_level(l1_map, l1_cols, l1_rows);  
+            render_enemies();
             
             
             draw_ui();
