@@ -47,4 +47,6 @@ void list_games(){
     print("(1) pong\n"); 
     print("(2) pnake\n"); 
     print("(3) tetris\n");
+    print("(4) mario\n");
+    print("(5) dkong\n");
 }

@@ -75,14 +75,15 @@ static uint32_t dark_brown = 0x8000FF8F;
 static uint32_t light_brown = 0xFF000FF0;
 static uint32_t black = 0x00000000;
 static uint32_t white = 0xFFFFFFFF;
-
+static uint32_t green = 0xFF000000;
 
 //sprites:
 static Sprite mario_sprite;
 static Sprite ground_sprite;
 static Sprite p_block_sprite;
 static Sprite goomba_sprite;
-
+static Sprite pole_sprite;
+static Sprite flag_sprite;
 //screen pos = world pos - camera pos
 
 //levels
@@ -93,11 +94,12 @@ static Sprite goomba_sprite;
 
     
 //rules:
-    //0 air, 1 brick, 2 question block
+    //0 air, 1 brick, 2 question block, 3 flag_pole, 4 flag
 
     //level 1
     #define l1_rows 18
     #define l1_cols 61
+    #define l1_end 2000 //end position for where the flag will go 
 
     int l1_map[l1_rows][l1_cols] = {
         {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
@@ -107,17 +109,17 @@ static Sprite goomba_sprite;
         {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
         {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
         {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
-        {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
-        {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
-        {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
-        {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
-        {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
-        {0,0,0,0,0,0,0,2,0,0,0,0,0,0,0,2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
-        {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
-        {0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
-        {0,0,0,1,1,0,0,0,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
-        {1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1},
-        {1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1}
+        {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
+        {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,4,0,0,0,0,0,0,0},
+        {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,3,0,0,0,0,0,0,0},
+        {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,3,0,0,0,0,0,0,0},
+        {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,3,0,0,0,0,0,0,0},
+        {0,0,0,0,0,0,0,2,0,0,0,0,0,0,0,2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,0,0,0,2,0,0,0,0,0,0,0,0,0,0,0,3,0,0,0,0,0,0,0},
+        {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,3,0,0,0,0,0,0,0},
+        {0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,0,0,0,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,3,0,0,0,0,0,0,0},
+        {0,0,0,0,1,0,0,0,0,1,1,0,0,0,0,0,0,0,0,1,1,1,0,0,0,1,1,1,1,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0},
+        {1,1,1,1,1,1,1,1,1,1,1,1,1,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1},
+        {1,1,1,1,1,1,1,1,1,1,1,1,1,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1}
     };
 
 
@@ -319,7 +321,8 @@ static void check_collisions() {
                 player.velocity.y -= 50;
             }
             else{
-           // end_game =1;
+                lives --;
+                end_game =1;
             }
         
         
@@ -344,8 +347,19 @@ static void innit_level(){
     num_enemies = 0;
 
     add_enemy(300, 400);
+    add_enemy(1200, 400);
+    add_enemy(2200, 400);
+    add_enemy(800, 400);
+    add_enemy(1400, 400);
 
+    add_enemy(1200, 400);
+    add_enemy(1240, 400);
+    add_enemy(1210, 400);
+    add_enemy(1200, 400);
+
+    add_enemy(1900, 400);
 }
+
 
 static void render_level(int* level, int level_cols, int level_rows) {
     for (int row = 0; row < level_rows; row++) {
@@ -367,6 +381,9 @@ static void render_level(int* level, int level_cols, int level_rows) {
                    
                 if (tile_id ==1) draw_sprite(screen_x, screen_y, ground_sprite, scale+2);
                 if (tile_id ==2) draw_sprite(screen_x, screen_y, p_block_sprite, scale+2);
+                if (tile_id==3) draw_sprite(screen_x - 4, screen_y, pole_sprite, scale+3);
+                if (tile_id==4) draw_sprite(screen_x -10, screen_y,flag_sprite, scale+2);
+            
                 }
             }
         }
@@ -488,6 +505,9 @@ static void input_poll(){
         player.velocity.y = -jump_str; 
         player.is_on_ground = 0;
     }
+
+
+    if (is_pressed('q')) end_game =1;
 }
 
 
@@ -515,7 +535,9 @@ static void main_loop() {
             
             draw_ui();
 
-            s_printf(buf, "in air = %d", player.is_on_ground); draw_text(30, 100, buf, 0xFF000000, 3);
+            s_printf(buf, "in air = %d", player.is_on_ground); draw_text(30, 100, buf, 0xFF000000, 2);
+            s_printf(buf, "posx = %d", player.position.x); draw_text(30, 120, buf, 0xFF000000, 2);
+
 
             draw_sprite(player.position.x- camera.position.x, player.position.y - camera.position.y, mario_sprite, scale);
             
@@ -614,6 +636,43 @@ void mario_on_start(){
     goomba_sprite.pixles = goomba_pixles;
     goomba_sprite.height = 10;
     goomba_sprite.width = 10;
+
+
+
+    uint32_t flag_pixles[64] ={
+        white, white, white, white,white ,white ,white, white,
+        white, white, white, white, green,green,white, white,
+        0x000000FF, white, white, green,white ,white ,green, white,
+        0x000000FF, 0x000000FF, white, green, white, white, green, white,
+        0x000000FF, 0x000000FF, 0x000000FF, white, green, green, white, white,
+        0x000000FF, 0x000000FF, 0x000000FF, 0x000000FF, white, white, white, white,
+        0x000000FF,0x000000FF ,0x000000FF ,0x000000FF,0x000000FF, white, white, white,
+        0x000000FF, 0x000000FF, 0x000000FF, 0x000000FF, 0x000000FF, 0x000000FF, white, white,
+    };
+
+    flag_sprite.pixles = flag_pixles;
+    flag_sprite.height=8;
+    flag_sprite.width =8;
+
+    uint32_t pole_pixles[64] ={
+        0x000000FF, 0x000000FF, 0x000000FF, green, green,  0x000000FF, 0x000000FF, 0x000000FF, 
+        0x000000FF, 0x000000FF, 0x000000FF, green, green,  0x000000FF, 0x000000FF, 0x000000FF, 
+        0x000000FF, 0x000000FF, 0x000000FF, green, green,  0x000000FF, 0x000000FF, 0x000000FF, 
+        0x000000FF, 0x000000FF, 0x000000FF, green, green,  0x000000FF, 0x000000FF, 0x000000FF, 
+        0x000000FF, 0x000000FF, 0x000000FF, green, green,  0x000000FF, 0x000000FF, 0x000000FF, 
+        0x000000FF, 0x000000FF, 0x000000FF, green, green,  0x000000FF, 0x000000FF, 0x000000FF, 
+        0x000000FF, 0x000000FF, 0x000000FF, green, green, 0x000000FF, 0x000000FF, 0x000000FF, 
+        
+    };
+    pole_sprite.pixles = pole_pixles;
+    pole_sprite.height = 8;
+    pole_sprite.width = 8;
+
+
+
+
+
+
 
 
     main_loop();
