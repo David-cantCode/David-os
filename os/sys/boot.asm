@@ -60,8 +60,11 @@ DATA_SEG            equ 0x10
 KERN_LOAD_PHYS      equ 0x00010000        ; 64 KiB
 KERNEL_START_ADDR   equ 0x00100000        ; 1 mib not mb lol
 
-KERNEL_SECTORS      equ 120     ; kernel size, if os doesnt load fully just increase this lol, to much increase makes the os not load too 
+KERNEL_SECTORS      equ 128    ; kernel size, if os doesnt load fully just increase this lol, to much increase makes the os not load too 
 
+
+;current bug bootloader doesnt allow a kernel of more then 128 sectors
+;how to fix, idk lmao
 
 start:
 
@@ -179,7 +182,7 @@ vbe_done:
 ;read kernel to 0x10000
 ;make sure es points there
 
-
+init_kernel:
 
     mov ax, KERN_LOAD_PHYS >> 4    ; ES = 0x1000
     mov es, ax
@@ -193,6 +196,8 @@ vbe_done:
     int 0x13
     jc disk_read_error
 
+    
+kernel_load_done:
 
 
 
