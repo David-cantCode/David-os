@@ -27,6 +27,7 @@ struct Player{
 struct Enemy{
     struct Vector2 position;
     struct Vector2 velocity;
+    int hit_box; //size of the hitbox ex: 16*16 sprite has hitbox of 16
     int is_alive;
     int is_on_ground;
 };
@@ -58,7 +59,8 @@ static int screen_h = 600;
 static int gravity = 2;
 static int mario_offset = 35; //height offset so hes no clipping into tiles
 static int jump_str = 25;
-
+static int player_hit_box = 32;
+const static int scale = 2; //global scale for sprites so theyre not hella tiny
 
 static int lives = 3; 
 static int score; 
@@ -218,6 +220,7 @@ static void add_enemy(int x, int y) {
         enemies[num_enemies].velocity.y = 0;
         enemies[num_enemies].is_alive = 1;
         enemies[num_enemies].is_on_ground = 0;
+        enemies[num_enemies].hit_box =10;
         num_enemies++;
     }
 }
@@ -231,7 +234,7 @@ static void render_enemies() {
         int screen_y = enemies[i].position.y - camera.position.y;
 
 
-        draw_sprite(screen_x, screen_y, goomba_sprite, 2); 
+        draw_sprite(screen_x, screen_y, goomba_sprite, scale); 
       
     }
 }
@@ -290,6 +293,46 @@ for (int i = 0; i < num_enemies; i++) {
 }
 
 static void check_collisions() {
+
+    //cycle through all enemies check if hitboxes overlap with mario
+
+    for (int i = 0; i < num_enemies; i++) {
+        
+        if (!enemies[i].is_alive) continue;
+
+        struct Enemy* e = &enemies[i];
+
+        if (e->position.x - player.position.x > 200)continue;
+        //this function is being ran allot so why not stop it from goinging if the the player and enemy are too far
+
+
+        int collision_x = player.position.x  < e->position.x + e->hit_box && player.position.x  + player_hit_box > e->position.x ;
+        int collision_y = player.position.y -5 < e->position.y + e->hit_box && player.position.y + 5+ player_hit_box > e->position.y;
+        
+        if (collision_x && collision_y) {
+
+            if (player.is_on_ground==0){
+
+
+                e->is_alive =0;
+                score+=100;
+                player.velocity.y -= 50;
+            }
+            else{
+           // end_game =1;
+            }
+        
+        
+        }
+
+
+
+
+    }
+
+
+
+
 }
 
 
@@ -322,8 +365,8 @@ static void render_level(int* level, int level_cols, int level_rows) {
                 
                 if (screen_x + TILE_SIZE > 0 && screen_x < screen_w) {
                    
-                if (tile_id ==1) draw_sprite(screen_x, screen_y, ground_sprite, 4);
-                if (tile_id ==2) draw_sprite(screen_x, screen_y, p_block_sprite, 4);
+                if (tile_id ==1) draw_sprite(screen_x, screen_y, ground_sprite, scale+2);
+                if (tile_id ==2) draw_sprite(screen_x, screen_y, p_block_sprite, scale+2);
                 }
             }
         }
@@ -353,7 +396,7 @@ void update_physics(int* level, int level_cols, int level_rows) {
 
     //why dont i just use one variable since there the same? idk haha
     int player_w = 32; 
-    int player_h = 32; 
+    int player_h = 30; 
 
     //x axis movement and collison
     player.position.x += player.velocity.x;
@@ -396,7 +439,7 @@ void update_physics(int* level, int level_cols, int level_rows) {
     //floor_check
     if (player.velocity.y > 0) {
         int tile_left = get_tile(player.position.x + 4, player.position.y + player_h, level, level_cols, level_rows);
-        int tile_right = get_tile(player.position.x + player_w - 4, player.position.y + player_h, level, level_cols, level_rows);
+        int tile_right = get_tile(player.position.x + player_w +4 , player.position.y + player_h, level, level_cols, level_rows);
         //+- 4; lil offset
 
         if (tile_left != 0 || tile_right != 0) {
@@ -472,7 +515,9 @@ static void main_loop() {
             
             draw_ui();
 
-            draw_sprite(player.position.x- camera.position.x, player.position.y - camera.position.y, mario_sprite, 2);
+            s_printf(buf, "in air = %d", player.is_on_ground); draw_text(30, 100, buf, 0xFF000000, 3);
+
+            draw_sprite(player.position.x- camera.position.x, player.position.y - camera.position.y, mario_sprite, scale);
             
         
             }
