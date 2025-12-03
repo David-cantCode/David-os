@@ -38,7 +38,7 @@ bdb_dir_entries_count: dw 512
 
 bdb_total_sectors:     dw 0          ; keep 0 if using bdb_large_sector_count
 bdb_media_descriptor_type: db 0F8h
-bdb_sectors_per_fat:   dw 64         ;changed to 64 sectors per FAT
+bdb_sectors_per_fat:   dw 64       ;changed to 64 sectors per FAT
 
 bdb_sectors_per_track: dw 32
 bdb_heads:             dw 2
@@ -58,8 +58,10 @@ DATA_SEG            equ 0x10
 
 KERN_LOAD_PHYS      equ 0x00010000        ; 64 KiB
 KERNEL_START_ADDR   equ 0x00100000        ;1 mib not mb lol
+KERNEL_SECTORS      equ 140   ;kernel size, if os doesnt load fully just increase this lol, to much increase makes the os not load too 
 
-KERNEL_SECTORS      equ 128    ; kernel size, if os doesnt load fully just increase this lol, to much increase makes the os not load too 
+
+
 
 
 ;current bug bootloader doesnt allow a kernel of more then 128 sectors
@@ -176,34 +178,106 @@ vbe_error:
 
 vbe_done:
 
+    jmp load_kernel_to_mem
+
+
+add_cylinder:
+    mov byte [curr_head], 0
+
 
 
 ;read kernel to 0x10000
 ;make sure es points there
 
 load_kernel_to_mem:
+    ;how 0x13:0x02
+    ;for all bios calls ah contains the type
+    
+    ;ah like always syscall type (0x02 for read) 
+    ;al - num sectors to read 
+    ;ch - cylindar
+    ;cl starting sector
+    ;dh head 
+    ;dl drive number 
+    ;bx points the location of disc -> sector
+    ;for our loop New BX=Old BX+(Sectors Read×512)
 
-    ;current issue
+    ;the kernel is then stored in the kernel phys to the disc
+    ;however this can only read 64kib at a time (125) sectors
+ 
+
+    ;idea loop to read 32 sectors at a time (31 for first cuz bios) 
+    ;after sectors read head ++ 
+    ;if head == 2 cylindar ++
+
+    
+
+    ;******************
+    ;*******CHUNK 1****
+    ;*****************
+    ;remember 1st chunk reads only 31
+
 
     mov ax, KERN_LOAD_PHYS >> 4    
     mov es, ax
-    xor bx, bx                     
-    mov ah, 0x02                  
-    mov al, KERNEL_SECTORS         
-    mov ch, 0x00                   
-    mov cl, 0x02                  
-    mov dh, 0x00                  
-    mov dl, [BootDrive]           
+    xor bx, bx
+
+    mov ah, 0x02
+    mov al, 31
+    mov ch, curr_cylinder
+    mov cl, curr_sector
+    ;note curr_sector has to be inc by 31 this call then 32 for the loop
+    mov dh, curr_head
+    mov dl, [BootDrive]
     int 0x13
     jc disk_read_error
 
+    ;update pointers
+
+    movzx cx, al ;mov sec count
+    shl cx, 9 ;* 512
+    add bx, cx ; back to new bx
+
+
+    mov al, KERNEL_SECTORS
+    add byte [sectors_left], al
+    sub byte [sectors_left], 31
+
+
+    add byte [curr_sector], 31
+    add byte [curr_head], 1
+    add byte [sectors_to_read], 32
+
+
+    ;loop
+    xor dx, dx
     
+.load_loop:
+
+    mov ax, KERN_LOAD_PHYS >> 4    
+    mov es, ax
+    mov ah, 0x02
+    mov al, sectors_to_read
+    mov ch, curr_cylinder
+    mov cl, curr_sector
+    mov dh, curr_head
+    mov dl, [BootDrive]
+    int 0x13
+
+    ;update pointers
+
+    movzx cx, al ;mov sec count
+    shl cx, 9 ;* 512
+    add bx, cx ; back to new bx
+
+
+
+
+    cmp [sectors_left], 0
+    jne kernel_load_done
+
+
 kernel_load_done:
-
-
-
-
-
 
     cli
     call enable_a20
@@ -256,22 +330,14 @@ init_pm:
     jmp KERNEL_START_ADDR
 
 
-
-
 disk_read_error:
     cli
 .hang: hlt
       jmp .hang
 
-
-
-
 ;**************************************
 ;**************CREATE GPT TABLE********
 ;**************************************
-
-
-
 gdt_start:
     dq 0x0000000000000000          ;confusing read about segement descriptors in the future
     dq 0x00CF9A000000FFFF         
@@ -283,6 +349,14 @@ gdt_descriptor:
     dd gdt_start
 
 BootDrive db 0
+
+sectors_to_read db 0
+sectors_left db 0
+curr_sector db 0x02 ;set to 2 so it doesnt include bootloader
+curr_head db 0
+curr_cylinder db 0
+curr_bx db 0
+
 
 times 510 - ($-$$) db 0 ;fill all bytes to 510 with 0s 
 dw 0xAA55 ;fill last bytes 510-512 with special numbers so bios knows its bootable
