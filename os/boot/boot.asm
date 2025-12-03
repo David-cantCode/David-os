@@ -58,9 +58,7 @@ DATA_SEG            equ 0x10
 
 KERN_LOAD_PHYS      equ 0x00010000        ; 64 KiB
 KERNEL_START_ADDR   equ 0x00100000        ;1 mib not mb lol
-KERNEL_SECTORS      equ 140   ;kernel size, if os doesnt load fully just increase this lol, to much increase makes the os not load too 
-
-
+KERNEL_SECTORS      equ 186   ;kernel size, if os doesnt load fully just increase this lol, to much increase makes the os not load too 
 
 
 
@@ -68,7 +66,6 @@ KERNEL_SECTORS      equ 140   ;kernel size, if os doesnt load fully just increas
 ;how to fix, idk lmao
 
 start:
-
 ;clear mem segs
     cli
     xor ax, ax
@@ -77,15 +74,10 @@ start:
     mov ss, ax
     mov sp, 0x7C00
     sti
-
     mov [BootDrive], dl ;preserve bios boot drive
 
 
-;read kernel to 0x10000
-
-
-    ;setup vbe framebuffer
-
+    ;call vbe_setup
 
     mov ax, 0x0000
     mov es, ax 
@@ -177,13 +169,14 @@ vbe_error:
 
 
 vbe_done:
+    call load_kernel_to_mem
+;read kernel to 0x10000
 
-    jmp load_kernel_to_mem
 
 
-add_cylinder:
-    mov byte [curr_head], 0
 
+set_sectors:
+    ;this function is called when there are less then 32 sectors to read
 
 
 ;read kernel to 0x10000
@@ -201,80 +194,56 @@ load_kernel_to_mem:
     ;dl drive number 
     ;bx points the location of disc -> sector
     ;for our loop New BX=Old BX+(Sectors Read×512)
+    ;however bx cannot exceed 64kib 
 
     ;the kernel is then stored in the kernel phys to the disc
     ;however this can only read 64kib at a time (125) sectors
  
 
     ;idea loop to read 32 sectors at a time (31 for first cuz bios) 
-    ;after sectors read head ++ 
+    ;after sectors read head ++ and sectors needs to be read at 0x00 
     ;if head == 2 cylindar ++
 
-    
-
-    ;******************
-    ;*******CHUNK 1****
-    ;*****************
-    ;remember 1st chunk reads only 31
-
-
-    mov ax, KERN_LOAD_PHYS >> 4    
+    mov byte [sectors_left], KERNEL_SECTORS
     mov es, ax
-    xor bx, bx
-
-    mov ah, 0x02
-    mov al, 31
-    mov ch, curr_cylinder
-    mov cl, curr_sector
-    ;note curr_sector has to be inc by 31 this call then 32 for the loop
-    mov dh, curr_head
-    mov dl, [BootDrive]
-    int 0x13
-    jc disk_read_error
-
-    ;update pointers
-
-    movzx cx, al ;mov sec count
-    shl cx, 9 ;* 512
-    add bx, cx ; back to new bx
-
-
-    mov al, KERNEL_SECTORS
-    add byte [sectors_left], al
-    sub byte [sectors_left], 31
-
-
-    add byte [curr_sector], 31
-    add byte [curr_head], 1
-    add byte [sectors_to_read], 32
-
-
-    ;loop
-    xor dx, dx
-    
+    xor bx, bx  
 .load_loop:
 
     mov ax, KERN_LOAD_PHYS >> 4    
     mov es, ax
     mov ah, 0x02
-    mov al, sectors_to_read
-    mov ch, curr_cylinder
-    mov cl, curr_sector
-    mov dh, curr_head
+    mov al, [sectors_to_read]
+    mov ch, [curr_cylinder]
+    mov cl, [curr_sector]
+    mov dh, [curr_head]
     mov dl, [BootDrive]
     int 0x13
 
     ;update pointers
 
+    sub byte [sectors_left], al
+    cmp [sectors_left], 0
+    je kernel_load_done
+    
     movzx cx, al ;mov sec count
     shl cx, 9 ;* 512
     add bx, cx ; back to new bx
 
 
 
+    mov byte [sectors_to_read], 32
+    
+    mov byte [curr_sector], 1
 
-    cmp [sectors_left], 0
-    jne kernel_load_done
+    add byte [curr_head], 1
+    cmp byte [curr_head], 2
+    jl .load_loop
+
+    ;if we need to increase cylindar
+
+    mov byte [curr_head], 0
+    add byte [curr_cylinder], 1
+    jmp .load_loop
 
 
 kernel_load_done:
@@ -331,9 +300,7 @@ init_pm:
 
 
 disk_read_error:
-    cli
-.hang: hlt
-      jmp .hang
+    jmp $
 
 ;**************************************
 ;**************CREATE GPT TABLE********
@@ -350,7 +317,7 @@ gdt_descriptor:
 
 BootDrive db 0
 
-sectors_to_read db 0
+sectors_to_read db 31
 sectors_left db 0
 curr_sector db 0x02 ;set to 2 so it doesnt include bootloader
 curr_head db 0

@@ -10,6 +10,7 @@ SECTIONS
     .text ALIGN(4096) :
     {
         *(.text)
+      
     }
 
     /* Read-only data */

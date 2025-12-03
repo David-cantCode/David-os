@@ -90,6 +90,10 @@ $(BIN_DIR):
 $(BIN_DIR)/boot.bin: $(BOOT_DIR)/boot.asm | $(BIN_DIR)
 	$(AS) -f bin $< -o $@
 
+$(BIN_DIR)/stage2.bin: $(BOOT_DIR)/vbe.asm | $(BIN_DIR)
+	$(AS) -f bin $< -o $@
+
+
 # Assemble kernel asm and ISR as elf32 objects
 $(BUILD_DIR)/kernel.asm.o: $(SYS_DIR)/kernel.asm | $(BUILD_DIR)
 	$(AS) -f elf32 -g $< -o $@
@@ -124,6 +128,7 @@ $(BIN_DIR)/davidos.iso: $(BIN_DIR)/boot.bin $(BIN_DIR)/kernel.bin
 	dd if=/dev/zero of=$@ bs=512 count=65536
 	dd if=$(BIN_DIR)/boot.bin of=$@ bs=512 seek=0 conv=notrunc
 	dd if=$(BIN_DIR)/kernel.bin of=$@ bs=512 seek=1 conv=notrunc
+
 
 #old:
 #$(BIN_DIR)/davidos.img: $(BIN_DIR)/boot.bin $(BIN_DIR)/kernel.bin
