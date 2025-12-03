@@ -1,5 +1,12 @@
+
+
+
+;*****************
+;DLOADER 
 ;AUG 12 2025
-;DAVID BOOTLOADER aug 12
+;*********************
+
+
 
 ; memmory segments
 ;CS code segment
@@ -10,16 +17,8 @@
 
 ;Physical address = seg * 16 + offset
 
-
-
-
 ;cli - disable interupts
-; sti - enable interupts
-
-
-
-
-
+;sti - enable interupts
 
 [BITS 16]
 [ORG 0x7C00]
@@ -58,7 +57,7 @@ CODE_SEG            equ 0x08
 DATA_SEG            equ 0x10
 
 KERN_LOAD_PHYS      equ 0x00010000        ; 64 KiB
-KERNEL_START_ADDR   equ 0x00100000        ; 1 mib not mb lol
+KERNEL_START_ADDR   equ 0x00100000        ;1 mib not mb lol
 
 KERNEL_SECTORS      equ 128    ; kernel size, if os doesnt load fully just increase this lol, to much increase makes the os not load too 
 
@@ -77,7 +76,7 @@ start:
     mov sp, 0x7C00
     sti
 
-    mov [BootDrive], dl            ; preserve bios boot drive
+    mov [BootDrive], dl ;preserve bios boot drive
 
 
 ;read kernel to 0x10000
@@ -182,17 +181,19 @@ vbe_done:
 ;read kernel to 0x10000
 ;make sure es points there
 
-init_kernel:
+load_kernel_to_mem:
 
-    mov ax, KERN_LOAD_PHYS >> 4    ; ES = 0x1000
+    ;current issue
+
+    mov ax, KERN_LOAD_PHYS >> 4    
     mov es, ax
-    xor bx, bx                     ; BX = 0
-    mov ah, 0x02                   ; BIOS read sectors (CHS)
-    mov al, KERNEL_SECTORS         ; count
-    mov ch, 0x00                   ; cylinder 0
-    mov cl, 0x02                   ; sector 2 (sector 1 is boot)
-    mov dh, 0x00                   ; head 0
-    mov dl, [BootDrive]            ; correct drive
+    xor bx, bx                     
+    mov ah, 0x02                  
+    mov al, KERNEL_SECTORS         
+    mov ch, 0x00                   
+    mov cl, 0x02                  
+    mov dh, 0x00                  
+    mov dl, [BootDrive]           
     int 0x13
     jc disk_read_error
 
@@ -201,12 +202,17 @@ kernel_load_done:
 
 
 
+
+
+
     cli
     call enable_a20
     lgdt [gdt_descriptor]
 
+
+    ;prep for protected mode
     mov eax, cr0
-    or  eax, 1       ;enable protected mode 
+    or  eax, 1       
     mov cr0, eax
     jmp CODE_SEG:init_pm
 
@@ -214,6 +220,8 @@ kernel_load_done:
 
 
 enable_a20:
+    ;allow the cpu to use mem > 1mb
+
     in   al, 0x92
     or   al, 2
     out  0x92, al
@@ -229,25 +237,28 @@ init_pm:
     mov ax, DATA_SEG
     mov ds, ax
     mov es, ax
-    mov fs, ax   ; Reload segment registers.
+    mov fs, ax   
     mov gs, ax
     mov ss, ax 
+
+    ;set stack pointer 
     mov esp, 0x90000
     
 
-;copy kernel from 0x00010000 -> 0x00100000 
-    mov esi, KERN_LOAD_PHYS        ; src
-    mov edi, KERNEL_START_ADDR     ; dst
+    ;copy kernel from PHYS -> ADDR
+    mov esi, KERN_LOAD_PHYS        
+    mov edi, KERNEL_START_ADDR    
     mov ecx, (KERNEL_SECTORS*512)/4 ;size in dwords
     rep movsd
 
-;ent kernel
+
+    ;long jump 2 kernel
     jmp KERNEL_START_ADDR
 
 
-;made by chatgpt im not complaing cuz it works
+
+
 disk_read_error:
-    
     cli
 .hang: hlt
       jmp .hang
