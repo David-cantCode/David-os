@@ -1,0 +1,1 @@
+bootloader located on sector 1

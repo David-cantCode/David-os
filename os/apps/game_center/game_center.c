@@ -8,7 +8,7 @@ extern void pong_on_start();
 extern void tetris_main();
 extern void mtest_start();
 extern void mario_on_start();
-extern void dkong_on_start();
+
 
 
 void play_game(char* game){
@@ -29,9 +29,7 @@ void play_game(char* game){
     else if (compare_string(game, "mario")==0){
         mario_on_start();
     }
-    else if (compare_string(game, "dkong")==0){
-        dkong_on_start();
-    }
+
 
 
 

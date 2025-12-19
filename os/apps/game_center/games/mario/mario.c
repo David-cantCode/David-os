@@ -317,7 +317,7 @@ static void check_collisions() {
 
                 e->is_alive =0;
                 score+=100;
-                player.velocity.y -= 50;
+                if (player.velocity.y >= -40){player.velocity.y -= 50;} 
             }
             else{
                 lives --;
