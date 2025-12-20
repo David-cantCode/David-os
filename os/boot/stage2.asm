@@ -5,7 +5,7 @@ CODE_SEG            equ 0x08
 DATA_SEG            equ 0x10
 KERN_LOAD_PHYS      equ 0x00010000        ; 64 KiB
 KERNEL_START_ADDR   equ 0x00100000        ;1 mib not mb lol
-KERNEL_SECTORS      equ 186   ;kernel size, if os doesnt load fully just increase this lol, to much increase makes the os not load too 
+KERNEL_SECTORS      equ 157   ;kernel size, if os doesnt load fully just increase this lol, to much increase makes the os not load too 
 
 
 stage2_start:
@@ -24,7 +24,7 @@ stage2_start:
     call print_string
 
 
-    jmp vbe_done
+    jmp load_kernel_to_mem
 
 
 vbe_setup:
@@ -118,7 +118,7 @@ vbe_error:
 
 
 vbe_done:
-    jmp $
+    ret
 
 
 
@@ -158,17 +158,33 @@ load_kernel_to_mem:
     ;however this can only read 64kib at a time (125) sectors
  
 
-    ;idea loop to read 32 sectors at a time (31 for first cuz bios) 
+    ;idea loop to read 32 sectors at a time (28 for first cuz boot) 
     ;after sectors read head ++ and sectors needs to be read at 0x00 
-    ;if head == 2 cylindar ++
+    ;if head == 2 cylinder ++
 
     mov byte [sectors_left], KERNEL_SECTORS
-    mov es, ax
-    xor bx, bx  
-.load_loop:
-
     mov ax, KERN_LOAD_PHYS >> 4    
     mov es, ax
+    xor bx, bx
+    
+    
+    
+    mov si, debug
+    call print_string
+
+
+
+.load_loop:
+    
+    cmp byte [sectors_left], 0
+    jbe kernel_load_done
+    
+
+
+
+    
+    
+    ;bios call
     mov ah, 0x02
     mov al, [sectors_to_read]
     mov ch, [curr_cylinder]
@@ -176,35 +192,56 @@ load_kernel_to_mem:
     mov dh, [curr_head]
     mov dl, [BootDrive]
     int 0x13
+    jc disk_error
+
+
+
 
     ;update pointers
 
-    sub byte [sectors_left], al
-    cmp [sectors_left], 0
+    sub [sectors_left], al
+        
+    movzx cx, al ; move sec count to cx
+    shl cx, 9 ; * 512 to get bytes
+    
+    add bx, cx ;update offset
+    jnc .no_overflow           
+    
+    ;bx overflowwed (kernel >128 secs)
+    ;bump es by 64KB (128 secs)
+    mov dx, es
+    add dx, 0x1000
+    mov es, dx
+
+    
+    
+.no_overflow:
+    
+    cmp byte [sectors_left], 0
     je kernel_load_done
     
-    movzx cx, al ;mov sec count
-    shl cx, 9 ;* 512
-    add bx, cx ; back to new bx
-
-
-
-    mov byte [sectors_to_read], 32
-    
+    ;gemotry update
+    mov byte [sectors_to_read], 32 
     mov byte [curr_sector], 1
-
+    
+    ;++head
     add byte [curr_head], 1
     cmp byte [curr_head], 2
     jl .load_loop
 
-    ;if we need to increase cylindar
 
+    ;++ cylinder
     mov byte [curr_head], 0
     add byte [curr_cylinder], 1
     jmp .load_loop
 
 
+
 kernel_load_done:
+
+    mov si, debug
+    call print_string
+    call vbe_setup
 
     cli
     call enable_a20
@@ -252,7 +289,6 @@ init_pm:
     mov ecx, (KERNEL_SECTORS*512)/4 ;size in dwords
     rep movsd
 
-
     ;long jump 2 kernel
     jmp KERNEL_START_ADDR
 
@@ -275,9 +311,10 @@ clear_screen:
     int 0x10        
     ret
 
-disk_read_error:
+disk_error:
+    mov si, error_msg
+    call print_string
     jmp $
-
 
 
 
@@ -296,13 +333,14 @@ gdt_descriptor:
 
 BootDrive db 0
 
-sectors_to_read db 28
+sectors_to_read db 29
 sectors_left db 0
-curr_sector db 0x04 ;stage1 - 1 sector, stage2 - 2 sectors
+curr_sector db 0x03 ;stage1 - 1 sector, stage2 - 2 sectors
 curr_head db 0
 curr_cylinder db 0
 curr_bx db 0
 
 
-boot_info      db "DLOADER v0.5", 13, 10, 0
-
+boot_info db "DLOADER v0.5", 13, 10, 0
+debug db "Loading Kernel to mem", 13, 10, 0
+error_msg db "Disk read error", 13, 10, 0
