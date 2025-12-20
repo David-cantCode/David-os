@@ -44,10 +44,8 @@ ebr_system_id: db 'FAT16   ' ; 8 bytes
 CODE_SEG            equ 0x08
 DATA_SEG            equ 0x10
 
-
-stage2_addr equ 0x2000
-
-
+stage2_sectors equ 2
+stage2_addr equ 0x0000
 start:
 ;clear mem segs
     cli
@@ -63,20 +61,21 @@ start:
 
 
 load_stage2:
-    mov ax, 0x2000          ; Stage2 load address segment
+    mov ax, stage2_addr         ;stage2 load address segment
     mov es, ax
-    xor bx, bx              ; Offset address = 0
-    mov ah, 0x02            ; BIOS 13h - Read sectors
-    mov al, 2               ; Read 2 sectors
-    mov ch, 0               ; Cylinder 0
-    mov cl, 2               ; Sector 2
-    mov dh, 0               ; Head 0
-    mov dl, [BootDrive]    ; Boot drive number
+
+    mov bx, 0x7E00          
+    mov ah, 0x02            ;bios 13h == sector read
+    mov al, stage2_sectors  
+    mov ch, 0               ;cylinder 0
+    mov cl, 2               ;sector 2
+    mov dh, 0               ;head 0
+    mov dl, [BootDrive]    
     int 0x13
     jc disk_error
 
 
-    jmp 0x2000:0 
+    jmp 0x0000:0x7E00
 
 
 

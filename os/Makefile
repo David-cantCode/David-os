@@ -87,12 +87,14 @@ $(BIN_DIR):
 	mkdir -p $(BIN_DIR)
 
 # Bootloader (raw binary)
-$(BIN_DIR)/boot.bin: $(BOOT_DIR)/stage1.asm | $(BIN_DIR)
+$(BIN_DIR)/boot.bin: $(BOOT_DIR)/boot.asm | $(BIN_DIR)
 	$(AS) -f bin $< -o $@
 
 
 $(BIN_DIR)/stage2.bin: $(BOOT_DIR)/stage2.asm | $(BIN_DIR)
 	$(AS) -f bin $< -o $@
+
+
 
 
 # Assemble kernel asm and ISR as elf32 objects
@@ -129,7 +131,7 @@ $(BIN_DIR)/davidos.iso: $(BIN_DIR)/boot.bin $(BIN_DIR)/stage2.bin  $(BIN_DIR)/ke
 	dd if=/dev/zero of=$@ bs=512 count=65536
 	dd if=$(BIN_DIR)/boot.bin of=$@ bs=512 seek=0 conv=notrunc
 	dd if=$(BIN_DIR)/stage2.bin of=$@ bs=512 seek=1 conv=notrunc
-	dd if=$(BIN_DIR)/kernel.bin of=$@ bs=512 seek=2 conv=notrunc
+	dd if=$(BIN_DIR)/kernel.bin of=$@ bs=512 seek=3 conv=notrunc
 
 
 #old:

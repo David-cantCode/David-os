@@ -1,5 +1,5 @@
 [bits 16]
-[org 0x0]  ;since we call at 0x2000:0
+[org 0x7E00]  ;since we call at 0x2000:0
 
 CODE_SEG            equ 0x08
 DATA_SEG            equ 0x10
@@ -9,7 +9,6 @@ KERNEL_SECTORS      equ 186   ;kernel size, if os doesnt load fully just increas
 
 
 stage2_start:
-
     cli
     xor ax, ax
     mov ds, ax
@@ -18,6 +17,14 @@ stage2_start:
     mov sp, 0x7C00
     sti
     mov [BootDrive], dl 
+
+    call clear_screen
+
+    mov si, boot_info
+    call print_string
+
+
+    jmp vbe_done
 
 
 vbe_setup:
@@ -111,7 +118,18 @@ vbe_error:
 
 
 vbe_done:
-    call load_kernel_to_mem
+    jmp $
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -239,11 +257,32 @@ init_pm:
     jmp KERNEL_START_ADDR
 
 
+
+print_string:
+    mov ah, 0x0E
+.loop:
+    lodsb
+    test al, al
+    jz .done
+    int 0x10
+    jmp .loop
+.done:
+    ret
+
+clear_screen:
+    mov ah, 0x00    
+    mov al, 0x03    
+    int 0x10        
+    ret
+
 disk_read_error:
     jmp $
 
+
+
+
 ;**************************************
-;**************CREATE GPT TABLE********
+;**************DATA SECTION*************
 ;**************************************
 gdt_start:
     dq 0x0000000000000000      
@@ -257,11 +296,13 @@ gdt_descriptor:
 
 BootDrive db 0
 
-sectors_to_read db 31
+sectors_to_read db 28
 sectors_left db 0
-curr_sector db 0x03 ;set to 2 so it doesnt include bootloader
+curr_sector db 0x04 ;stage1 - 1 sector, stage2 - 2 sectors
 curr_head db 0
 curr_cylinder db 0
 curr_bx db 0
 
+
+boot_info      db "DLOADER v0.5", 13, 10, 0
 
