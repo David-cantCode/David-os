@@ -118,7 +118,6 @@ vbe_error:
 
 
 vbe_done:
-    ret
 
 
 
